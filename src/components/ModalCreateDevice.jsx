@@ -9,7 +9,6 @@ function ModalCreateDevice({ setIsModalOpen, devices, setDevices }) {
   const [tolerance, setTolerance] = useState("");
 
   const handleSave = () => {
-    // Yeni cihaz objesi oluştur
     const newDevice = {
       name,
       description,
@@ -18,101 +17,109 @@ function ModalCreateDevice({ setIsModalOpen, devices, setDevices }) {
       max: maxVal,
       tolerance,
     };
-
-    // Cihazı listeye ekle
     setDevices([...devices, newDevice]);
-
-    // Modal'ı kapat
     setIsModalOpen(false);
   };
 
-  const handleClose = () => {
-    setIsModalOpen(false);
-  };
+  const handleClose = () => setIsModalOpen(false);
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50">
-      {/* Arka plan karartısı */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Arka plan karartı */}
       <div
-        className="absolute inset-0 bg-black opacity-50"
+        className="absolute inset-0 bg-black/50"
         onClick={handleClose}
-      />
+      ></div>
 
       {/* Modal kutusu */}
-      <div className="relative bg-white rounded shadow-lg p-6 w-full max-w-md mx-2">
-        <h2 className="text-xl font-bold mb-4">Yeni Cihaz Oluştur</h2>
+      <div
+        className="
+          relative bg-white rounded-md shadow-lg p-6 w-full max-w-md
+        "
+      >
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">
+          Yeni Device Ekle
+        </h2>
 
-        <label className="block mb-2">
-          <span className="text-gray-700">Name:</span>
-          <input
-            type="text"
-            className="mt-1 block w-full border border-gray-300 rounded p-2"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </label>
+        <div className="space-y-3">
+          <div>
+            <label className="block text-sm text-gray-600">Name</label>
+            <input
+              type="text"
+              className="mt-1 w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-primary"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
 
-        <label className="block mb-2">
-          <span className="text-gray-700">Description:</span>
-          <input
-            type="text"
-            className="mt-1 block w-full border border-gray-300 rounded p-2"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-        </label>
+          <div>
+            <label className="block text-sm text-gray-600">Description</label>
+            <input
+              type="text"
+              className="mt-1 w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-primary"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
 
-        <label className="block mb-2">
-          <span className="text-gray-700">Color:</span>
-          <input
-            type="color"
-            className="mt-1 block w-full border border-gray-300 rounded p-1"
-            value={color}
-            onChange={(e) => setColor(e.target.value)}
-          />
-        </label>
+          <div>
+            <label className="block text-sm text-gray-600">Color</label>
+            <input
+              type="color"
+              className="mt-1 w-full border border-gray-300 rounded px-2 py-1 cursor-pointer focus:outline-none focus:border-primary"
+              value={color}
+              onChange={(e) => setColor(e.target.value)}
+            />
+          </div>
 
-        <div className="flex gap-2">
-          <label className="block mb-2 flex-1">
-            <span className="text-gray-700">Min:</span>
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <label className="block text-sm text-gray-600">Min</label>
+              <input
+                type="number"
+                className="mt-1 w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-primary"
+                value={minVal}
+                onChange={(e) => setMinVal(e.target.value)}
+              />
+            </div>
+
+            <div className="flex-1">
+              <label className="block text-sm text-gray-600">Max</label>
+              <input
+                type="number"
+                className="mt-1 w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-primary"
+                value={maxVal}
+                onChange={(e) => setMaxVal(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-600">Tolerance</label>
             <input
               type="number"
-              className="mt-1 block w-full border border-gray-300 rounded p-2"
-              value={minVal}
-              onChange={(e) => setMinVal(e.target.value)}
+              className="mt-1 w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-primary"
+              value={tolerance}
+              onChange={(e) => setTolerance(e.target.value)}
             />
-          </label>
-
-          <label className="block mb-2 flex-1">
-            <span className="text-gray-700">Max:</span>
-            <input
-              type="number"
-              className="mt-1 block w-full border border-gray-300 rounded p-2"
-              value={maxVal}
-              onChange={(e) => setMaxVal(e.target.value)}
-            />
-          </label>
+          </div>
         </div>
 
-        <label className="block mb-4">
-          <span className="text-gray-700">Tolerance:</span>
-          <input
-            type="number"
-            className="mt-1 block w-full border border-gray-300 rounded p-2"
-            value={tolerance}
-            onChange={(e) => setTolerance(e.target.value)}
-          />
-        </label>
-
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-end mt-4 gap-2">
           <button
-            className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded"
+            className="
+              bg-gray-300 text-gray-700 py-2 px-4 rounded
+              hover:bg-gray-400
+            "
             onClick={handleClose}
           >
             İptal
           </button>
           <button
-            className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded"
+            className="
+              bg-primary text-white py-2 px-4 rounded
+              hover:bg-primary/90
+            "
             onClick={handleSave}
           >
             Kaydet
