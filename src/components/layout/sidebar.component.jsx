@@ -57,7 +57,7 @@ const Sidebar = ({ devices, setDevices, isSidebarOpen, toggleSidebar }) => {
       >
         <FaPlus />
         {/* Sidebar kapalıysa metni gizliyoruz */}
-        {isSidebarOpen && <span>Yeni Device Ekle</span>}
+        {isSidebarOpen && <span>Yeni Chiaz Ekle</span>}
       </button>
 
       {/* Cihaz Listesi */}

@@ -38,7 +38,7 @@ function ModalCreateDevice({ setIsModalOpen, devices, setDevices }) {
         '
       >
         <h2 className='text-xl font-semibold text-gray-800 mb-4'>
-          Yeni Device Ekle
+          Yeni Cihaz Ekle
         </h2>
 
         <div className='space-y-3'>
