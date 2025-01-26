@@ -1,11 +1,14 @@
 import { useState } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import { setIsSidebarOpen } from '../../features/sidebar/sidebar.state'
 
 const useLayout = () => {
+  const dispatch = useDispatch()
   const [devices, setDevices] = useState([])
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const { isSidebarOpen } = useSelector(state => state.sidebar)
 
   const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen)
+    dispatch(setIsSidebarOpen(!isSidebarOpen))
   }
 
   return {

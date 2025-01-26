@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
 import { FaPlus, FaTabletAlt, FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 import { ModalCreateDevice } from '..'
 import useSidebar from './sidebar.hook'
 
 const Sidebar = ({ devices, setDevices, isSidebarOpen, toggleSidebar }) => {
+  const dispatch = useDispatch()
   const {
     isModalOpen,
     setIsModalOpen,
@@ -50,7 +52,7 @@ const Sidebar = ({ devices, setDevices, isSidebarOpen, toggleSidebar }) => {
           hover:bg-primary/90 transition-colors mb-4
           ${!isSidebarOpen && 'justify-center'}
         `}
-        onClick={() => setIsModalOpen(true)}
+        onClick={() => dispatch(setIsModalOpen(true))}
       >
         <FaPlus />
         {/* Sidebar kapalıysa metni gizliyoruz */}

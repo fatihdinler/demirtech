@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
+import { useDispatch } from 'react-redux'
 
 function ModalCreateDevice({ setIsModalOpen, devices, setDevices }) {
+  const dispatch = useDispatch()
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [color, setColor] = useState('#000000')
@@ -18,10 +20,10 @@ function ModalCreateDevice({ setIsModalOpen, devices, setDevices }) {
       tolerance,
     }
     setDevices([...devices, newDevice])
-    setIsModalOpen(false)
+    dispatch(setIsModalOpen(false))
   }
 
-  const handleClose = () => setIsModalOpen(false)
+  const handleClose = () => dispatch(setIsModalOpen(false))
 
   return (
     <div className='fixed inset-0 z-50 flex items-center justify-center'>

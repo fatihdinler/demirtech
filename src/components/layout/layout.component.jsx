@@ -2,7 +2,7 @@ import { Outlet } from 'react-router-dom'
 import { Navbar, Sidebar } from '../../components'
 import useLayout from './layout.hook'
 
-function Layout() {
+const Layout = () => {
   const {
     devices,
     isSidebarOpen,
