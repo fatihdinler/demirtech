@@ -6,7 +6,6 @@ const Layout = () => {
   const {
     devices,
     isSidebarOpen,
-    setDevices,
     toggleSidebar,
   } = useLayout()
 
@@ -14,14 +13,13 @@ const Layout = () => {
     <div className='min-h-screen flex bg-gray-50 text-textColor'>
       <Sidebar
         devices={devices}
-        setDevices={setDevices}
         isSidebarOpen={isSidebarOpen}
         toggleSidebar={toggleSidebar}
       />
       <div className='flex-1 flex flex-col'>
         <Navbar toggleSidebar={toggleSidebar} />
         <main className='p-4'>
-          <Outlet context={[devices, setDevices]} />
+          <Outlet context={[devices]} />
         </main>
       </div>
     </div>

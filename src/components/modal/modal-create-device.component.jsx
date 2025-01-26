@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useDispatch } from 'react-redux'
 
-function ModalCreateDevice({ setIsModalOpen, devices, setDevices }) {
+function ModalCreateDevice({ setIsModalOpen, devices }) {
   const dispatch = useDispatch()
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
@@ -19,7 +19,7 @@ function ModalCreateDevice({ setIsModalOpen, devices, setDevices }) {
       max: maxVal,
       tolerance,
     }
-    setDevices([...devices, newDevice])
+    // setDevices([...devices, newDevice])
     dispatch(setIsModalOpen(false))
   }
 

@@ -4,7 +4,7 @@ import { FaPlus, FaTabletAlt, FaChevronLeft, FaChevronRight } from 'react-icons/
 import { ModalCreateDevice } from '..'
 import useSidebar from './sidebar.hook'
 
-const Sidebar = ({ devices, setDevices, isSidebarOpen, toggleSidebar }) => {
+const Sidebar = ({ devices, isSidebarOpen, toggleSidebar }) => {
   const dispatch = useDispatch()
   const {
     isModalOpen,
@@ -38,11 +38,11 @@ const Sidebar = ({ devices, setDevices, isSidebarOpen, toggleSidebar }) => {
       </div>
 
       {/* Logo / Başlık (Sidebar açıkken göster, kapalıyken gizle) */}
-      <div className={`mb-6 ${!isSidebarOpen && 'hidden'}`}>
+      {/* <div className={`mb-6 ${!isSidebarOpen && 'hidden'}`}>
         <Link to='/dashboard' className='text-xl font-bold text-primary'>
           Sneat Devices
         </Link>
-      </div>
+      </div> */}
 
       {/* + Butonu */}
       <button
@@ -83,7 +83,6 @@ const Sidebar = ({ devices, setDevices, isSidebarOpen, toggleSidebar }) => {
         <ModalCreateDevice
           setIsModalOpen={setIsModalOpen}
           devices={devices}
-          setDevices={setDevices}
         />
       )}
     </aside>
