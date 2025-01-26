@@ -6,7 +6,7 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: "#696CFF", // Sneat’te sık kullanılan mor
+          DEFAULT: "#3A8BCA", // Sneat’te sık kullanılan mor
           hover: "#5a5ccc",
         },
         sidebarBg: "#F8F9FA", // açık gri

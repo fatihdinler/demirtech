@@ -1,16 +1,11 @@
+import { FaTabletAlt, FaChevronLeft, FaChevronRight, FaHome } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
-import { useDispatch } from 'react-redux'
-import { FaPlus, FaTabletAlt, FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 import { ModalCreateDevice } from '..'
 import useSidebar from './sidebar.hook'
 
 const Sidebar = ({ devices, isSidebarOpen, toggleSidebar }) => {
-  const dispatch = useDispatch()
-  const {
-    isModalOpen,
-    setIsModalOpen,
-    handleDeviceClick,
-  } = useSidebar()
+  const { isModalOpen, setIsModalOpen, handleDeviceClick } = useSidebar()
+
   return (
     <aside
       className={`
@@ -21,9 +16,7 @@ const Sidebar = ({ devices, isSidebarOpen, toggleSidebar }) => {
         flex flex-col
         transition-all duration-300
         ${isSidebarOpen ? 'w-64' : 'w-16'}
-      `}
-    >
-      {/* Sidebar'ı açıp kapatan buton (üstte) */}
+      `}>
       <div className='flex justify-end mb-4'>
         <button
           onClick={toggleSidebar}
@@ -37,29 +30,32 @@ const Sidebar = ({ devices, isSidebarOpen, toggleSidebar }) => {
         </button>
       </div>
 
-      {/* Logo / Başlık (Sidebar açıkken göster, kapalıyken gizle) */}
-      {/* <div className={`mb-6 ${!isSidebarOpen && 'hidden'}`}>
-        <Link to='/dashboard' className='text-xl font-bold text-primary'>
-          Sneat Devices
+      <div>
+        <Link
+          to="/dashboard"
+          className={`w-full flex items-center justify-start gap-2 border-2 border-primary text-primary py-2 px-3 
+            rounded-md shadow-sm hover:bg-primary hover:text-white transition-colors mb-3 ${!isSidebarOpen && 'justify-center'} `}>
+          <FaHome />
+          {isSidebarOpen && <span>Ana Sayfa</span>}
         </Link>
-      </div> */}
 
-      {/* + Butonu */}
-      <button
-        className={`
-          w-full flex items-center justify-center gap-2
-          bg-primary text-white py-2 px-3 rounded-md shadow-sm
-          hover:bg-primary/90 transition-colors mb-4
-          ${!isSidebarOpen && 'justify-center'}
-        `}
-        onClick={() => dispatch(setIsModalOpen(true))}
-      >
-        <FaPlus />
-        {/* Sidebar kapalıysa metni gizliyoruz */}
-        {isSidebarOpen && <span>Yeni Chiaz Ekle</span>}
-      </button>
+        <Link
+          to='/reports'
+          className={`
+          w-full flex items-center justify-start gap-2 border-2 border-primary text-primary py-2 px-3 
+            rounded-md shadow-sm hover:bg-primary hover:text-white transition-colors mb-3
+            ${!isSidebarOpen && 'justify-center'}
+          `} >
+          <FaHome />
+          {isSidebarOpen && <span>Raporlar</span>}
+        </Link>
+      </div>
 
-      {/* Cihaz Listesi */}
+      <div className='border-t border-gray-300 my-4'></div>
+      {isSidebarOpen && (
+        <h3 className='text-xs font-light text-gray-500 uppercase mb-2'>Cihazlar</h3>
+      )}
+
       <div className='flex-1 overflow-auto'>
         {devices.map((device, index) => (
           <div
@@ -78,7 +74,6 @@ const Sidebar = ({ devices, isSidebarOpen, toggleSidebar }) => {
         ))}
       </div>
 
-      {/* ModalCreateDevice */}
       {isModalOpen && (
         <ModalCreateDevice
           setIsModalOpen={setIsModalOpen}
