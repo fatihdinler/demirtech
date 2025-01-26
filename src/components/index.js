@@ -1,3 +1,5 @@
 export { Card } from './card'
 export { Layout } from './layout'
 export { ModalCreateDevice } from './modal'
+export { Sidebar } from './sidebar'
+export { Navbar } from './navbar'

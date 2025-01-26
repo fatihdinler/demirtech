@@ -1,17 +1,14 @@
-import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { FaPlus, FaTabletAlt, FaChevronLeft, FaChevronRight } from 'react-icons/fa'
-import { ModalCreateDevice } from '../../components'
+import { ModalCreateDevice } from '..'
+import useSidebar from './sidebar.hook'
 
 const Sidebar = ({ devices, setDevices, isSidebarOpen, toggleSidebar }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const navigate = useNavigate()
-
-  // Device listesindeki item'a tıklayınca detail sayfasına gideceğiz.
-  const handleDeviceClick = (index) => {
-    navigate(`/device/${index}`)
-  }
-
+  const {
+    isModalOpen,
+    setIsModalOpen,
+    handleDeviceClick,
+  } = useSidebar()
   return (
     <aside
       className={`

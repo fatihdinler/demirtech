@@ -1,15 +1,14 @@
-import React, { useState } from 'react'
 import { Outlet } from 'react-router-dom'
-import Navbar from './navbar.component'
-import Sidebar from './sidebar.component'
+import { Navbar, Sidebar } from '../../components'
+import useLayout from './layout.hook'
 
 function Layout() {
-  const [devices, setDevices] = useState([])
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen)
-  }
+  const {
+    devices,
+    isSidebarOpen,
+    setDevices,
+    toggleSidebar,
+  } = useLayout()
 
   return (
     <div className='min-h-screen flex bg-gray-50 text-textColor'>
