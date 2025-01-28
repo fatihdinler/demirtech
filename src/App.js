@@ -1,16 +1,19 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { Layout } from './components'
-import { Dashboard, DeviceDetail, ReportsList } from './pages'
+import { routes } from './routes'
 
 const App = () => {
   return (
     <Router>
       <Routes>
         <Route element={<Layout />}>
-          <Route path='/dashboard' element={<Dashboard />} />
-          <Route path='/device/:id' element={<DeviceDetail />} />
-          <Route path='/reports' element={<ReportsList />} />
+          {routes.map(route => (
+            <Route
+              path={route.to}
+              element={route.element}
+            />
+          ))}
           <Route path='/' element={<Navigate to='/dashboard' replace />} />
           <Route path='*' element={<Navigate to='/dashboard' replace />} />
         </Route>
