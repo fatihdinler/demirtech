@@ -31,8 +31,7 @@ const Layout = () => {
           flex items-center justify-center
           hover:bg-primary/90 transition-transform transform hover:scale-105
         '
-        onClick={() => dispatch(setIsModalOpen(true))}
-      >
+        onClick={() => dispatch(setIsModalOpen(true))}>
         <FaPlus className='text-lg' />
       </button>
     </div>

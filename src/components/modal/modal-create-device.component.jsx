@@ -1,21 +1,7 @@
 import React from 'react'
-import { useSelector, useDispatch } from 'react-redux'
-import {
-  setName,
-  setDescription,
-  setChipId,
-  setMin,
-  setMax,
-  setTolerance,
-  setMeasurementType,
-  setModelName,
-  setColor,
-  clearPage,
-} from '../../features/devices/devices-create.state'
+import useModalDeviceCreate from './modal-create-device.hook'
 
 const ModalCreateDevice = ({ setIsModalOpen }) => {
-  const dispatch = useDispatch()
-
   const {
     name,
     description,
@@ -26,30 +12,19 @@ const ModalCreateDevice = ({ setIsModalOpen }) => {
     measurementType,
     modelName,
     color,
-  } = useSelector((state) => state.devices.create)
-
-  const handleSave = () => {
-    const newDevice = {
-      name,
-      description,
-      chipId,
-      min,
-      max,
-      tolerance,
-      measurementType,
-      modelName,
-      color,
-    }
-
-    console.log('Saved Device:', newDevice)
-    dispatch(clearPage())
-    dispatch(setIsModalOpen(false))
-  }
-
-  const handleClose = () => {
-    dispatch(clearPage())
-    dispatch(setIsModalOpen(false))
-  }
+    validationErrors,
+    handleSave,
+    handleClose,
+    setName,
+    setDescription,
+    setChipId,
+    setMin,
+    setMax,
+    setTolerance,
+    setMeasurementType,
+    setModelName,
+    setColor,
+  } = useModalDeviceCreate(setIsModalOpen)
 
   return (
     <div className='fixed inset-0 z-50 flex items-center justify-center'>
@@ -64,38 +39,41 @@ const ModalCreateDevice = ({ setIsModalOpen }) => {
             <label className='block text-sm text-gray-600'>Name</label>
             <input
               type='text'
-              className='mt-1 w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-primary'
+              className={`mt-1 w-full border text-zinc-800 ${validationErrors.name ? 'border-red-500' : 'border-gray-300'} rounded px-2 py-1 focus:outline-none focus:border-primary`}
               value={name || ''}
-              onChange={(e) => dispatch(setName(e.target.value))}
+              onChange={(e) => setName(e.target.value)}
             />
+            {validationErrors.name && <p className='text-red-500 text-sm'>{validationErrors.name}</p>}
           </div>
 
           <div>
             <label className='block text-sm text-gray-600'>Description</label>
             <input
               type='text'
-              className='mt-1 w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-primary'
+              className={`mt-1 w-full border text-zinc-800 ${validationErrors.description ? 'border-red-500' : 'border-gray-300'} rounded px-2 py-1 focus:outline-none focus:border-primary`}
               value={description || ''}
-              onChange={(e) => dispatch(setDescription(e.target.value))}
+              onChange={(e) => setDescription(e.target.value)}
             />
+            {validationErrors.description && <p className='text-red-500 text-sm'>{validationErrors.description}</p>}
           </div>
 
           <div>
             <label className='block text-sm text-gray-600'>Chip ID</label>
             <input
               type='text'
-              className='mt-1 w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-primary'
+              className={`mt-1 w-full border text-zinc-800 ${validationErrors.chipId ? 'border-red-500' : 'border-gray-300'} rounded px-2 py-1 focus:outline-none focus:border-primary`}
               value={chipId || ''}
-              onChange={(e) => dispatch(setChipId(e.target.value))}
+              onChange={(e) => setChipId(e.target.value)}
             />
+            {validationErrors.chipId && <p className='text-red-500 text-sm'>{validationErrors.chipId}</p>}
           </div>
 
           <div>
             <label className='block text-sm text-gray-600'>Cihaz Modeli</label>
             <select
-              className='mt-1 w-full border border-gray-300 rounded px-2 py-2 focus:outline-none focus:border-primary'
+              className={`mt-1 w-full border text-zinc-800 ${validationErrors.modelName ? 'border-red-500' : 'border-gray-300'} rounded px-2 py-2 focus:outline-none focus:border-primary`}
               value={modelName || ''}
-              onChange={(e) => dispatch(setModelName(e.target.value))}>
+              onChange={(e) => setModelName(e.target.value)}>
               <option value='' disabled>
                 Cihaz Modeli Seçiniz
               </option>
@@ -103,14 +81,15 @@ const ModalCreateDevice = ({ setIsModalOpen }) => {
               <option value='DT-200'>DT-200</option>
               <option value='DT-300'>DT-300</option>
             </select>
+            {validationErrors.modelName && <p className='text-red-500 text-sm'>{validationErrors.modelName}</p>}
           </div>
 
           <div>
             <label className='block text-sm text-gray-600'>Ölçüm Birimi</label>
             <select
-              className='mt-1 w-full border border-gray-300 rounded px-2 py-2 focus:outline-none focus:border-primary'
+              className={`mt-1 w-full border text-zinc-800 ${validationErrors.measurementType ? 'border-red-500' : 'border-gray-300'} rounded px-2 py-2 focus:outline-none focus:border-primary`}
               value={measurementType || ''}
-              onChange={(e) => dispatch(setMeasurementType(e.target.value))}
+              onChange={(e) => setMeasurementType(e.target.value)}
             >
               <option value='' disabled>
                 Ölçüm Tipini Seçiniz
@@ -119,6 +98,7 @@ const ModalCreateDevice = ({ setIsModalOpen }) => {
               <option value='humidity'>Humidity</option>
               <option value='current'>Current</option>
             </select>
+            {validationErrors.measurementType && <p className='text-red-500 text-sm'>{validationErrors.measurementType}</p>}
           </div>
 
           <div>
@@ -127,7 +107,7 @@ const ModalCreateDevice = ({ setIsModalOpen }) => {
               type='color'
               className='mt-1 w-full cursor-pointer border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-primary'
               value={color || '#000000'}
-              onChange={(e) => dispatch(setColor(e.target.value))}
+              onChange={(e) => setColor(e.target.value)}
             />
           </div>
 
@@ -136,20 +116,21 @@ const ModalCreateDevice = ({ setIsModalOpen }) => {
               <label className='block text-sm text-gray-600'>Min</label>
               <input
                 type='number'
-                className='mt-1 w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-primary'
+                className={`mt-1 w-full border text-zinc-800 ${validationErrors.min ? 'border-red-500' : 'border-gray-300'} rounded px-2 py-1 focus:outline-none focus:border-primary`}
                 value={min || ''}
-                onChange={(e) => dispatch(setMin(Number(e.target.value)))}
+                onChange={(e) => setMin(Number(e.target.value))}
               />
+              {validationErrors.min && <p className='text-red-500 text-sm'>{validationErrors.min}</p>}
             </div>
-
             <div className='flex-1'>
               <label className='block text-sm text-gray-600'>Max</label>
               <input
                 type='number'
-                className='mt-1 w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-primary'
+                className={`mt-1 w-full border text-zinc-800 ${validationErrors.max ? 'border-red-500' : 'border-gray-300'} rounded px-2 py-1 focus:outline-none focus:border-primary`}
                 value={max || ''}
-                onChange={(e) => dispatch(setMax(Number(e.target.value)))}
+                onChange={(e) => setMax(Number(e.target.value))}
               />
+              {validationErrors.max && <p className='text-red-500 text-sm'>{validationErrors.max}</p>}
             </div>
           </div>
 
@@ -157,10 +138,11 @@ const ModalCreateDevice = ({ setIsModalOpen }) => {
             <label className='block text-sm text-gray-600'>Tolerance</label>
             <input
               type='number'
-              className='mt-1 w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-primary'
+              className={`mt-1 w-full border text-zinc-800 ${validationErrors.tolerance ? 'border-red-500' : 'border-gray-300'} rounded px-2 py-1 focus:outline-none focus:border-primary`}
               value={tolerance || ''}
-              onChange={(e) => dispatch(setTolerance(Number(e.target.value)))}
+              onChange={(e) => setTolerance(Number(e.target.value))}
             />
+            {validationErrors.tolerance && <p className='text-red-500 text-sm'>{validationErrors.tolerance}</p>}
           </div>
         </div>
 
