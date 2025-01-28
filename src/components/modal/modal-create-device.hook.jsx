@@ -29,12 +29,13 @@ const useModalDeviceCreate = (setIsModalOpen) => {
   } = useSelector((state) => state.devices.create)
 
   const [validationErrors, setValidationErrors] = useState({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const validateFields = () => {
     const errors = {}
 
     if (!name) errors.name = 'İsim alanı boş bırakılamaz!'
-    if (!description) errors.description = 'Açıklama alanı boş bırakılamaz1'
+    if (!description) errors.description = 'Açıklama alanı boş bırakılamaz!'
     if (!chipId) errors.chipId = 'Chip ID alanı boş bırakılamaz!'
     if (!modelName) errors.modelName = 'Cihaz Modeli alanı boş bırakılamaz!'
     if (!measurementType) errors.measurementType = 'Ölçüm Tipi alanı boş bırakılamaz!'
@@ -61,9 +62,18 @@ const useModalDeviceCreate = (setIsModalOpen) => {
       color,
     }
 
-    // ADD addDevice logic here!
-    dispatch(clearPage())
-    dispatch(setIsModalOpen(false))
+    try {
+      setIsSubmitting(true)
+      await dispatch(addDevice(newDevice)).unwrap()
+      dispatch(clearPage())
+      dispatch(setIsModalOpen(false))
+      console.log('Device successfully added:', newDevice)
+    } catch (error) {
+      console.error('Error adding device:', error)
+      setValidationErrors({ apiError: 'Cihaz eklenirken bir hata oluştu. Lütfen tekrar deneyin.' })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleClose = () => {
@@ -82,6 +92,7 @@ const useModalDeviceCreate = (setIsModalOpen) => {
     modelName,
     color,
     validationErrors,
+    isSubmitting,
     setName: (value) => dispatch(setName(value)),
     setDescription: (value) => dispatch(setDescription(value)),
     setChipId: (value) => dispatch(setChipId(value)),
