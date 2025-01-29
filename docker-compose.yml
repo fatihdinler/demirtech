@@ -1,0 +1,32 @@
+version: '3'
+services:
+  db:
+    image: mongo:latest
+    container_name: demirtech-db
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - app-network
+
+  mqtt:
+    image: emqx/emqx:latest
+    container_name: demirtech-mqtt
+    restart: always
+    ports:
+      - "1883:1883"
+      - "8083:8083"
+      - "8081:8081"
+    environment:
+      - EMQX_ALLOW_ANONYMOUS=true
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:

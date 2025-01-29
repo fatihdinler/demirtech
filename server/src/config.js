@@ -1,0 +1,9 @@
+require('dotenv').config()
+
+const config = {
+  DEMIRTECH_DATABASE_NAME: process.env.DEMIRTECH_DATABASE_NAME,
+  DEMIRTECH_DATABASE_CONNECTION_URL: process.env.DEMIRTECH_DATABASE_CONNECTION_URL,
+  DEMIRTECH_APPLICATION_PORT: process.env.DEMIRTECH_APPLICATION_PORT,
+}
+
+module.exports = config
