@@ -1,57 +1,56 @@
-const mongoose = require('mongoose')
-const { v4: uuidv4 } = require('uuid')
+/**
+ * models/Device.js
+ * 
+ * Bu dosya, hem klima içerisinde çalışan hem de bağımsız olarak takılan 
+ * cihazları (örneğin, sensörler, kontrol üniteleri) temsil eden Device 
+ * şemasını ve modelini tanımlar.
+ *
+ * Örnek Kullanım:
+ *   const Device = require('./models/Device')
+ *   const device = new Device({
+ *     branch: branchId,
+ *     deviceName: 'Sensör 1',
+ *     deviceType: 'Independent',
+ *     status: 'Active',
+ *     installationDate: new Date()
+ *   })
+ *   device.save().then(...)
+ */
 
-const DeviceSchema = mongoose.Schema({
-  id: {
-    type: String,
-    unique: true,
-    default: uuidv4
+const mongoose = require('mongoose')
+const { Schema } = mongoose
+
+const DeviceSchema = new Schema({
+  branch: { 
+    type: Schema.Types.ObjectId, 
+    ref: 'Branch', 
+    required: [true, 'Şube bilgisi gerekli'] 
   },
-  name: {
-    type: String,
-    required: true
+  climate: { 
+    type: Schema.Types.ObjectId, 
+    ref: 'Climate', 
+    default: null 
   },
-  description: {
-    type: String,
-    required: true
+  deviceName: { 
+    type: String, 
+    required: [true, 'Cihaz adı gerekli'], 
+    trim: true 
   },
-  chipId: {
-    type: String,
-    require: true,
+  deviceType: { 
+    type: String, 
+    enum: {
+      values: ['Inside', 'Independent'],
+      message: 'deviceType değeri "Inside" veya "Independent" olmalıdır'
+    },
+    required: [true, 'Cihaz tipi gerekli']
   },
-  min: {
-    type: Number,
-    required: false,
-    default: 0,
+  status: { 
+    type: String, 
+    trim: true 
   },
-  max: {
-    type: Number,
-    required: false,
-    default: 0,
-  },
-  tolerance: {
-    type: Number,
-    required: false,
-    default: 0,
-  },
-  measurementType: {
-    type: String,
-    enum: ['temperature', 'humidity', 'current'],
-    required: true,
-  },
-  modelName: {
-    type: String,
-    enum: ['DT-100', 'DT-200', 'DT-300'],
-    required: true,
-  },
-  color: {
-    type: String,
-    required: false,
-    default: '#ffffff',
-  },
-}, {
-  collection: 'devices',
-  timestamps: { createdAt: 'createdTime', updatedAt: 'updatedTime' }
-})
+  installationDate: { 
+    type: Date 
+  }
+}, { timestamps: true })
 
 module.exports = mongoose.model('Device', DeviceSchema)
