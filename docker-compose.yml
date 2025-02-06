@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:6
+    container_name: mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    environment:
+      # MongoDB başlangıç veritabanı ismini belirliyoruz.
+      MONGO_INITDB_DATABASE: demirtechDB
+
+  server:
+    build: ./server
+    ports:
+      - "3000:3000"  # Express uygulamanızın dinlediği port
+    volumes:
+      - ./server:/app      # Hosttaki server dosyalarını container'a mount ediyoruz
+      - /app/node_modules  # Container'daki node_modules klasörünü ayrı tutuyoruz
+    restart: always
+    depends_on:
+      - mongodb
+
+  web:
+    build: ./web
+    ports:
+      - "3438:3438"  # React uygulamanızın dinlediği port
+    volumes:
+      - ./web:/app         # Hosttaki web dosyalarını container'a mount ediyoruz
+      - /app/node_modules  # Container'daki node_modules klasörünü ayrı tutuyoruz
+    restart: always
+
+volumes:
+  mongo-data:
