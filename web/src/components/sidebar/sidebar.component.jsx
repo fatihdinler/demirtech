@@ -1,97 +1,144 @@
-import { FaChevronLeft, FaChevronRight, FaTabletAlt } from 'react-icons/fa'
+import React from 'react'
+import { Nav, Button, ListGroup } from 'react-bootstrap'
 import { Link, useLocation } from 'react-router-dom'
+import { FaChevronLeft, FaChevronRight, FaTabletAlt } from 'react-icons/fa'
 import { routes } from '../../routes'
-import { ModalCreateDevice } from '../modal'
 import useSidebar from './sidebar.hook'
+import { ModalCreateDevice } from '../modal'
 
 const Sidebar = ({ devices, isSidebarOpen, toggleSidebar }) => {
   const { isModalOpen, setIsModalOpen, handleDeviceClick } = useSidebar()
   const location = useLocation()
 
+  const sidebarWidth = isSidebarOpen ? 250 : 80
+
   return (
-    <aside
-      className={`
-        h-screen bg-gray-900 text-gray-100
-        border-r border-gray-800 p-4
-        flex flex-col transition-all duration-300
-        ${isSidebarOpen ? 'w-64' : 'w-20'}
-      `}
+    <div
+      style={{
+        width: sidebarWidth,
+        minHeight: '100vh',
+        backgroundColor: '#343a40',
+        color: '#f8f9fa',
+        padding: '1rem',
+        transition: 'width 0.3s'
+      }}
     >
-      <div className='flex justify-end mb-6'>
-        <button
+      <div className='d-flex justify-content-end mb-3'>
+        <Button
+          variant='secondary'
           onClick={toggleSidebar}
-          className='
-            bg-gray-800 hover:bg-gray-700
-            w-10 h-10 flex items-center justify-center
-            text-gray-400 hover:text-gray-100
-            rounded-full shadow transition-colors'
+          style={{ width: '40px', height: '40px', borderRadius: '50%' }}
         >
           {isSidebarOpen ? <FaChevronLeft /> : <FaChevronRight />}
-        </button>
+        </Button>
       </div>
 
-      <nav>
-        {routes.map((route) => (
-          route.isSidebarPage && (
-            <Link
-              key={route.to}
-              to={route.to}
-              className={`
-                flex items-center gap-3 p-3 rounded-lg
-                text-gray-400 hover:text-gray-100
-                hover:bg-gray-800 transition-colors mb-2
-                ${location.pathname === route.to ? 'bg-gray-800 text-gray-100' : ''}
-              `}
-            >
-              <div className='text-xl'>{route.icon}</div>
-              {isSidebarOpen && <span className='text-sm font-medium'>{route.label}</span>}
-              {location.pathname === route.to && (
-                <div className='w-2 h-2 rounded-full bg-green-500 ml-auto' />
-              )}
-            </Link>
-          )
-        ))}
-      </nav>
-
-      <div className='border-t border-gray-700 my-4'></div>
-
-      {isSidebarOpen && (
-        <h3 className='text-xs uppercase font-semibold text-gray-500 mb-4'>Cihazlar</h3>
-      )}
-      <div className='flex-1 overflow-auto'>
-        {devices.map((device) => {
-          const isActiveDevice = location.pathname === `/device-detail/${device.id}`
+      {/* Rotalar */}
+      <Nav className='flex-column'>
+        {routes.map((route) => {
+          if (!route.isSidebarPage) return null
+          const active = location.pathname === route.to
           return (
-            <div
-              key={device.id}
-              onClick={() => handleDeviceClick(device.id)}
-              className={`
-                flex items-center gap-3 p-3 rounded-lg
-                text-gray-400 hover:text-gray-100
-                hover:bg-gray-800 transition-colors mb-2 cursor-pointer
-                ${isActiveDevice ? 'bg-gray-800 text-gray-100' : ''}
-              `}
+            <Nav.Link
+              as={Link}
+              to={route.to}
+              key={route.to}
+              active={active}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                padding: '0.75rem',
+                borderRadius: '0.5rem',
+                backgroundColor: active ? '#495057' : 'transparent',
+                color: active ? '#ffffff' : '#ced4da',
+                marginBottom: '0.5rem'
+              }}
             >
-              <FaTabletAlt className='text-xl' />
+              <span style={{ fontSize: '1.25rem' }}>{route.icon}</span>
               {isSidebarOpen && (
-                <span className='text-sm font-medium'>{device.name}</span>
+                <span style={{ marginLeft: '0.75rem', fontSize: '0.9rem', fontWeight: 500 }}>
+                  {route.label}
+                </span>
               )}
-              {isActiveDevice && (
-                <div className='w-2 h-2 rounded-full bg-green-500 ml-auto' />
+              {active && (
+                <div
+                  style={{
+                    marginLeft: 'auto',
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    backgroundColor: '#28a745'
+                  }}
+                ></div>
               )}
-            </div>
+            </Nav.Link>
           )
         })}
-      </div>
+      </Nav>
 
-      {/* Modal */}
-      {isModalOpen && (
-        <ModalCreateDevice
-          setIsModalOpen={setIsModalOpen}
-          devices={devices}
-        />
+      <hr style={{ borderColor: '#495057', margin: '1rem 0' }} />
+
+      {isSidebarOpen && (
+        <h6
+          style={{
+            textTransform: 'uppercase',
+            fontWeight: 'bold',
+            color: '#adb5bd',
+            marginBottom: '1rem'
+          }}
+        >
+          Cihazlar
+        </h6>
       )}
-    </aside>
+
+      <ListGroup variant='flush' style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 300px)' }}>
+        {devices.map((device) => {
+          const activeDevice = location.pathname === `/device-detail/${device.id}`
+          return (
+            <ListGroup.Item
+              key={device.id}
+              action
+              onClick={() => handleDeviceClick(device.id)}
+              active={activeDevice}
+              style={{
+                backgroundColor: activeDevice ? '#495057' : 'transparent',
+                border: 'none',
+                color: activeDevice ? '#ffffff' : '#ced4da',
+                cursor: 'pointer',
+                padding: '0.75rem',
+                display: 'flex',
+                alignItems: 'center',
+                borderRadius: '0.5rem',
+                marginBottom: '0.5rem'
+              }}
+            >
+              <FaTabletAlt style={{ fontSize: '1.25rem' }} />
+              {isSidebarOpen && (
+                <span style={{ marginLeft: '0.75rem', fontSize: '0.9rem', fontWeight: 500 }}>
+                  {device.name}
+                </span>
+              )}
+              {activeDevice && (
+                <div
+                  style={{
+                    marginLeft: 'auto',
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    backgroundColor: '#28a745'
+                  }}
+                ></div>
+              )}
+            </ListGroup.Item>
+          )
+        })}
+      </ListGroup>
+
+      {/* Modal (Cihaz ekleme) */}
+      {isModalOpen && (
+        <ModalCreateDevice setIsModalOpen={setIsModalOpen} devices={devices} />
+      )}
+    </div>
   )
 }
 

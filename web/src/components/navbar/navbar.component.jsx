@@ -1,32 +1,35 @@
+import React from 'react'
+import { Navbar as RBNavbar, Container, Nav, Badge } from 'react-bootstrap'
 import { FaBell, FaUserCircle } from 'react-icons/fa'
 import DemirtekLogoSecondary from '../../assets/demirtek-logo-secondary.png'
 
 const Navbar = () => {
   return (
-    <nav className='h-16 bg-navbarBg flex items-center justify-between px-6 border-b border-gray-200'>
-      <div className='flex-1'></div>
-
-      <div className='absolute left-1/2 transform -translate-x-1/2'>
-        <img
-          src={DemirtekLogoSecondary}
-          alt='Demirtek Logo Secondary'
-          className='h-12 object-contain'
-        />
-      </div>
-
-      <div className='flex items-center space-x-4'>
-        <button className='relative text-gray-600 hover:text-primary'>
-          <FaBell size={20} />
-          <span className='absolute -top-1 -right-2 bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full'>
-            3
-          </span>
-        </button>
-        <div className='flex items-center text-gray-600 hover:text-primary'>
-          <FaUserCircle size={24} />
-          <span className='ml-1 hidden sm:inline-block'>John Doe</span>
-        </div>
-      </div>
-    </nav>
+    <RBNavbar bg='light' className='border-bottom'>
+      <Container fluid className='d-flex justify-content-between align-items-center'>
+        {/* Sol kısımda boş bir alan isterseniz ileride ekleyebilirsiniz */}
+        <div style={{ width: '40px' }}></div>
+        <RBNavbar.Brand className='mx-auto'>
+          <img
+            src={DemirtekLogoSecondary}
+            alt='Demirtek Logo Secondary'
+            style={{ height: '48px', objectFit: 'contain' }}
+          />
+        </RBNavbar.Brand>
+        <Nav className='d-flex align-items-center'>
+          <div style={{ position: 'relative', marginRight: '1rem', cursor: 'pointer' }}>
+            <FaBell size={20} color='#6c757d' />
+            <Badge pill bg='danger' style={{ position: 'absolute', top: '-4px', right: '-8px' }}>
+              3
+            </Badge>
+          </div>
+          <div className='d-flex align-items-center' style={{ cursor: 'pointer' }}>
+            <FaUserCircle size={24} color='#6c757d' />
+            <span className='ms-1 d-none d-sm-inline'>John Doe</span>
+          </div>
+        </Nav>
+      </Container>
+    </RBNavbar>
   )
 }
 

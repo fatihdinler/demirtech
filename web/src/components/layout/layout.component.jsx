@@ -1,39 +1,59 @@
+import React from 'react'
+import { Row, Col, Button } from 'react-bootstrap'
 import { Outlet } from 'react-router-dom'
-import { Navbar, Sidebar } from '../../components'
-import useLayout from './layout.hook'
 import { useDispatch } from 'react-redux'
 import { FaPlus } from 'react-icons/fa'
+import { Sidebar, Navbar } from '../../components'
+import useLayout from './layout.hook'
 import { setIsModalOpen } from '../../features/sidebar/sidebar.state'
 
 const Layout = () => {
   const { devices, isSidebarOpen, toggleSidebar } = useLayout()
   const dispatch = useDispatch()
 
+  const sidebarStyle = {
+    minWidth: isSidebarOpen ? 250 : 80,
+    transition: 'all 0.3s'
+  }
+
   return (
-    <div className='min-h-screen flex bg-gray-50 text-textColor relative'>
-      <Sidebar
-        devices={devices}
-        isSidebarOpen={isSidebarOpen}
-        toggleSidebar={toggleSidebar}
-      />
+    <div style={{ minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
+      <Row className="g-0">
+        <Col xs="auto" style={{ padding: 0, ...sidebarStyle }}>
+          <Sidebar
+            devices={devices}
+            isSidebarOpen={isSidebarOpen}
+            toggleSidebar={toggleSidebar}
+          />
+        </Col>
 
-      <div className='flex-1 flex flex-col'>
-        <Navbar toggleSidebar={toggleSidebar} />
-        <main className='p-4'>
-          <Outlet context={[devices]} />
-        </main>
-      </div>
+        {/* Sütun 2: İçerik alanı (geri kalan tüm genişliği kaplar) */}
+        <Col style={{ padding: 0 }}>
+          <Navbar />
+          <div style={{ padding: '1rem' }}>
+            <Outlet context={[devices]} />
+          </div>
+        </Col>
+      </Row>
 
-      <button
-        className='
-          fixed bottom-6 right-6 md:bottom-10 md:right-10
-          bg-primary text-white w-14 h-14 rounded-full shadow-lg
-          flex items-center justify-center
-          hover:bg-primary/90 transition-transform transform hover:scale-105
-        '
-        onClick={() => dispatch(setIsModalOpen(true))}>
-        <FaPlus className='text-lg' />
-      </button>
+      {/* Sağ alt köşedeki + butonu */}
+      <Button
+        variant="primary"
+        style={{
+          position: 'fixed',
+          bottom: '1.5rem',
+          right: '1.5rem',
+          borderRadius: '50%',
+          width: '56px',
+          height: '56px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+        onClick={() => dispatch(setIsModalOpen(true))}
+      >
+        <FaPlus />
+      </Button>
     </div>
   )
 }

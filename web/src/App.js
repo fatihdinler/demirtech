@@ -8,14 +8,11 @@ const App = () => {
     <Router>
       <Routes>
         <Route element={<Layout />}>
-          {routes.map(route => (
-            <Route
-              path={route.to}
-              element={route.element}
-            />
+          {routes.map((route, index) => (
+            <Route key={index} path={route.to} element={route.element} />
           ))}
-          <Route path='/' element={<Navigate to='/dashboard' replace />} />
-          <Route path='*' element={<Navigate to='/dashboard' replace />} />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Route>
       </Routes>
     </Router>
