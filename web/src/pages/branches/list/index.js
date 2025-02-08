@@ -1,0 +1,1 @@
+export { default as BranchesList } from './branches-list.page'

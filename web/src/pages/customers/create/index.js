@@ -1,0 +1,1 @@
+export { default as CustomersCreate } from './customers-create.page'

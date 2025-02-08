@@ -1,0 +1,1 @@
+export { default as ClimatesCreate } from './climates-create.page'
