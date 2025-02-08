@@ -1,1 +1,0 @@
-export { default as ModalCreateDevice } from './modal-create-device.component'
