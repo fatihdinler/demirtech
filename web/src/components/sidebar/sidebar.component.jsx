@@ -3,11 +3,9 @@ import { Nav, Button } from 'react-bootstrap'
 import { Link, useLocation } from 'react-router-dom'
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 import { routes } from '../../routes'
-import useSidebar from './sidebar.hook'
 
 const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
   const location = useLocation()
-
   const sidebarWidth = isSidebarOpen ? 250 : 80
 
   return (
@@ -15,24 +13,32 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
       style={{
         width: sidebarWidth,
         minHeight: '100vh',
-        backgroundColor: '#343a40',
-        color: '#f8f9fa',
+        backgroundColor: '#ffffff', // Açık tema için beyaz arka plan
+        color: '#343a40',
         padding: '1rem',
-        transition: 'width 0.3s'
+        transition: 'width 0.3s ease',
+        borderRight: '1px solid #dee2e6'
       }}
     >
-      <div className='d-flex justify-content-end mb-3'>
+      <div className="d-flex justify-content-end mb-3">
         <Button
-          variant='secondary'
+          variant="outline-secondary"
           onClick={toggleSidebar}
-          style={{ width: '40px', height: '40px', borderRadius: '50%' }}
+          style={{
+            width: '40px',
+            height: '40px',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
         >
           {isSidebarOpen ? <FaChevronLeft /> : <FaChevronRight />}
         </Button>
       </div>
 
       {/* Rotalar */}
-      <Nav className='flex-column'>
+      <Nav className="flex-column">
         {routes.map((route) => {
           if (!route.isSidebarPage) return null
           const active = location.pathname === route.to
@@ -45,16 +51,25 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                padding: '0.75rem',
-                borderRadius: '0.5rem',
-                backgroundColor: active ? '#495057' : 'transparent',
-                color: active ? '#ffffff' : '#ced4da',
-                marginBottom: '0.5rem'
+                padding: '0.75rem 1rem',
+                borderRadius: '0.375rem',
+                marginBottom: '0.5rem',
+                textDecoration: 'none',
+                color: active ? '#007bff' : '#495057',
+                backgroundColor: active ? '#e9ecef' : 'transparent',
+                boxShadow: active ? '0 4px 6px rgba(0,0,0,0.05)' : 'none',
+                transition: 'background-color 0.2s ease, box-shadow 0.2s ease'
               }}
             >
               <span style={{ fontSize: '1.25rem' }}>{route.icon}</span>
               {isSidebarOpen && (
-                <span style={{ marginLeft: '0.75rem', fontSize: '0.9rem', fontWeight: 500 }}>
+                <span
+                  style={{
+                    marginLeft: '0.75rem',
+                    fontSize: '1rem',
+                    fontWeight: 500
+                  }}
+                >
                   {route.label}
                 </span>
               )}
@@ -62,10 +77,10 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
                 <div
                   style={{
                     marginLeft: 'auto',
-                    width: '8px',
-                    height: '8px',
+                    width: '6px',
+                    height: '6px',
                     borderRadius: '50%',
-                    backgroundColor: '#28a745'
+                    backgroundColor: '#007bff'
                   }}
                 ></div>
               )}
