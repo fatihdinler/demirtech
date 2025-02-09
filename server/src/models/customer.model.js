@@ -1,27 +1,23 @@
-/**
- * models/Customer.js
- * 
- * Bu dosya, büyük firma zincirlerini (örneğin, Kredi, Şok, Bim, Carrefoursa) 
- * temsil eden Customer şemasını ve modelini tanımlar.
- *
- * Örnek Kullanım:
- *   const Customer = require('./models/Customer')
- *   const newCustomer = new Customer({ name: 'Bim', description: 'Perakende Zinciri' })
- *   newCustomer.save().then(...)
- */
-
 const mongoose = require('mongoose')
 const { Schema } = mongoose
+const { v4: uuid } = require('uuid')
 
 const CustomerSchema = new Schema({
-  name: { 
-    type: String, 
-    required: [true, 'Müşteri adı gerekli'], 
-    trim: true 
+  id: {
+    type: String,
+    unique: true,
+    required: true,
+    default: uuid,
   },
-  description: { 
-    type: String, 
-    trim: true 
+  name: {
+    type: String,
+    required: [true, 'Müşteri adı gerekli'],
+    trim: true
+  },
+  description: {
+    type: String,
+    trim: true,
+    default: '',
   }
 }, { timestamps: true })
 

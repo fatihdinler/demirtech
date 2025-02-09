@@ -14,7 +14,7 @@ const mongoose = require('mongoose')
 const { Schema } = mongoose
 
 const RoleSchema = new Schema({
-  roleName: { 
+  name: { 
     type: String, 
     required: [true, 'Role adı gerekli'], 
     unique: true, 
