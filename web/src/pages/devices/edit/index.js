@@ -1,0 +1,1 @@
+export { default as DevicesEdit } from './devices-edit.page'

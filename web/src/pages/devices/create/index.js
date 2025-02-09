@@ -1,0 +1,1 @@
+export { default as DevicesCreate } from './devices-create.page'

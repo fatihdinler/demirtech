@@ -1,0 +1,1 @@
+export { default as DevicesList } from './devices-list.page'
