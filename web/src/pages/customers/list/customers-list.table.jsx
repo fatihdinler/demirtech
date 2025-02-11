@@ -1,9 +1,33 @@
 import React from 'react'
+import { Table } from '../../../components'
 
-const CustomerListTable = () => {
+const CustomersListTable = ({ customers }) => {
+  const columns = [
+    {
+      header: 'Ad',
+      accessor: 'name',
+      filterable: true,
+    },
+    {
+      header: 'Description',
+      accessor: 'description',
+      filterable: true,
+    },
+    {
+      header: 'Actions',
+      accessor: 'actions',
+    },
+  ]
+
   return (
-    <div>CustomerListTable</div>
+    <Table
+      data={customers}
+      columns={columns}
+      defaultPageSize={5}
+      pageSizeOptions={[5, 10, 20]}
+      editRoute={['/customers', '/edit']}
+    />
   )
 }
 
-export default CustomerListTable
+export default CustomersListTable

@@ -1,8 +1,18 @@
-import React from 'react'
+import useCustomersList from './customers-list.hook'
+import CustomersListTable from './customers-list.table'
 
 const CustomersList = () => {
+  const {
+    customers,
+    isLoading,
+    error,
+    refetch,
+  } = useCustomersList({ skipInitialLoad: false })
+
   return (
-    <div>Customers</div>
+    <div>
+      <CustomersListTable customers={customers} />
+    </div>
   )
 }
 

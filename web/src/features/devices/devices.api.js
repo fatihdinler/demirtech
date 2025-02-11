@@ -52,7 +52,6 @@ export const removeDevice = createAsyncThunk('devices/removeDevice', async (id, 
   }
 })
 
-// Slice
 const devicesSlice = createSlice({
   name: 'devices',
   initialState: {
@@ -69,7 +68,6 @@ const devicesSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Fetch Devices
       .addCase(fetchDevices.pending, (state) => {
         state.isLoading = true
         state.error = null
@@ -81,21 +79,6 @@ const devicesSlice = createSlice({
       .addCase(fetchDevices.rejected, (state, action) => {
         state.isLoading = false
         state.error = action.payload.data
-      })
-      // Add Device
-      .addCase(addDevice.fulfilled, (state, action) => {
-        // state.data.push(action.payload)
-      })
-      // Update Device
-      .addCase(updateDevice.fulfilled, (state, action) => {
-        const index = state.data.findIndex((device) => device.id === action.payload.id)
-        if (index !== -1) {
-          state.data[index] = action.payload.data
-        }
-      })
-      // Remove Device
-      .addCase(removeDevice.fulfilled, (state, action) => {
-        // state.data = state.data.filter((device) => device.id !== action.payload)
       })
   },
 })
