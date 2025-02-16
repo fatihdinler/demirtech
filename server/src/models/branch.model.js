@@ -20,16 +20,16 @@ const mongoose = require('mongoose')
 const { Schema } = mongoose
 
 const BranchSchema = new Schema({
-  customer: {
-    type: Schema.Types.ObjectId,
+  customerId: {
+    type: String,
     ref: 'Customer',
     required: [true, 'Müşteri bilgisi gerekli']
   },
-  regionManager: {
-    type: Schema.Types.ObjectId,
+  regionManagerId: {
+    type: String,
     ref: 'User'
   },
-  branchName: {
+  name: {
     type: String,
     required: [true, 'Şube adı gerekli'],
     trim: true
