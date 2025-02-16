@@ -28,7 +28,7 @@ const useCustomersList = ({ skipInitialLoad = false } = {}) => {
     customers,
     isLoading,
     error,
-    refetch
+    refetch,
   }
 }
 

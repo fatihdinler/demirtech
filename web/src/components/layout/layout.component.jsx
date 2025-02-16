@@ -35,25 +35,6 @@ const Layout = () => {
           </div>
         </Col>
       </Row>
-
-      {/* Sağ alt köşedeki + butonu */}
-      <Button
-        variant="primary"
-        style={{
-          position: 'fixed',
-          bottom: '1.5rem',
-          right: '1.5rem',
-          borderRadius: '50%',
-          width: '56px',
-          height: '56px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}
-        onClick={() => dispatch(setIsModalOpen(true))}
-      >
-        <FaPlus />
-      </Button>
     </div>
   )
 }

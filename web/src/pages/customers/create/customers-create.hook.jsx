@@ -3,11 +3,13 @@ import { createCustomerValidator, retrieveSuccessMessage, } from './customers-cr
 import { setName, setDescription, clearPage } from '../../../features/customers/customers-create.state'
 import { addCustomer } from '../../../features/customers/customers.api'
 import { useNavigate } from 'react-router-dom'
+import useCustomersList from '../list/customers-list.hook'
 
 const useCustomersCreate = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const { name, description } = useSelector(state => state.customers.create)
+  const { refetch: refetchCustomersAfterCreation } = useCustomersList()
 
   const onChange = (event, field) => {
     event.preventDefault()
@@ -39,6 +41,7 @@ const useCustomersCreate = () => {
       const response = await dispatch(addCustomer(postData)).unwrap()
       retrieveSuccessMessage(response)
       clearPageHandler()
+      refetchCustomersAfterCreation()
       return navigate('/customers')
     }
   }
