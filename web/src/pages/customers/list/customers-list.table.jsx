@@ -9,12 +9,12 @@ const CustomersListTable = ({ customers }) => {
       filterable: true,
     },
     {
-      header: 'Description',
+      header: 'Açıklama',
       accessor: 'description',
       filterable: true,
     },
     {
-      header: 'Actions',
+      header: 'Aksiyonlar',
       accessor: 'actions',
     },
   ]

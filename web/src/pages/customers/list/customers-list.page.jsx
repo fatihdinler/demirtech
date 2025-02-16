@@ -11,7 +11,6 @@ const CustomersList = () => {
     refetch,
   } = useCustomersList({ skipInitialLoad: false })
 
-  console.log(error)
   return (
     <Container fluid>
       <>

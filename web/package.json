@@ -13,7 +13,8 @@
     "react-icons": "^5.4.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "6",
-    "react-scripts": "5.0.1"
+    "react-scripts": "5.0.1",
+    "react-toastify": "^11.0.3"
   },
   "scripts": {
     "start": "PORT=3438 react-scripts start",

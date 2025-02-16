@@ -1,0 +1,25 @@
+.page-footer .secondary-button {
+  border-width: 0;
+  background-color: gray;
+  transition: background-color 0.3s ease;
+}
+
+.page-footer .secondary-button:hover {
+  background-color: rgb(204, 203, 203);
+}
+
+.page-footer .primary-button {
+  border-width: 0;
+  background-color: var(--blue);
+  color: white;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.page-footer .primary-button:hover {
+  background-color: #5dbfe9;
+}
+
+.page-footer .dividor {
+  height: 1px;
+  background-color: rgba(0, 0, 0, 0.1);
+}

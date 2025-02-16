@@ -7,7 +7,7 @@ const CreateButton = ({ link }) => {
   const navigationHandler = () => navigate(link)
 
   return (
-    <div className='page-footer'>
+    <div className=''>
       <Button
         className='primary-button mb-2'
         onClick={navigationHandler}>
