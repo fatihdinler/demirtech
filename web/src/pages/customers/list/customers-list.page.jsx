@@ -1,5 +1,7 @@
 import useCustomersList from './customers-list.hook'
 import CustomersListTable from './customers-list.table'
+import { ListPagesHeader } from '../../../components'
+import { Container } from 'react-bootstrap'
 
 const CustomersList = () => {
   const {
@@ -9,10 +11,23 @@ const CustomersList = () => {
     refetch,
   } = useCustomersList({ skipInitialLoad: false })
 
+  console.log(error)
   return (
-    <div>
-      <CustomersListTable customers={customers} />
-    </div>
+    <Container fluid>
+      <>
+        {isLoading && error === null ? (
+          <p>Loading...</p>
+        ) : (
+          <>
+            <ListPagesHeader
+              breadcrumbItems={[{ label: 'Müşteriler', link: '/customers' }]}
+              navigateTo='/customers/create'
+            />
+            <CustomersListTable customers={customers} />
+          </>
+        )}
+      </>
+    </Container>
   )
 }
 

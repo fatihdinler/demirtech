@@ -1,0 +1,1 @@
+export { default as ListPagesHeader } from './list-pages-header.component'

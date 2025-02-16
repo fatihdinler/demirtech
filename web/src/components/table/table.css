@@ -1,88 +1,127 @@
-/* Kart stili */
-.table-card {
-  border-radius: 8px;
+/* Ant Design benzeri tablo kartı */
+.antd-table-card {
+  border: 1px solid #f0f0f0;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   overflow: hidden;
-  border: 1px solid #e7ebf0;
-  margin: 1rem 0;
 }
 
-/* Header boş olabilir, isterseniz oraya buton veya başlık ekleyebilirsiniz */
-.table-header {
-  background-color: #f4f7fa;
-  min-height: 2px;
-  /* Sadece ince bir bar gibi görünsün */
-  border-bottom: 1px solid #e7ebf0;
+/* Tablo düzeni */
+.antd-table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-/* Tablo gövdesi */
-.custom-table {
-  font-size: 0.9rem;
-  background-color: #fff;
+.antd-table thead {
+  background: #fafafa;
 }
 
-/* Tablonun satır hover ve spacing ayarları */
-.custom-table tbody tr.custom-row:hover {
-  background-color: #fdfdfd !important;
+.antd-table th,
+.antd-table td {
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+  text-align: left;
 }
 
-/* Sütun başlığı yapısı */
-.column-header {
+.antd-table th:first-child,
+.antd-table td:first-child {
+  padding-left: 24px;
+}
+
+.antd-table th:last-child,
+.antd-table td:last-child {
+  padding-right: 24px;
+}
+
+/* Sütun başlıklarının düzeni */
+.antd-column-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  position: relative;
 }
 
-/* Filtre ikonu butonu */
-.filter-button {
-  background: transparent;
-  border: none;
-  color: #888;
-  margin-left: 0.25rem;
-  cursor: pointer;
-  font-size: 0.85rem;
-}
-
-.filter-button:hover {
-  color: #555;
-}
-
-/* Filtre input'unun açılacağı küçük kutu */
-.filter-input {
-  margin-top: 0.25rem;
-}
-
-/* Kayıt bulunamadı satırı */
-.no-data {
-  color: #999;
-  font-style: italic;
-}
-
-/* Footer stili */
-.table-footer {
-  background-color: #f4f7fa;
-  border-top: 1px solid #e7ebf0;
-  min-height: 60px;
-}
-
-/* Sayfa başına kayıt seçimi alanı */
-.page-size .page-size-select {
-  width: 70px;
-  margin-left: 5px;
-}
-
-/* Dropdown menü için ikon buton */
-.table-menu-button {
+/* Filtre butonu */
+.antd-filter-button {
   background: none;
   border: none;
-  color: #555;
-  padding: 0;
-  font-size: 1.1rem;
   cursor: pointer;
-  outline: none;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 14px;
+  padding: 0;
 }
 
-/* İsterseniz dropdown menü stilini daha da özelleştirebilirsiniz */
-.dropdown-menu {
-  font-size: 0.9rem;
+.antd-filter-button:hover {
+  color: rgba(0, 0, 0, 0.85);
+}
+
+/* Filtre input alanı */
+.antd-filter-input {
+  margin-top: 8px;
+}
+
+/* Kayıt bulunamadı mesajı */
+.antd-no-data {
+  text-align: center;
+  padding: 16px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+/* Satır hover efekti */
+.antd-table tbody tr:hover {
+  background: #f5f5f5;
+}
+
+/* Tablo alt bilgisi (footer) */
+.antd-table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #fafafa;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* Sayfalama düzeni */
+.antd-pagination {
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.antd-pagination .page-item a {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.antd-pagination .page-item.active a {
+  background-color: #1890ff;
+  border-color: #1890ff;
+  color: #fff;
+}
+
+/* Sayfa başına gösterim seçeneği */
+.antd-page-size {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.antd-page-size .page-size-select {
+  margin-left: 8px;
+  width: auto;
+  display: inline-block;
+}
+
+/* Dropdown butonu (Actions) */
+.antd-dropdown-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.45);
+  padding: 0;
+}
+
+.antd-dropdown-button:hover {
+  color: rgba(0, 0, 0, 0.85);
 }
