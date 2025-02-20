@@ -2,10 +2,10 @@ import { useEffect, useCallback } from 'react'
 import { useDispatch, useSelector, shallowEqual } from 'react-redux'
 import { fetchCustomers } from '../../../features/customers/customers.api'
 
-const useCustomersList = ({ skipInitialLoad = false } = {}) => {
+const useCustomersList = () => {
   const dispatch = useDispatch()
 
-  const { data: customers, isLoading, error } = useSelector(
+  const { data: customers, isLoading, error, hasFetched } = useSelector(
     (state) => state.customers.api,
     shallowEqual
   )
@@ -15,10 +15,10 @@ const useCustomersList = ({ skipInitialLoad = false } = {}) => {
   }, [dispatch])
 
   useEffect(() => {
-    if (!skipInitialLoad && (!customers || customers.length === 0) && !isLoading && !error) {
+    if (!hasFetched && !isLoading) {
       loadCustomers()
     }
-  }, [skipInitialLoad, customers, isLoading, error, loadCustomers])
+  }, [hasFetched, isLoading, loadCustomers])
 
   const refetch = useCallback(() => {
     loadCustomers()

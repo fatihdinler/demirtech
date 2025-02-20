@@ -1,9 +1,9 @@
 // Table.jsx
-import React, { useState, useMemo } from 'react';
-import { Card, Form, Pagination, Dropdown } from 'react-bootstrap';
-import { FaFilter, FaEllipsisV } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
-import './table.css';
+import React, { useState, useMemo } from 'react'
+import { Card, Form, Pagination, Dropdown } from 'react-bootstrap'
+import { FaFilter, FaEllipsisV } from 'react-icons/fa'
+import { useNavigate } from 'react-router-dom'
+import './table.css'
 
 const Table = ({
   data,
@@ -11,50 +11,51 @@ const Table = ({
   pageSizeOptions = [10, 20, 50, 100],
   defaultPageSize = 10,
   editRoute,
+  handleDelete,
 }) => {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
-  const [filterVisible, setFilterVisible] = useState({});
-  const [filterValues, setFilterValues] = useState({});
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(defaultPageSize);
+  const [filterVisible, setFilterVisible] = useState({})
+  const [filterValues, setFilterValues] = useState({})
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(defaultPageSize)
 
   const toggleFilter = (accessor) => {
     setFilterVisible((prev) => ({
       ...prev,
       [accessor]: !prev[accessor],
-    }));
-  };
+    }))
+  }
 
   // Filtre değerlerini günceller
   const handleFilterChange = (accessor, value) => {
-    setFilterValues((prev) => ({ ...prev, [accessor]: value }));
-    setCurrentPage(1);
-  };
+    setFilterValues((prev) => ({ ...prev, [accessor]: value }))
+    setCurrentPage(1)
+  }
 
   // Veriye göre filtre uygula
   const filteredData = useMemo(() => {
     return data.filter((item) =>
       columns.every((col) => {
         if (col.filterable && filterValues[col.accessor]) {
-          const filterVal = filterValues[col.accessor].toLowerCase();
-          const itemVal = (item[col.accessor] || '').toString().toLowerCase();
-          return itemVal.includes(filterVal);
+          const filterVal = filterValues[col.accessor].toLowerCase()
+          const itemVal = (item[col.accessor] || '').toString().toLowerCase()
+          return itemVal.includes(filterVal)
         }
-        return true;
+        return true
       })
-    );
-  }, [data, columns, filterValues]);
+    )
+  }, [data, columns, filterValues])
 
-  const totalPages = Math.ceil(filteredData.length / pageSize);
+  const totalPages = Math.ceil(filteredData.length / pageSize)
   const paginatedData = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return filteredData.slice(startIndex, startIndex + pageSize);
-  }, [filteredData, currentPage, pageSize]);
+    const startIndex = (currentPage - 1) * pageSize
+    return filteredData.slice(startIndex, startIndex + pageSize)
+  }, [filteredData, currentPage, pageSize])
 
   // Sayfalama numaralarının oluşturulması
   const renderPaginationItems = () => {
-    let items = [];
+    let items = []
     for (let i = 1; i <= totalPages; i++) {
       items.push(
         <Pagination.Item
@@ -64,49 +65,48 @@ const Table = ({
         >
           {i}
         </Pagination.Item>
-      );
+      )
     }
-    return items;
-  };
+    return items
+  }
 
   // Satırdaki “Actions” sütunu için menü (Düzenle, Sil)
   const ActionsMenu = ({ row }) => {
-    const handleEdit = () => {
+    const editOperation = () => {
       // editRoute, örneğin ['/edit', '?mode=edit'] şeklinde bekleniyor.
-      navigate(`${editRoute[0]}/${row.id}${editRoute[1]}`);
-    };
+      navigate(`${editRoute[0]}/${row.id}${editRoute[1]}`)
+    }
 
-    const handleDelete = () => {
-      // Silme işlemini burada tanımlayabilirsiniz.
-      console.log('Silinecek kayıt:', row);
-    };
+    const deleteOperation = () => {
+      handleDelete(row.id)
+    }
 
     return (
-      <Dropdown align="end">
-        <Dropdown.Toggle as="button" className="antd-dropdown-button">
+      <Dropdown align='end'>
+        <Dropdown.Toggle as='button' className='antd-dropdown-button'>
           <FaEllipsisV />
         </Dropdown.Toggle>
         <Dropdown.Menu>
-          <Dropdown.Item onClick={handleEdit}>Düzenle</Dropdown.Item>
-          <Dropdown.Item onClick={handleDelete}>Sil</Dropdown.Item>
+          <Dropdown.Item onClick={editOperation}>Düzenle</Dropdown.Item>
+          <Dropdown.Item onClick={deleteOperation}>Sil</Dropdown.Item>
         </Dropdown.Menu>
       </Dropdown>
-    );
-  };
+    )
+  }
 
   return (
-    <Card className="antd-table-card">
-      <Card.Body className="p-0">
-        <table className="antd-table">
+    <Card className='antd-table-card'>
+      <Card.Body className='p-0'>
+        <table className='antd-table'>
           <thead>
             <tr>
               {columns.map((col) => (
                 <th key={col.accessor}>
-                  <div className="antd-column-header">
+                  <div className='antd-column-header'>
                     <span>{col.header}</span>
                     {col.filterable && (
                       <button
-                        className="antd-filter-button"
+                        className='antd-filter-button'
                         onClick={() => toggleFilter(col.accessor)}
                       >
                         <FaFilter />
@@ -114,11 +114,11 @@ const Table = ({
                     )}
                   </div>
                   {col.filterable && filterVisible[col.accessor] && (
-                    <div className="antd-filter-input">
+                    <div className='antd-filter-input'>
                       <Form.Control
-                        size="sm"
-                        type="text"
-                        placeholder="Filtre..."
+                        size='sm'
+                        type='text'
+                        placeholder='Filtre...'
                         value={filterValues[col.accessor] || ''}
                         onChange={(e) =>
                           handleFilterChange(col.accessor, e.target.value)
@@ -133,33 +133,33 @@ const Table = ({
           <tbody>
             {paginatedData.length > 0 ? (
               paginatedData.map((row, rowIndex) => (
-                <tr key={row.id || rowIndex} className="antd-table-row">
+                <tr key={row.id || rowIndex} className='antd-table-row'>
                   {columns.map((col) => {
                     if (col.render) {
                       return (
                         <td key={`${row.id || rowIndex}-${col.accessor}`}>
                           {col.render(row[col.accessor], row)}
                         </td>
-                      );
+                      )
                     }
                     if (col.accessor === 'actions') {
                       return (
                         <td key={`actions-${rowIndex}`}>
                           <ActionsMenu row={row} />
                         </td>
-                      );
+                      )
                     }
                     return (
                       <td key={`${row.id || rowIndex}-${col.accessor}`}>
                         {row[col.accessor]}
                       </td>
-                    );
+                    )
                   })}
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={columns.length} className="antd-no-data">
+                <td colSpan={columns.length} className='antd-no-data'>
                   Kayıt bulunamadı.
                 </td>
               </tr>
@@ -168,8 +168,8 @@ const Table = ({
         </table>
       </Card.Body>
 
-      <Card.Footer className="antd-table-footer">
-        <Pagination className="antd-pagination">
+      <Card.Footer className='antd-table-footer'>
+        <Pagination className='antd-pagination'>
           <Pagination.Prev
             disabled={currentPage === 1}
             onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
@@ -180,16 +180,16 @@ const Table = ({
             onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
           />
         </Pagination>
-        <div className="antd-page-size">
+        <div className='antd-page-size'>
           <span>Sayfa Başına:</span>
           <Form.Control
-            as="select"
+            as='select'
             value={pageSize}
             onChange={(e) => {
-              setPageSize(Number(e.target.value));
-              setCurrentPage(1);
+              setPageSize(Number(e.target.value))
+              setCurrentPage(1)
             }}
-            className="page-size-select"
+            className='page-size-select'
           >
             {pageSizeOptions.map((opt) => (
               <option key={opt} value={opt}>
@@ -200,7 +200,7 @@ const Table = ({
         </div>
       </Card.Footer>
     </Card>
-  );
-};
+  )
+}
 
-export default Table;
+export default Table

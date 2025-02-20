@@ -1,7 +1,8 @@
-import React from 'react'
 import { Table } from '../../../components'
+import useCustomersRemover from './customers-list.remover'
 
 const CustomersListTable = ({ customers }) => {
+  const { removeCustomerData } = useCustomersRemover()
   const columns = [
     {
       header: 'Ad',
@@ -26,6 +27,7 @@ const CustomersListTable = ({ customers }) => {
       defaultPageSize={5}
       pageSizeOptions={[5, 10, 20]}
       editRoute={['/customers', '/edit']}
+      handleDelete={removeCustomerData}
     />
   )
 }

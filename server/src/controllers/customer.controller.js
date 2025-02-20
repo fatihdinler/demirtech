@@ -67,6 +67,7 @@ const deleteCustomer = asyncHandler(async (req, res) => {
   res.status(httpStatus.OK).json({
     status: 'SUCCESS',
     message: 'Customer deleted successfully',
+    data: deletedCustomer,
   })
 })
 

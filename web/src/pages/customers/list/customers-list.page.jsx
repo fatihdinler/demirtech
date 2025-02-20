@@ -1,6 +1,6 @@
 import useCustomersList from './customers-list.hook'
 import CustomersListTable from './customers-list.table'
-import { ListPagesHeader } from '../../../components'
+import { ListPagesHeader, Loading } from '../../../components'
 import { Container } from 'react-bootstrap'
 
 const CustomersList = () => {
@@ -8,14 +8,13 @@ const CustomersList = () => {
     customers,
     isLoading,
     error,
-    refetch,
-  } = useCustomersList({ skipInitialLoad: false })
+  } = useCustomersList()
 
   return (
     <Container fluid>
       <>
         {isLoading && error === null ? (
-          <p>Loading...</p>
+          <Loading />
         ) : (
           <>
             <ListPagesHeader

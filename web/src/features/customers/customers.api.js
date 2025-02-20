@@ -45,8 +45,7 @@ export const updateCustomer = createAsyncThunk('customers/updateCustomer', async
 
 export const removeCustomer = createAsyncThunk('customers/removeCustomer', async (id, { rejectWithValue }) => {
   try {
-    await _deleteCustomer(id)
-    return id
+    return await _deleteCustomer(id)
   } catch (error) {
     return rejectWithValue(error.response?.data || 'Error deleting customer')
   }
@@ -58,12 +57,14 @@ const customersSlice = createSlice({
     data: [],
     isLoading: false,
     error: null,
+    hasFetched: false,
   },
   reducers: {
     resetApi: (state) => {
       state.data = []
       state.isLoading = false
       state.error = null
+      state.hasFetched = false
     }
   },
   extraReducers: (builder) => {
@@ -75,13 +76,16 @@ const customersSlice = createSlice({
       .addCase(fetchCustomers.fulfilled, (state, action) => {
         state.isLoading = false
         state.data = action.payload.data
+        state.hasFetched = true
       })
       .addCase(fetchCustomers.rejected, (state, action) => {
         state.isLoading = false
         state.error = action.payload.data
+        state.hasFetched = true
       })
   },
 })
+
 
 export const {
   resetApi,
