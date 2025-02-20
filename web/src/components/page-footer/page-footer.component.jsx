@@ -7,10 +7,10 @@ const PageFooter = ({ isCreatePage, createOrEditHandler, cancelHander }) => {
       <Row className='d-flex mt-4'>
         <Col className='d-flex justify-content-end'>
           <Button className=' me-2' onClick={cancelHander} variant='outline-secondary'>
-            Cancel
+            İptal
           </Button>
           <Button className='' onClick={createOrEditHandler}>
-            {isCreatePage ? 'Create' : 'Edit'}
+            {isCreatePage ? 'Oluştur' : 'Düzenle'}
           </Button>
         </Col>
       </Row>

@@ -1,15 +1,15 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import {
-  createCustomer,
-  deleteCustomer,
-  editCustomer,
-  getCustomer,
-  getCustomers,
+  _createCustomer,
+  _deleteCustomer,
+  _editCustomer,
+  _getCustomer,
+  _getCustomers,
 } from '../../services/customers.service'
 
 export const fetchCustomers = createAsyncThunk('customers/fetchCustomers', async (_, { rejectWithValue }) => {
   try {
-    return await getCustomers()
+    return await _getCustomers()
   } catch (error) {
     return rejectWithValue(error.response?.data || 'Error fetching customers')
   }
@@ -19,7 +19,7 @@ export const fetchCustomer = createAsyncThunk(
   'customers/fetchCustomer',
   async (id, { rejectWithValue }) => {
     try {
-      return await getCustomer(id)
+      return await _getCustomer(id)
     } catch (error) {
       return rejectWithValue(error.response?.data || 'Error fetching customer')
     }
@@ -28,7 +28,7 @@ export const fetchCustomer = createAsyncThunk(
 
 export const addCustomer = createAsyncThunk('customers/addCustomer', async (data, { rejectWithValue }) => {
   try {
-    const response = await createCustomer(data)
+    const response = await _createCustomer(data)
     return response
   } catch (error) {
     return rejectWithValue(error.response?.data || 'Error creating customer')
@@ -37,7 +37,7 @@ export const addCustomer = createAsyncThunk('customers/addCustomer', async (data
 
 export const updateCustomer = createAsyncThunk('customers/updateCustomer', async ({ id, updatedData }, { rejectWithValue }) => {
   try {
-    return await editCustomer(id, updatedData)
+    return await _editCustomer(id, updatedData)
   } catch (error) {
     return rejectWithValue(error.response?.data || 'Error updating customer')
   }
@@ -45,7 +45,7 @@ export const updateCustomer = createAsyncThunk('customers/updateCustomer', async
 
 export const removeCustomer = createAsyncThunk('customers/removeCustomer', async (id, { rejectWithValue }) => {
   try {
-    await deleteCustomer(id)
+    await _deleteCustomer(id)
     return id
   } catch (error) {
     return rejectWithValue(error.response?.data || 'Error deleting customer')
