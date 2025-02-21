@@ -2,11 +2,13 @@ import { combineReducers, configureStore } from '@reduxjs/toolkit'
 import devicesReducer from './devices/devices.reducer'
 import sidebarReducer from './sidebar/sidebar.state'
 import customersReducer from './customers/customers.reducer'
+import branchesReducer from './branches/branches.reducer'
 
 const rootReducer = combineReducers({
   devices: devicesReducer,
   sidebar: sidebarReducer,
   customers: customersReducer,
+  branches: branchesReducer,
 })
 
 const store = configureStore({
