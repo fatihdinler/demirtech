@@ -2,16 +2,11 @@ const { validateIdInParams } = require('../helpers/common.helper')
 
 const createBranch = async (req, res, next) => {
   let errors = []
-  const { customerId, regionManagerId, name, address, contactInfo } = req.body
+  const { customerId, name, address, contactInfo } = req.body
 
   if (!customerId) {
     errors.push({
       error: `'customerId' field is required to create a branch.`,
-    })
-  }
-  if (!regionManagerId) {
-    errors.push({
-      error: `'regionManagerId' field is required to create a branch.`,
     })
   }
   if (!address) {
@@ -47,16 +42,11 @@ const getBranch = (req, res, next) => {
 const updateBranch = (req, res, next) => {
   validateIdInParams(req, res, () => {
     let errors = []
-    const { customerId, regionManagerId, name, address, contactInfo } = req.body
+    const { customerId, name, address, contactInfo } = req.body
 
     if (!customerId || customerId === undefined) {
       errors.push({
         error: `'customerId' field is required to update a branch.`,
-      })
-    }
-    if (!regionManagerId || regionManagerId === undefined) {
-      errors.push({
-        error: `'regionManagerId' field is required to update a branch.`,
       })
     }
     if (!address || address === undefined) {

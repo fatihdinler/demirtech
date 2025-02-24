@@ -1,25 +1,14 @@
-/**
- * models/Branch.js
- * 
- * Bu dosya, bir Customer'a ait mağaza veya şubeleri temsil eden Branch 
- * şemasını ve modelini tanımlar. İsteğe bağlı olarak, her şubenin bir bölge 
- * müdürü (User) ile ilişkilendirilmesi sağlanabilir.
- *
- * Örnek Kullanım:
- *   const Branch = require('./models/Branch')
- *   const branch = new Branch({
- *     customer: customerId,
- *     branchName: 'İstanbul Şubesi',
- *     address: 'Örnek Mah., Örnek Sok.',
- *     contactInfo: '0212 123 45 67'
- *   })
- *   branch.save().then(...)
- */
-
 const mongoose = require('mongoose')
 const { Schema } = mongoose
+const { v4: uuid } = require('uuid')
 
 const BranchSchema = new Schema({
+  id: {
+    type: String,
+    unique: true,
+    required: true,
+    default: uuid,
+  },
   customerId: {
     type: String,
     ref: 'Customer',

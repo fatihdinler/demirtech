@@ -1,8 +1,9 @@
 import { Table } from '../../../components'
 import useBranchesListRemover from './branches-list.remover'
 
-const BranchesListTable = ({ branches }) => {
+const BranchesListTable = ({ branches, customers }) => {
   const { removeBranchData } = useBranchesListRemover()
+
   const columns = [
     {
       header: 'Ad',
@@ -13,6 +14,10 @@ const BranchesListTable = ({ branches }) => {
       header: 'Müşteri',
       accessor: 'customerId',
       filterable: true,
+      render: (value, row) => {
+        const customer = customers.find(cust => cust.id === value)
+        return customer ? customer.name : value
+      }
     },
     {
       header: 'Bölge Müdürü',

@@ -1,4 +1,3 @@
-// Table.jsx
 import React, { useState, useMemo } from 'react'
 import { Card, Form, Pagination, Dropdown } from 'react-bootstrap'
 import { FaFilter, FaEllipsisV } from 'react-icons/fa'
