@@ -8,6 +8,7 @@ const client = mqtt.connect('mqtt://broker.emqx.io', { username: 'emqx', passwor
 const deviceRoutes = require('./src/routes/device.route')
 const customerRoutes = require('./src/routes/customer.route')
 const branchRoutes = require('./src/routes/branch.route')
+const climateRoutes = require('./src/routes/climate.route')
 
 const app = express()
 const port = config.DEMIRTECH_APPLICATION_PORT || 4001
@@ -49,3 +50,4 @@ app.listen(port, async () => {
 app.use('/api/devices', deviceRoutes)
 app.use('/api/customers', customerRoutes)
 app.use('/api/branches', branchRoutes)
+app.use('/api/climates', climateRoutes)
