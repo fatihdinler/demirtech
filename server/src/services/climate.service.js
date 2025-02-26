@@ -1,4 +1,5 @@
 const Climate = require('../models/climate.model')
+const { climateModels } = require('../../constants')
 
 const createClimate = async (data) => {
   const climate = new Climate(data)
@@ -22,10 +23,15 @@ const deleteClimate = async (id) => {
   return result.deletedCount > 0
 }
 
+const getClimateModelNames = () => {
+  return climateModels
+}
+
 module.exports = {
   createClimate,
   getClimates,
   getClimate,
   updateClimate,
   deleteClimate,
+  getClimateModelNames,
 }

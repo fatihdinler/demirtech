@@ -71,10 +71,20 @@ const deleteClimate = asyncHandler(async (req, res) => {
   })
 })
 
+const getClimateModelNames = asyncHandler(async (req, res) => {
+  const modelNames = ClimateService.getClimateModelNames()
+  res.status(httpStatus.OK).json({
+    status: 'SUCCESS',
+    message: 'Climate model names retrieved successfully',
+    data: modelNames,
+  })
+})
+
 module.exports = {
   createClimate,
   getClimate,
   getClimates,
   updateClimate,
   deleteClimate,
+  getClimateModelNames,
 }
