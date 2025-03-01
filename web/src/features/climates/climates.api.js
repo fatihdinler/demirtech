@@ -5,6 +5,7 @@ import {
   _editClimate,
   _getClimate,
   _getClimates,
+  _getClimateModelNames,
 } from '../../services/climates.service'
 
 export const fetchClimates = createAsyncThunk('climates/fetchClimates', async (_, { rejectWithValue }) => {

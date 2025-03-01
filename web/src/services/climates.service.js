@@ -27,8 +27,3 @@ export const _getClimates = async () => {
   const response = await axios.get(API_BASE_URL)
   return response.data
 }
-
-export const _getClimateModelNames = async () => {
-  const response = await axios.get(`${API_BASE_URL}/model-names`)
-  return response.data
-}

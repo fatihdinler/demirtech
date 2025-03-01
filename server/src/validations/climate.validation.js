@@ -70,15 +70,10 @@ const deleteClimate = (req, res, next) => {
   validateIdInParams(req, res, next)
 }
 
-const getClimateModelNames = (req, res, next) => {
-  return next()
-}
-
 module.exports = {
   createClimate,
   getClimates: async (req, res, next) => next(),
   getClimate,
   updateClimate,
   deleteClimate,
-  getClimateModelNames,
 }

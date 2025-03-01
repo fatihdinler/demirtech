@@ -23,15 +23,10 @@ const deleteClimate = async (id) => {
   return result.deletedCount > 0
 }
 
-const getClimateModelNames = () => {
-  return climateModels
-}
-
 module.exports = {
   createClimate,
   getClimates,
   getClimate,
   updateClimate,
   deleteClimate,
-  getClimateModelNames,
 }

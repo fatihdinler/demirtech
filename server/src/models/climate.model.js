@@ -20,7 +20,7 @@ const ClimateSchema = new Schema({
     default: '',
   },
   branchId: {
-    type: Schema.Types.ObjectId,
+    type: String,
     ref: 'Branch',
     required: [true, 'Şube bilgisi gerekli']
   },
