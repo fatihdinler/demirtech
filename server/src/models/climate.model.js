@@ -9,6 +9,16 @@ const ClimateSchema = new Schema({
     required: true,
     default: uuid,
   },
+  name: {
+    type: String,
+    required: [true, 'Klima adı gerekli'],
+    trim: true
+  },
+  description: {
+    type: String,
+    trim: true,
+    default: '',
+  },
   branchId: {
     type: Schema.Types.ObjectId,
     ref: 'Branch',
@@ -18,9 +28,6 @@ const ClimateSchema = new Schema({
     type: String,
     required: [true, 'Klima modeli gerekli'],
     trim: true
-  },
-  installationDate: {
-    type: Date,
   },
 }, { timestamps: true })
 
