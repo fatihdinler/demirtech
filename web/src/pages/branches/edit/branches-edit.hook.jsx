@@ -11,8 +11,16 @@ const useBranchesEdit = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const { id } = useParams()
-  const { name, customerId, regionManagerId, address, contactInfo } = useSelector(state => state.branches.edit)
   const { refetch: refetchBranchesAfterEditing } = useBranchesList()
+
+  const { name, customerId, regionManagerId, address, contactInfo } = useSelector(state => state.branches.edit)
+  const { data: customers, isLoading: isCustomersLoading, error: errorCustomers, hasFetched: doesCustomersLoaded } = useSelector(state => state.customers.api)
+
+  useEffect(() => {
+    if (!doesCustomersLoaded && !isCustomersLoading) {
+      dispatch(fetchCustomers())
+    }
+  }, [doesCustomersLoaded, isCustomersLoading, dispatch])
 
   useEffect(() => {
     const fetchBranchData = async () => {
@@ -42,13 +50,6 @@ const useBranchesEdit = () => {
     if (id) fetchBranchData()
   }, [dispatch, id])
 
-  const { data: customers, isLoading: isCustomersLoading, error: errorCustomers, hasFetched: doesCustomersLoaded } = useSelector(state => state.customers.api)
-  useEffect(() => {
-    if (!doesCustomersLoaded && !isCustomersLoading) {
-      dispatch(fetchCustomers())
-    }
-  }, [doesCustomersLoaded, isCustomersLoading, dispatch])
-
   const onChange = (event, field) => {
     event.preventDefault()
     switch (field) {
@@ -66,10 +67,12 @@ const useBranchesEdit = () => {
     }
   }
 
-  const clearPageHandler = () => {
-    dispatch(clearPage())
-    navigate('/branches')
-  }
+  const customersOptions = customers?.map(customer => ({ value: customer.id, label: customer.name }))
+  const handleCustomersChange = (selectedOption) => dispatch(setCustomerId(selectedOption.value))
+
+  const regionManagers = [{ id: '123123123', name: 'User 1' }, { id: '934880345', name: 'User 2' }]
+  const mockDataForRegionManagerOptions = regionManagers.map(regionManager => ({ value: regionManager.id, label: regionManager.name }))
+  const handleRegionManagerChange = (selectedOption) => dispatch(setRegionManagerId(selectedOption.value))
 
   const editBranch = async () => {
     const postData = {
@@ -90,12 +93,10 @@ const useBranchesEdit = () => {
     }
   }
 
-  const customersOptions = customers?.map(customer => ({ value: customer.id, label: customer.name }))
-  const handleCustomersChange = (selectedOption) => dispatch(setCustomerId(selectedOption.value))
-
-  const regionManagers = [{ id: '123123123', name: 'User 1' }, { id: '934880345', name: 'User 2' }]
-  const mockDataForRegionManagerOptions = regionManagers.map(regionManager => ({ value: regionManager.id, label: regionManager.name }))
-  const handleRegionManagerChange = (selectedOption) => dispatch(setRegionManagerId(selectedOption.value))
+  const clearPageHandler = () => {
+    dispatch(clearPage())
+    navigate('/branches')
+  }
 
   return {
     name,
