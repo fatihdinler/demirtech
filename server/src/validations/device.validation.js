@@ -1,17 +1,13 @@
 const { validateIdInParams } = require('../helpers/common.helper')
+const { deviceTypes, deviceLocationTypes, deviceMeasurementTypes } = require('../../constants')
 
 const createDevice = async (req, res, next) => {
   let errors = []
-  const { name, description, chipId, min, max, tolerance, measurementType, modelName, color } = req.body
+  const { name, chipId, deviceType, deviceLocationType, measurementType, } = req.body
 
   if (!name) {
     errors.push({
       error: `'name' field is required to create a device.`,
-    })
-  }
-  if (!description) {
-    errors.push({
-      error: `'description' field is required to create a device.`,
     })
   }
   if (!chipId) {
@@ -19,34 +15,19 @@ const createDevice = async (req, res, next) => {
       error: `'chipId' field is required to create a device.`,
     })
   }
-  if (min === undefined) {
+  if (!deviceTypes.includes(deviceType)) {
     errors.push({
-      error: `'min' field is required to create a device.`,
+      error: `'deviceType' field should be one of ${deviceTypes.map(type => type)}`,
     })
   }
-  if (!max) {
+  if (!deviceLocationTypes.includes(deviceLocationType)) {
     errors.push({
-      error: `'max' field is required to create a device.`,
+      error: `'deviceLocationType' field should be one of ${deviceLocationTypes.map(type => type)}`,
     })
   }
-  if (!tolerance) {
+  if (!deviceMeasurementTypes.includes(measurementType)) {
     errors.push({
-      error: `'tolerance' field is required to create a device.`,
-    })
-  }
-  if (!['temperature', 'humidity', 'current'].includes(measurementType)) {
-    errors.push({
-      error: `'measurementType' field should be one of ['temperature', 'humidity', 'current'].`,
-    })
-  }
-  if (!['DT-100', 'DT-200', 'DT-300'].includes(modelName)) {
-    errors.push({
-      error: `'modelName' field should be one of ['DT-100', 'DT-200', 'DT-300'].`,
-    })
-  }
-  if (!color) {
-    errors.push({
-      error: `'color' field is required to create a device.`,
+      error: `'deviceMeasurementTypes' field should be one of ${deviceMeasurementTypes.map(type => type)}`,
     })
   }
 
@@ -67,53 +48,34 @@ const getDevice = (req, res, next) => {
 const updateDevice = (req, res, next) => {
   validateIdInParams(req, res, () => {
     let errors = []
-    const { name, description, chipId, min, max, tolerance, measurementType, modelName, color } = req.body
+    const { name, chipId, branchId, deviceType, deviceLocationType, measurementType, } = req.body
 
     if (!name || name === undefined) {
       errors.push({
-        error: `'name' field is required to update a device.`,
-      })
-    }
-    if (!description || description === undefined) {
-      errors.push({
-        error: `'description' field is required to update a device.`,
+        error: `'name' field is required to create a device.`,
       })
     }
     if (!chipId || chipId === undefined) {
       errors.push({
-        error: `'chipId' field is required to update a device.`,
+        error: `'chipId' field is required to create a device.`,
       })
     }
-    if (!min || min === undefined) {
+    if (!deviceTypes.includes(deviceType) || deviceType === undefined) {
       errors.push({
-        error: `'min' field is required to update a device.`,
+        error: `'deviceType' field should be one of ${deviceTypes.map(type => type)}`,
       })
     }
-    if (!max || max === undefined) {
+    if (!deviceLocationTypes.includes(deviceLocationType) || deviceLocationType === undefined) {
       errors.push({
-        error: `'max' field is required to update a device.`,
+        error: `'deviceLocationType' field should be one of ${deviceLocationTypes.map(type => type)}`,
       })
     }
-    if (!tolerance || tolerance === undefined) {
+    if (!deviceMeasurementTypes.includes(measurementType) || measurementType === undefined) {
       errors.push({
-        error: `'tolerance' field is required to update a device.`,
+        error: `'deviceMeasurementTypes' field should be one of ${deviceMeasurementTypes.map(type => type)}`,
       })
     }
-    if (!['temperature', 'humidity', 'current'].includes(measurementType)) {
-      errors.push({
-        error: `'measurementType' field should be one of ['temperature', 'humidity', 'current'].`,
-      })
-    }
-    if (!['DT-100', 'DT-200', 'DT-300'].includes(modelName)) {
-      errors.push({
-        error: `'modelName' field should be one of ['DT-100', 'DT-200', 'DT-300'].`,
-      })
-    }
-    if (!color || color === undefined) {
-      errors.push({
-        error: `'color' field is required to update a device.`,
-      })
-    }
+
     if (errors.length) {
       return res.status(404).send({
         message: 'VALIDATION_FAILED',

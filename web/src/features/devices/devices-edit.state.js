@@ -4,12 +4,12 @@ const initialState = {
   name: null,
   description: null,
   chipId: null,
-  min: null,
-  max: null,
-  tolerance: null,
+  branchId: null,
+  climateId: null,
+  deviceType: null,
+  deviceLocationType: null,
   measurementType: null,
-  modelName: null,
-  color: null,
+  mqttTopic: null,
 }
 
 export const devicesEdit = createSlice({
@@ -25,34 +25,34 @@ export const devicesEdit = createSlice({
     setChipId: (state, action) => {
       state.chipId = action.payload
     },
-    setMin: (state, action) => {
-      state.min = action.payload
+    setBranchId: (state, action) => {
+      state.branchId = action.payload
     },
-    setMax: (state, action) => {
-      state.max = action.payload
+    setClimateId: (state, action) => {
+      state.climateId = action.payload
     },
-    setTolerance: (state, action) => {
-      state.tolerance = action.payload
+    setDeviceType: (state, action) => {
+      state.deviceType = action.payload
+    },
+    setDeviceLocationType: (state, action) => {
+      state.deviceLocationType = action.payload
     },
     setMeasurementType: (state, action) => {
       state.measurementType = action.payload
     },
-    setModelName: (state, action) => {
-      state.modelName = action.payload
-    },
-    setColor: (state, action) => {
-      state.color = action.payload
+    setMqttTopic: (state, action) => {
+      state.mqttTopic = action.payload
     },
     clearPage: (state) => {
       state.name = initialState.name
       state.description = initialState.description
       state.chipId = initialState.chipId
-      state.min = initialState.min
-      state.max = initialState.max
-      state.tolerance = initialState.tolerance
+      state.branchId = initialState.branchId
+      state.climateId = initialState.climateId
+      state.deviceType = initialState.deviceType
+      state.deviceLocationType = initialState.deviceLocationType
       state.measurementType = initialState.measurementType
-      state.modelName = initialState.modelName
-      state.color = initialState.color
+      state.mqttTopic = initialState.mqttTopic
     },
   },
 })
@@ -61,12 +61,12 @@ export const {
   setName,
   setDescription,
   setChipId,
-  setMin,
-  setMax,
-  setTolerance,
+  setBranchId,
+  setClimateId,
+  setDeviceType,
+  setDeviceLocationType,
   setMeasurementType,
-  setModelName,
-  setColor,
+  setMqttTopic,
   clearPage,
 } = devicesEdit.actions
 

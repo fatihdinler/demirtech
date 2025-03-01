@@ -5,7 +5,7 @@ import { setName, setDescription, setModel, setBranchId, clearPage } from '../..
 import { fetchBranches } from '../../../features/branches/branches.api'
 import { addClimate, } from '../../../features/climates/climates.api'
 import { useNavigate } from 'react-router-dom'
-import { climateModels } from '../../../utils/climate-models'
+import { climateModels } from '../../../utils/constants'
 import useClimatesList from '../list/climates-list.hook'
 
 const useClimatesCreate = () => {

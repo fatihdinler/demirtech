@@ -1,56 +1,61 @@
-/**
- * models/Device.js
- * 
- * Bu dosya, hem klima içerisinde çalışan hem de bağımsız olarak takılan 
- * cihazları (örneğin, sensörler, kontrol üniteleri) temsil eden Device 
- * şemasını ve modelini tanımlar.
- *
- * Örnek Kullanım:
- *   const Device = require('./models/Device')
- *   const device = new Device({
- *     branch: branchId,
- *     deviceName: 'Sensör 1',
- *     deviceType: 'Independent',
- *     status: 'Active',
- *     installationDate: new Date()
- *   })
- *   device.save().then(...)
- */
-
 const mongoose = require('mongoose')
 const { Schema } = mongoose
+const { v4: uuid } = require('uuid')
+const { deviceTypes, deviceLocationTypes, deviceMeasurementTypes, } = require('../../constants')
 
 const DeviceSchema = new Schema({
-  branch: { 
-    type: Schema.Types.ObjectId, 
-    ref: 'Branch', 
-    required: [true, 'Şube bilgisi gerekli'] 
+  id: {
+    type: String,
+    unique: true,
+    required: true,
+    default: uuid,
   },
-  climate: { 
-    type: Schema.Types.ObjectId, 
-    ref: 'Climate', 
-    default: null 
+  name: {
+    type: String,
+    required: [true, 'Cihaz adı gerekli'],
+    trim: true
   },
-  deviceName: { 
-    type: String, 
-    required: [true, 'Cihaz adı gerekli'], 
-    trim: true 
+  description: {
+    type: String,
+    trim: true,
+    default: '',
   },
-  deviceType: { 
-    type: String, 
+  chipId: {
+    type: String,
+    trim: true,
+    required: [true, 'ChipId gerekli'],
+  },
+  climateId: {
+    type: String,
+    ref: 'Climate',
+    default: null
+  },
+  deviceType: {
+    type: String,
+    required: [true, 'Cihaz tipi gerekli'],
+    trim: true,
     enum: {
-      values: ['Inside', 'Independent'],
-      message: 'deviceType değeri "Inside" veya "Independent" olmalıdır'
+      values: deviceTypes,
+    },
+  },
+  deviceLocationType: {
+    type: String,
+    enum: {
+      values: deviceLocationTypes,
     },
     required: [true, 'Cihaz tipi gerekli']
   },
-  status: { 
-    type: String, 
-    trim: true 
+  measurementType: {
+    type: String,
+    enum: {
+      values: deviceMeasurementTypes,
+    },
+    required: [true, 'ölçüm tipi gerekli'],
   },
-  installationDate: { 
-    type: Date 
-  }
+  mqttTopic: {
+    type: String,
+    default: '',
+  },
 }, { timestamps: true })
 
 module.exports = mongoose.model('Device', DeviceSchema)

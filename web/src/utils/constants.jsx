@@ -1,5 +1,5 @@
 // Do not delete this, we use MQTT communication with device in helps of this array!
-const climateModels = [
+export const climateModels = [
   'CARRIER',
   'DAIKIN',
   'ARCELIK',
@@ -14,32 +14,24 @@ const climateModels = [
   'YORK',
 ]
 
-const deviceTypes = [
+export const deviceTypes = [
   'DT-100',
   'DT-200',
   'DT-300',
 ]
 
-const deviceLocationTypes = [
+export const deviceLocationTypes = [
   'INTEGRATED',
   'INDEPENDENT',
 ]
 
-const deviceStatuses = [
+export const deviceStatuses = [
   'ON',
   'OFF',
 ]
 
-const deviceMeasurementTypes = [
+export const deviceMeasurementTypes = [
   'TEMPERATURE',
   'HUMIDITY',
   'CURRENT',
 ]
-
-module.exports = {
-  climateModels,
-  deviceTypes,
-  deviceLocationTypes,
-  deviceStatuses,
-  deviceMeasurementTypes,
-}
