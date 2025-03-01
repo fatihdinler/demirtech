@@ -3,7 +3,7 @@ const { deviceTypes, deviceLocationTypes, deviceMeasurementTypes } = require('..
 
 const createDevice = async (req, res, next) => {
   let errors = []
-  const { name, chipId, deviceType, deviceLocationType, measurementType, } = req.body
+  const { name, chipId, deviceType, deviceLocationType, measurementType } = req.body
 
   if (!name) {
     errors.push({
@@ -13,6 +13,10 @@ const createDevice = async (req, res, next) => {
   if (!chipId) {
     errors.push({
       error: `'chipId' field is required to create a device.`,
+    })
+  } else if (!/^\d+$/.test(chipId)) {
+    errors.push({
+      error: `'chipId' field must be a numeric value.`,
     })
   }
   if (!deviceTypes.includes(deviceType)) {
@@ -48,7 +52,7 @@ const getDevice = (req, res, next) => {
 const updateDevice = (req, res, next) => {
   validateIdInParams(req, res, () => {
     let errors = []
-    const { name, chipId, branchId, deviceType, deviceLocationType, measurementType, } = req.body
+    const { name, chipId, branchId, deviceType, deviceLocationType, measurementType } = req.body
 
     if (!name || name === undefined) {
       errors.push({
@@ -58,6 +62,10 @@ const updateDevice = (req, res, next) => {
     if (!chipId || chipId === undefined) {
       errors.push({
         error: `'chipId' field is required to create a device.`,
+      })
+    } else if (!/^\d+$/.test(chipId)) {
+      errors.push({
+        error: `'chipId' field must be a numeric value.`,
       })
     }
     if (!deviceTypes.includes(deviceType) || deviceType === undefined) {

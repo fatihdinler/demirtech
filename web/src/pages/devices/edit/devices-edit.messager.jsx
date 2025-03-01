@@ -14,6 +14,12 @@ export const editDeviceValidator = (postData) => {
       autoClose: 3000,
     })
     return false
+  } else if (!/^\d+$/.test(postData.chipId)) {
+    toast.error('Chip ID alanı sayısal bir alan olmalıdır', {
+      position: 'top-right',
+      autoClose: 3000,
+    })
+    return false
   }
   if (!postData.climateId) {
     toast.error('Klima alanı boş bırakılamaz', {

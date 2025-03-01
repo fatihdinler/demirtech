@@ -1,7 +1,6 @@
 import React from 'react'
 import { Row, Col } from 'react-bootstrap'
 import { Outlet } from 'react-router-dom'
-import { useDispatch } from 'react-redux'
 import { Sidebar, Navbar } from '../../components'
 import useLayout from './layout.hook'
 
@@ -23,11 +22,10 @@ const Layout = () => {
           />
         </Col>
 
-        {/* Sütun 2: İçerik alanı (geri kalan tüm genişliği kaplar) */}
         <Col style={{ padding: 0 }}>
           <Navbar />
           <div style={{ padding: '1rem' }}>
-            <Outlet context={[]} />
+            <Outlet />
           </div>
         </Col>
       </Row>

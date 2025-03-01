@@ -2,6 +2,7 @@ const Device = require('../models/device.model')
 
 const createDevice = async (data) => {
   const device = new Device(data)
+  device.mqttTopic = `demirtech/${data.chipId}/${data.measurementType.toLowerCase()}`
   return await device.save()
 }
 
@@ -14,6 +15,7 @@ const getDevice = async (id) => {
 }
 
 const updateDevice = async (id, data) => {
+  data.mqttTopic = `demirtech/${data.chipId}/${data.measurementType.toLowerCase()}`
   return await Device.findOneAndUpdate({ id }, data, { new: true })
 }
 

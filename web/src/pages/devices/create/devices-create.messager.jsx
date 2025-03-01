@@ -14,6 +14,12 @@ export const createDeviceValidator = (postData) => {
       autoClose: 3000,
     })
     return false
+  } else if (!/^\d+$/.test(postData.chipId)) {
+    toast.error('Chip ID alanı sayısal bir alan olmalıdır', {
+      position: 'top-right',
+      autoClose: 3000,
+    })
+    return false
   }
   if (!postData.climateId) {
     toast.error('Klima alanı boş bırakılamaz', {
@@ -47,6 +53,9 @@ export const createDeviceValidator = (postData) => {
 }
 
 export const retrieveSuccessMessage = (response) => {
+  console.log('response ----->', response)
+
+
   if (response.status === 'SUCCESS') {
     toast.success(response.message || 'Cihaz başarıyla oluşturuldu!', {
       position: 'top-right',
