@@ -5,6 +5,8 @@ const cors = require('cors')
 const { connectDb } = require('./src/helpers/database.helper')
 const config = require('./src/config')
 const client = mqtt.connect('mqtt://broker.emqx.io', { username: 'emqx', password: 'password' })
+const { listenDevicesMqtt } = require('./src/helpers/mqtt.helper')
+
 const customerRoutes = require('./src/routes/customer.route')
 const branchRoutes = require('./src/routes/branch.route')
 const climateRoutes = require('./src/routes/climate.route')
@@ -37,6 +39,7 @@ app.listen(port, async () => {
 
     const { connection: db } = await connectDb()
     global.db = db
+    listenDevicesMqtt()
   } catch (error) {
     console.error(`Error in app.js: ${error.message}`)
   }
