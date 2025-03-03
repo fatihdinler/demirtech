@@ -1,46 +1,69 @@
-import React from 'react'
-import { Card as BootstrapCard } from 'react-bootstrap'
+import React from 'react';
+import { Card as BootstrapCard } from 'react-bootstrap';
+import PropTypes from 'prop-types';
 
-function Card({ title, value, icon, children }) {
+function Card({ title, description, extraContent, onClick, hoverable = false }) {
   return (
     <BootstrapCard
+      onClick={onClick}
       style={{
-        border: '1px solid #e5e7eb',
-        borderRadius: '0.375rem',
-        boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+        cursor: onClick ? 'pointer' : 'default',
+        transition: 'transform 0.2s, box-shadow 0.2s',
+        border: 'none',
+        borderRadius: '0.75rem',
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+        background: '#ffffff'
       }}
-      className='mb-4'
+      className="modern-card mb-4"
+      onMouseEnter={(e) => {
+        if (hoverable && onClick) {
+          e.currentTarget.style.transform = 'translateY(-5px)';
+          e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.2)';
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (hoverable && onClick) {
+          e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
+        }
+      }}
     >
       <BootstrapCard.Body>
-        <div className='d-flex justify-content-between align-items-center mb-2'>
+        <div className="mb-3">
           <BootstrapCard.Title
             style={{
-              fontSize: '1rem',
+              fontSize: '1.125rem',
               fontWeight: 600,
               color: '#1f2937',
-              marginBottom: 0
             }}
           >
             {title}
           </BootstrapCard.Title>
-          {icon && <div>{icon}</div>}
-        </div>
-        {value && (
-          <div
+          <BootstrapCard.Text
             style={{
-              fontSize: '1.25rem',
-              fontWeight: 'bold',
-              color: '#374151',
-              marginBottom: '0.5rem'
+              fontSize: '0.95rem',
+              color: '#4b5563',
             }}
           >
-            {value}
+            {description}
+          </BootstrapCard.Text>
+        </div>
+        {extraContent && (
+          <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+            {extraContent}
           </div>
         )}
-        {children && <div>{children}</div>}
       </BootstrapCard.Body>
     </BootstrapCard>
-  )
+  );
 }
 
-export default Card
+Card.propTypes = {
+  title: PropTypes.string.isRequired,
+  description: PropTypes.string,
+  extraContent: PropTypes.node,
+  onClick: PropTypes.func,
+  hoverable: PropTypes.bool,
+};
+
+export default Card;
