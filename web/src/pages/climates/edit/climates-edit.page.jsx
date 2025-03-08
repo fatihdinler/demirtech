@@ -12,6 +12,9 @@ const ClimatesEdit = () => {
     onChange,
     branchesOptions,
     handleBranchesChange,
+    customerId,
+    customersOptions,
+    handleCustomersChange,
     clearPageHandler,
     editClimate,
     climateModelsOptions,
@@ -26,6 +29,7 @@ const ClimatesEdit = () => {
           { label: 'Düzenle' }
         ]}
       />
+
       <div className='page-background'>
         <Row className='mt-3'>
           <Col md={6}>
@@ -51,19 +55,33 @@ const ClimatesEdit = () => {
             </Form.Group>
           </Col>
         </Row>
+
         <Row className='mt-3'>
-          <Col md={12}>
+          <Col md={6}>
+            <Form.Group controlId='climateBranch'>
+              <Form.Label>Müşteri</Form.Label>
+              <Select
+                options={customersOptions}
+                value={customersOptions ? customersOptions.find(option => option.value === customerId) : null}
+                onChange={handleCustomersChange}
+                placeholder='Müşteri seçin'
+              />
+            </Form.Group>
+          </Col>
+          <Col md={6}>
             <Form.Group controlId='climateBranch'>
               <Form.Label>Şube</Form.Label>
               <Select
                 options={branchesOptions}
-                value={branchesOptions.find(option => option.value === branchId)}
+                value={branchesOptions ? branchesOptions.find(option => option.value === branchId) : null}
                 onChange={handleBranchesChange}
                 placeholder='Şube seçin'
+                isDisabled={!customerId}
               />
             </Form.Group>
           </Col>
         </Row>
+
         <Row className='mt-3'>
           <Col md={12}>
             <Form.Group controlId='climateDescription'>
@@ -78,6 +96,7 @@ const ClimatesEdit = () => {
             </Form.Group>
           </Col>
         </Row>
+
         <PageFooter
           createOrEditHandler={editClimate}
           cancelHander={clearPageHandler}

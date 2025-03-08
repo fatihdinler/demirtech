@@ -1,27 +1,46 @@
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { editClimateValidator, retrieveSuccessMessage } from './climates-edit.messager'
-import { setName, setDescription, setModel, setBranchId, clearPage } from '../../../features/climates/climates-edit.state'
+import { setName, setDescription, setModel, setBranchId, setCustomerId, clearPage } from '../../../features/climates/climates-edit.state'
 import { fetchClimate, updateClimate } from '../../../features/climates/climates.api'
 import { fetchBranches } from '../../../features/branches/branches.api'
+import { fetchCustomers } from '../../../features/customers/customers.api'
 import { useNavigate, useParams } from 'react-router-dom'
 import { climateModels } from '../../../utils/constants'
 import useClimatesList from '../list/climates-list.hook'
 
 const useClimatesEdit = () => {
+  const { id } = useParams()
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const { id } = useParams()
-  const { refetch: refetchClimatesAfterEditing } = useClimatesList()
 
-  const { name, description, model, branchId } = useSelector(state => state.climates.edit)
+  const { name, description, model, branchId, customerId } = useSelector(state => state.climates.edit)
+
   const { data: branches, isLoading: isBranchesLoading, hasFetched: doesBranchesLoaded } = useSelector(state => state.branches.api)
+  const { data: customers, isLoading: isCustomersLoading, error: errorCustomers, hasFetched: doesCustomersLoaded } = useSelector(state => state.customers.api)
+
+  const { refetch: refetchClimatesAfterEditing } = useClimatesList()
 
   useEffect(() => {
     if (!doesBranchesLoaded && !isBranchesLoading) {
       dispatch(fetchBranches())
     }
   }, [doesBranchesLoaded, isBranchesLoading, dispatch])
+
+  useEffect(() => {
+    if (!doesBranchesLoaded && !isBranchesLoading) {
+      dispatch(fetchCustomers())
+    }
+  }, [doesBranchesLoaded, isBranchesLoading, dispatch])
+
+  useEffect(() => {
+    if (branchId && branches?.length > 0) {
+      const selectedBranch = branches.find(branch => branch.id === branchId)
+      if (selectedBranch && selectedBranch.customerId !== customerId) {
+        dispatch(setCustomerId(selectedBranch.customerId))
+      }
+    }
+  }, [branchId, branches, customerId, dispatch])
 
   useEffect(() => {
     const fetchClimateData = async () => {
@@ -62,7 +81,16 @@ const useClimatesEdit = () => {
     }
   }
 
-  const branchesOptions = branches?.map(branch => ({ value: branch.id, label: branch.name }))
+  const customersOptions = customers?.map(customer => ({ value: customer.id, label: customer.name }))
+  const handleCustomersChange = (selectedOption) => {
+    dispatch(setCustomerId(selectedOption.value))
+    dispatch(setBranchId(null))
+  }
+
+  const branchesOptions = customerId
+    ? branches?.filter(branch => branch.customerId === customerId)
+      .map(branch => ({ value: branch.id, label: branch.name }))
+    : []
   const handleBranchesChange = (selectedOption) => dispatch(setBranchId(selectedOption.value))
 
   const climateModelsOptions = climateModels.map(climateModel => ({ value: climateModel, label: climateModel }))
@@ -96,9 +124,12 @@ const useClimatesEdit = () => {
     description,
     model,
     branchId,
+    customerId,
     onChange,
     branchesOptions,
     handleBranchesChange,
+    customersOptions,
+    handleCustomersChange,
     clearPageHandler,
     editClimate,
     climateModelsOptions,

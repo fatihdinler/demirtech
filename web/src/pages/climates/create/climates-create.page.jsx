@@ -12,6 +12,9 @@ const ClimatesCreate = () => {
     onChange,
     branchesOptions,
     handleBranchesChange,
+    customerId,
+    customersOptions,
+    handleCustomersChange,
     clearPageHandler,
     createClimate,
     climateModelsOptions,
@@ -53,7 +56,18 @@ const ClimatesCreate = () => {
         </Row>
 
         <Row className='mt-3'>
-          <Col md={12}>
+          <Col md={6}>
+            <Form.Group controlId='climateBranch'>
+              <Form.Label>Müşteri</Form.Label>
+              <Select
+                options={customersOptions}
+                value={customersOptions ? customersOptions.find(option => option.value === customerId) : null}
+                onChange={handleCustomersChange}
+                placeholder='Müşteri seçin'
+              />
+            </Form.Group>
+          </Col>
+          <Col md={6}>
             <Form.Group controlId='climateBranch'>
               <Form.Label>Şube</Form.Label>
               <Select
@@ -61,6 +75,7 @@ const ClimatesCreate = () => {
                 value={branchesOptions ? branchesOptions.find(option => option.value === branchId) : null}
                 onChange={handleBranchesChange}
                 placeholder='Şube seçin'
+                isDisabled={!customerId}
               />
             </Form.Group>
           </Col>

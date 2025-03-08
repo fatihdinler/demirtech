@@ -1,9 +1,10 @@
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { createClimateValidator, retrieveSuccessMessage, } from './climates-create.messager'
-import { setName, setDescription, setModel, setBranchId, clearPage } from '../../../features/climates/climates-create.state'
+import { setName, setDescription, setModel, setBranchId, setCustomerId, clearPage } from '../../../features/climates/climates-create.state'
 import { fetchBranches } from '../../../features/branches/branches.api'
-import { addClimate, } from '../../../features/climates/climates.api'
+import { fetchCustomers } from '../../../features/customers/customers.api'
+import { addClimate } from '../../../features/climates/climates.api'
 import { useNavigate } from 'react-router-dom'
 import { climateModels } from '../../../utils/constants'
 import useClimatesList from '../list/climates-list.hook'
@@ -11,8 +12,11 @@ import useClimatesList from '../list/climates-list.hook'
 const useClimatesCreate = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const { name, description, model, branchId } = useSelector(state => state.climates.create)
+  const { name, description, model, branchId, customerId, } = useSelector(state => state.climates.create)
+
   const { data: branches, isLoading: isBranchesLoading, error: errorBranches, hasFetched: doesBranchesLoaded } = useSelector(state => state.branches.api)
+  const { data: customers, isLoading: isCustomersLoading, error: errorCustomers, hasFetched: doesCustomersLoaded } = useSelector(state => state.customers.api)
+
   const { refetch: refetchClimatesAfterCreation } = useClimatesList()
 
   useEffect(() => {
@@ -20,6 +24,12 @@ const useClimatesCreate = () => {
       dispatch(fetchBranches())
     }
   }, [doesBranchesLoaded, isBranchesLoading, dispatch])
+
+  useEffect(() => {
+    if (!doesCustomersLoaded && !isCustomersLoading) {
+      dispatch(fetchCustomers())
+    }
+  }, [doesCustomersLoaded, isCustomersLoading, dispatch])
 
   const onChange = (event, field) => {
     event.preventDefault()
@@ -35,7 +45,13 @@ const useClimatesCreate = () => {
     }
   }
 
-  const branchesOptions = branches?.map(branch => ({ value: branch.id, label: branch.name }))
+  const customersOptions = customers?.map(customer => ({ value: customer.id, label: customer.name }))
+  const handleCustomersChange = (selectedOption) => dispatch(setCustomerId(selectedOption.value))
+
+  const branchesOptions = customerId
+    ? branches?.filter(branch => branch.customerId === customerId)
+      .map(branch => ({ value: branch.id, label: branch.name }))
+    : []
   const handleBranchesChange = (selectedOption) => dispatch(setBranchId(selectedOption.value))
 
   const climateModelsOptions = climateModels.map(climateModel => ({ value: climateModel, label: climateModel }))
@@ -69,9 +85,12 @@ const useClimatesCreate = () => {
     description,
     model,
     branchId,
+    customerId,
     onChange,
     branchesOptions,
     handleBranchesChange,
+    customersOptions,
+    handleCustomersChange,
     clearPageHandler,
     createClimate,
     climateModelsOptions,

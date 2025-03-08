@@ -5,6 +5,7 @@ const initialState = {
   description: null,
   branchId: null,
   model: null,
+  customerId: null,
 }
 
 export const climatesEdit = createSlice({
@@ -23,11 +24,15 @@ export const climatesEdit = createSlice({
     setModel: (state, action) => {
       state.model = action.payload
     },
+    setCustomerId: (state, action) => {
+      state.customerId = action.payload
+    },
     clearPage: (state) => {
       state.name = initialState.name
       state.description = initialState.description
       state.branchId = initialState.branchId
       state.model = initialState.model
+      state.customerId = initialState.customerId
     },
   },
 })
@@ -38,6 +43,7 @@ export const {
   setBranchId,
   setModel,
   clearPage,
+  setCustomerId,
 } = climatesEdit.actions
 
 export default climatesEdit.reducer
