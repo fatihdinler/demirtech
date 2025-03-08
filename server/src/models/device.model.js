@@ -38,13 +38,6 @@ const DeviceSchema = new Schema({
       values: deviceTypes,
     },
   },
-  deviceLocationType: {
-    type: String,
-    enum: {
-      values: deviceLocationTypes,
-    },
-    required: [true, 'Cihaz tipi gerekli']
-  },
   measurementType: {
     type: String,
     enum: {

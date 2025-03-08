@@ -10,7 +10,6 @@ const DevicesCreate = () => {
     chipId,
     climateId,
     deviceType,
-    deviceLocationType,
     measurementType,
     onChange,
     climatesOptions,
@@ -19,10 +18,14 @@ const DevicesCreate = () => {
     createDevice,
     deviceTypesOptions,
     handleDeviceTypesChange,
-    deviceLocationTypesOptions,
-    handleDeviceLocationTypesChange,
     deviceMeasurementTypesOptions,
     handleDeviceMeasurementTypesChange,
+    customersOptions,
+    handleCustomersChange,
+    branchesOptions,
+    handleBranchesChange,
+    customerId,
+    branchId,
   } = useDevicesCreate()
 
   return (
@@ -61,24 +64,25 @@ const DevicesCreate = () => {
 
         <Row className='mt-3'>
           <Col md={6}>
-            <Form.Group controlId='deviceClimate'>
-              <Form.Label>Klima</Form.Label>
+            <Form.Group controlId='climateBranch'>
+              <Form.Label>Müşteri</Form.Label>
               <Select
-                options={climatesOptions}
-                value={climatesOptions ? climatesOptions.find(option => option.value === climateId) : null}
-                onChange={handleClimatesChange}
-                placeholder='Klima seçin'
+                options={customersOptions}
+                value={customersOptions ? customersOptions.find(option => option.value === customerId) : null}
+                onChange={handleCustomersChange}
+                placeholder='Müşteri seçin'
               />
             </Form.Group>
           </Col>
           <Col md={6}>
-            <Form.Group controlId='deviceType'>
-              <Form.Label>Cihaz Tipi</Form.Label>
+            <Form.Group controlId='climateBranch'>
+              <Form.Label>Şube</Form.Label>
               <Select
-                options={deviceTypesOptions}
-                value={deviceTypesOptions ? deviceTypesOptions.find(option => option.value === deviceType) : null}
-                onChange={handleDeviceTypesChange}
-                placeholder='Cihaz tipi seçin'
+                options={branchesOptions}
+                value={branchesOptions ? branchesOptions.find(option => option.value === branchId) : null}
+                onChange={handleBranchesChange}
+                placeholder={!customerId ? 'Lütfen Önce Müşteri Seçin' : 'Şube Seçin'}
+                isDisabled={!customerId}
               />
             </Form.Group>
           </Col>
@@ -86,17 +90,32 @@ const DevicesCreate = () => {
 
         <Row className='mt-3'>
           <Col md={6}>
-            <Form.Group controlId='deviceLocationType'>
-              <Form.Label>Cihaz Konum Tipi</Form.Label>
+            <Form.Group controlId='deviceClimate'>
+              <Form.Label>Klima</Form.Label>
               <Select
-                options={deviceLocationTypesOptions}
-                value={deviceLocationTypesOptions ? deviceLocationTypesOptions.find(option => option.value === deviceLocationType) : null}
-                onChange={handleDeviceLocationTypesChange}
-                placeholder='Cihaz konum tipi seçin'
+                options={climatesOptions}
+                value={climatesOptions ? climatesOptions.find(option => option.value === climateId) : null}
+                onChange={handleClimatesChange}
+                placeholder={(!customerId || !branchId) ? 'Lütfen Önce Müşteri ve Şube Seçin' : 'Klima Seçin'}
+                isDisabled={!customerId || !branchId}
               />
             </Form.Group>
           </Col>
           <Col md={6}>
+            <Form.Group controlId='deviceType'>
+              <Form.Label>Donanım Tipi</Form.Label>
+              <Select
+                options={deviceTypesOptions}
+                value={deviceTypesOptions ? deviceTypesOptions.find(option => option.value === deviceType) : null}
+                onChange={handleDeviceTypesChange}
+                placeholder='Donanım tipi seçin'
+              />
+            </Form.Group>
+          </Col>
+        </Row>
+
+        <Row className='mt-3'>
+          <Col md={12}>
             <Form.Group controlId='deviceMeasurementType'>
               <Form.Label>Ölçüm Tipi</Form.Label>
               <Select

@@ -24,6 +24,12 @@ const DevicesEdit = () => {
     handleDeviceLocationTypesChange,
     deviceMeasurementTypesOptions,
     handleDeviceMeasurementTypesChange,
+    customersOptions,
+    handleCustomersChange,
+    branchesOptions,
+    handleBranchesChange,
+    customerId,
+    branchId,
   } = useDevicesEdit()
 
   return (
@@ -60,6 +66,34 @@ const DevicesEdit = () => {
           </Col>
         </Row>
 
+        {/* Customer ve Branch seçimi */}
+        <Row className='mt-3'>
+          <Col md={6}>
+            <Form.Group controlId='deviceCustomer'>
+              <Form.Label>Müşteri</Form.Label>
+              <Select
+                options={customersOptions}
+                value={customersOptions ? customersOptions.find(option => option.value === customerId) : null}
+                onChange={handleCustomersChange}
+                placeholder='Müşteri seçin'
+              />
+            </Form.Group>
+          </Col>
+          <Col md={6}>
+            <Form.Group controlId='deviceBranch'>
+              <Form.Label>Şube</Form.Label>
+              <Select
+                options={branchesOptions}
+                value={branchesOptions ? branchesOptions.find(option => option.value === branchId) : null}
+                onChange={handleBranchesChange}
+                placeholder={!customerId ? 'Lütfen önce müşteri seçin' : 'Şube seçin'}
+                // isDisabled={!customerId}
+              />
+            </Form.Group>
+          </Col>
+        </Row>
+
+        {/* Climate seçimi: Sadece branch seçildiyse aktif */}
         <Row className='mt-3'>
           <Col md={6}>
             <Form.Group controlId='deviceClimate'>
@@ -68,7 +102,8 @@ const DevicesEdit = () => {
                 options={climatesOptions}
                 value={climatesOptions ? climatesOptions.find(option => option.value === climateId) : null}
                 onChange={handleClimatesChange}
-                placeholder='Klima seçin'
+                placeholder={(!customerId || !branchId) ? 'Lütfen önce müşteri ve şube seçin' : 'Klima seçin'}
+                // isDisabled={!customerId || !branchId}
               />
             </Form.Group>
           </Col>

@@ -35,13 +35,6 @@ export const editDeviceValidator = (postData) => {
     })
     return false
   }
-  if (!postData.deviceLocationType) {
-    toast.error('Cihaz Konum Tipi alanı boş bırakılamaz', {
-      position: 'top-right',
-      autoClose: 3000,
-    })
-    return false
-  }
   if (!postData.measurementType) {
     toast.error('Ölçüm Tipi alanı boş bırakılamaz', {
       position: 'top-right',

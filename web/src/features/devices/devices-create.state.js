@@ -4,12 +4,12 @@ const initialState = {
   name: null,
   description: null,
   chipId: null,
-  branchId: null,
   climateId: null,
   deviceType: null,
-  deviceLocationType: null,
   measurementType: null,
   mqttTopic: null,
+  customerId: null,
+  branchId: null,
 }
 
 export const devicesCreate = createSlice({
@@ -25,23 +25,23 @@ export const devicesCreate = createSlice({
     setChipId: (state, action) => {
       state.chipId = action.payload
     },
-    setBranchId: (state, action) => {
-      state.branchId = action.payload
-    },
     setClimateId: (state, action) => {
       state.climateId = action.payload
     },
     setDeviceType: (state, action) => {
       state.deviceType = action.payload
     },
-    setDeviceLocationType: (state, action) => {
-      state.deviceLocationType = action.payload
-    },
     setMeasurementType: (state, action) => {
       state.measurementType = action.payload
     },
     setMqttTopic: (state, action) => {
       state.mqttTopic = action.payload
+    },
+    setCustomerId: (state, action) => {
+      state.customerId = action.payload
+    },
+    setBranchId: (state, action) => {
+      state.branchId = action.payload
     },
     clearPage: (state) => {
       state.name = initialState.name
@@ -50,9 +50,10 @@ export const devicesCreate = createSlice({
       state.branchId = initialState.branchId
       state.climateId = initialState.climateId
       state.deviceType = initialState.deviceType
-      state.deviceLocationType = initialState.deviceLocationType
       state.measurementType = initialState.measurementType
       state.mqttTopic = initialState.mqttTopic
+      state.customerId = initialState.customerId
+      state.branchId = initialState.branchId
     },
   },
 })
@@ -61,13 +62,13 @@ export const {
   setName,
   setDescription,
   setChipId,
-  setBranchId,
   setClimateId,
   setDeviceType,
-  setDeviceLocationType,
   setMeasurementType,
   setMqttTopic,
   clearPage,
+  setCustomerId,
+  setBranchId,
 } = devicesCreate.actions
 
 export default devicesCreate.reducer

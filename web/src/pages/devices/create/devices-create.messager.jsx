@@ -21,22 +21,8 @@ export const createDeviceValidator = (postData) => {
     })
     return false
   }
-  if (!postData.climateId) {
-    toast.error('Klima alanı boş bırakılamaz', {
-      position: 'top-right',
-      autoClose: 3000,
-    })
-    return false
-  }
   if (!postData.deviceType) {
     toast.error('Cihaz Tipi alanı boş bırakılamaz', {
-      position: 'top-right',
-      autoClose: 3000,
-    })
-    return false
-  }
-  if (!postData.deviceLocationType) {
-    toast.error('Cihaz Konum Tipi alanı boş bırakılamaz', {
       position: 'top-right',
       autoClose: 3000,
     })
@@ -53,9 +39,6 @@ export const createDeviceValidator = (postData) => {
 }
 
 export const retrieveSuccessMessage = (response) => {
-  console.log('response ----->', response)
-
-
   if (response.status === 'SUCCESS') {
     toast.success(response.message || 'Cihaz başarıyla oluşturuldu!', {
       position: 'top-right',

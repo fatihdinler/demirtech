@@ -3,7 +3,7 @@ const { deviceTypes, deviceLocationTypes, deviceMeasurementTypes } = require('..
 
 const createDevice = async (req, res, next) => {
   let errors = []
-  const { name, chipId, deviceType, deviceLocationType, measurementType } = req.body
+  const { name, chipId, deviceType, measurementType } = req.body
 
   if (!name) {
     errors.push({
@@ -22,11 +22,6 @@ const createDevice = async (req, res, next) => {
   if (!deviceTypes.includes(deviceType)) {
     errors.push({
       error: `'deviceType' field should be one of ${deviceTypes.map(type => type)}`,
-    })
-  }
-  if (!deviceLocationTypes.includes(deviceLocationType)) {
-    errors.push({
-      error: `'deviceLocationType' field should be one of ${deviceLocationTypes.map(type => type)}`,
     })
   }
   if (!deviceMeasurementTypes.includes(measurementType)) {
@@ -52,7 +47,7 @@ const getDevice = (req, res, next) => {
 const updateDevice = (req, res, next) => {
   validateIdInParams(req, res, () => {
     let errors = []
-    const { name, chipId, branchId, deviceType, deviceLocationType, measurementType } = req.body
+    const { name, chipId, branchId, deviceType, measurementType } = req.body
 
     if (!name || name === undefined) {
       errors.push({
@@ -71,11 +66,6 @@ const updateDevice = (req, res, next) => {
     if (!deviceTypes.includes(deviceType) || deviceType === undefined) {
       errors.push({
         error: `'deviceType' field should be one of ${deviceTypes.map(type => type)}`,
-      })
-    }
-    if (!deviceLocationTypes.includes(deviceLocationType) || deviceLocationType === undefined) {
-      errors.push({
-        error: `'deviceLocationType' field should be one of ${deviceLocationTypes.map(type => type)}`,
       })
     }
     if (!deviceMeasurementTypes.includes(measurementType) || measurementType === undefined) {

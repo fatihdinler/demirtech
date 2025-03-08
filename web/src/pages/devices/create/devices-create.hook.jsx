@@ -1,19 +1,23 @@
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { createDeviceValidator, retrieveSuccessMessage } from './devices-create.messager'
-import { setName, setDescription, setChipId, setBranchId, setClimateId, setDeviceType, setDeviceLocationType, setMeasurementType, setMqttTopic, clearPage } from '../../../features/devices/devices-create.state'
+import { setName, setDescription, setChipId, setClimateId, setDeviceType, setMeasurementType, clearPage, setBranchId, setCustomerId, } from '../../../features/devices/devices-create.state'
 import { fetchClimates } from '../../../features/climates/climates.api'
+import { fetchBranches } from '../../../features/branches/branches.api'
+import { fetchCustomers } from '../../../features/customers/customers.api'
 import { addDevice } from '../../../features/devices/devices.api'
 import { useNavigate } from 'react-router-dom'
-import { deviceTypes, deviceLocationTypes, deviceMeasurementTypes } from '../../../utils/constants'
+import { deviceTypes, deviceMeasurementTypes } from '../../../utils/constants'
 import useDevicesList from '../list/devices-list.hook'
 
 const useDevicesCreate = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const { name, description, chipId, climateId, deviceType, deviceLocationType, measurementType } = useSelector(state => state.devices.create)
+  const { name, description, chipId, climateId, deviceType, measurementType, branchId, customerId, } = useSelector(state => state.devices.create)
 
   const { data: climates, isLoading: isClimatesLoading, hasFetched: doesClimatesLoaded } = useSelector(state => state.climates.api)
+  const { data: customers, isLoading: isCustomersLoading, error: errorCustomers, hasFetched: doesCustomersLoaded } = useSelector(state => state.customers.api)
+  const { data: branches, isLoading: isBranchesLoading, error: errorBranches, hasFetched: doesBranchesLoaded } = useSelector(state => state.branches.api)
 
   const { refetch: refetchDevicesAfterCreation } = useDevicesList()
 
@@ -22,6 +26,18 @@ const useDevicesCreate = () => {
       dispatch(fetchClimates())
     }
   }, [doesClimatesLoaded, isClimatesLoading, dispatch])
+
+  useEffect(() => {
+    if (!doesCustomersLoaded && !isCustomersLoading) {
+      dispatch(fetchCustomers())
+    }
+  }, [doesCustomersLoaded, isCustomersLoading, dispatch])
+
+  useEffect(() => {
+    if (!doesBranchesLoaded && !isBranchesLoading) {
+      dispatch(fetchBranches())
+    }
+  }, [doesBranchesLoaded, isBranchesLoading, dispatch])
 
   const onChange = (event, field) => {
     event.preventDefault()
@@ -40,14 +56,23 @@ const useDevicesCreate = () => {
     }
   }
 
-  const climatesOptions = climates?.map(climate => ({ value: climate.id, label: climate.name }))
+  const customersOptions = customers?.map(customer => ({ value: customer.id, label: customer.name }))
+  const handleCustomersChange = (selectedOption) => dispatch(setCustomerId(selectedOption.value))
+
+  const branchesOptions = customerId
+    ? branches?.filter(branch => branch.customerId === customerId)
+      .map(branch => ({ value: branch.id, label: branch.name }))
+    : []
+  const handleBranchesChange = (selectedOption) => dispatch(setBranchId(selectedOption.value))
+
+  const climatesOptions = branchId
+    ? climates?.filter(climate => climate.branchId === branchId)
+      .map(climate => ({ value: climate.id, label: climate.name }))
+    : []
   const handleClimatesChange = (selectedOption) => dispatch(setClimateId(selectedOption.value))
 
   const deviceTypesOptions = deviceTypes.map(dt => ({ value: dt, label: dt }))
   const handleDeviceTypesChange = (selectedOption) => dispatch(setDeviceType(selectedOption.value))
-
-  const deviceLocationTypesOptions = deviceLocationTypes.map(dlt => ({ value: dlt, label: dlt }))
-  const handleDeviceLocationTypesChange = (selectedOption) => dispatch(setDeviceLocationType(selectedOption.value))
 
   const deviceMeasurementTypesOptions = deviceMeasurementTypes.map(dmt => ({ value: dmt, label: dmt }))
   const handleDeviceMeasurementTypesChange = (selectedOption) => dispatch(setMeasurementType(selectedOption.value))
@@ -64,7 +89,6 @@ const useDevicesCreate = () => {
       chipId,
       climateId,
       deviceType,
-      deviceLocationType,
       measurementType,
     }
 
@@ -84,7 +108,6 @@ const useDevicesCreate = () => {
     chipId,
     climateId,
     deviceType,
-    deviceLocationType,
     measurementType,
     onChange,
     climatesOptions,
@@ -93,10 +116,14 @@ const useDevicesCreate = () => {
     createDevice,
     deviceTypesOptions,
     handleDeviceTypesChange,
-    deviceLocationTypesOptions,
-    handleDeviceLocationTypesChange,
     deviceMeasurementTypesOptions,
     handleDeviceMeasurementTypesChange,
+    customersOptions,
+    handleCustomersChange,
+    branchesOptions,
+    handleBranchesChange,
+    customerId,
+    branchId,
   }
 }
 

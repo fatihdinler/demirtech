@@ -35,11 +35,6 @@ const DevicesListTable = ({ devices, branches, climates }) => {
       filterable: true,
     },
     {
-      header: 'Cihaz Konum Tipi',
-      accessor: 'deviceLocationType',
-      filterable: true,
-    },
-    {
       header: 'Ölçüm Tipi',
       accessor: 'measurementType',
       filterable: true,
