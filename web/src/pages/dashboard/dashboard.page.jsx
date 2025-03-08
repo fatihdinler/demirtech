@@ -1,7 +1,9 @@
+// src/pages/dashboard/dashboard.page.jsx
 import React, { useState } from 'react';
 import { Container, Row, Col, Breadcrumb } from 'react-bootstrap';
 import useDashboard from './dashboard.hook';
-import { Card } from '../../components'
+import useRealtimeDeviceData from '../../hooks/socket.hook';
+import { Card } from '../../components';
 
 const Dashboard = () => {
   const {
@@ -18,6 +20,9 @@ const Dashboard = () => {
     isDevicesLoading,
     errorDevices,
   } = useDashboard();
+
+  // Realtime verileri almak için hook'u kullanıyoruz.
+  const realtimeDataMap = useRealtimeDeviceData();
 
   // Seçim adımları için state yönetimi
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -78,6 +83,34 @@ const Dashboard = () => {
       )}
     </Breadcrumb>
   );
+
+  // Yardımcı fonksiyon: Realtime veriyi stilize şekilde gösterir.
+  const renderRealtimeData = (realtime) => {
+    if (!realtime) return null;
+    let unit = '';
+    let color = '#000';
+    const type = realtime.type.toLowerCase();
+    if (type === 'temperature') {
+      unit = '°C';
+      color = '#e74c3c'; // kırmızı
+    } else if (type === 'humidity') {
+      unit = '%';
+      color = '#3498db'; // mavi
+    } else if (type === 'current') {
+      unit = 'A';
+      color = '#27ae60'; // yeşil
+    }
+    return (
+      <div style={{ marginTop: '1rem', textAlign: 'center' }}>
+        <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: color }}>
+          {realtime.value}{unit}
+        </div>
+        <div style={{ fontSize: '1rem', color: '#6b7280' }}>
+          {type.toUpperCase()}
+        </div>
+      </div>
+    );
+  };
 
   // Müşteri seçim ekranı
   const renderCustomerSelection = () => {
@@ -146,7 +179,7 @@ const Dashboard = () => {
     );
   };
 
-  // Klima seçildikten sonra, seçilen klimanın cihazlarını gösteren ekran (opsiyonel)
+  // renderDevices fonksiyonunun güncellenmiş hali:
   const renderDevices = () => {
     if (isDevicesLoading) return <div>Cihazlar yükleniyor...</div>;
     if (errorDevices) return <div>Hata: {errorDevices.message}</div>;
@@ -156,21 +189,52 @@ const Dashboard = () => {
     return (
       <Row>
         {filteredDevices.length > 0 ? (
-          filteredDevices.map((device) => (
-            <Col key={device.id} xs={12} sm={6} md={4} lg={3} className="mb-4">
-              <Card
-                title={device.name}
-                description={device.description || 'Açıklama bulunamadı'}
-                extraContent={
-                  <>
-                    <div>Chip ID: {device.chipId}</div>
-                    <div>MQTT Topic: {device.mqttTopic}</div>
-                  </>
-                }
-                hoverable={false}
-              />
-            </Col>
-          ))
+          filteredDevices.map((device) => {
+            const realtime = realtimeDataMap[device.id];
+            return (
+              <Col key={device.id} xs={12} sm={6} md={4} lg={3} className="mb-4">
+                <Card
+                  title={device.name}
+                  description={device.description || 'Açıklama bulunamadı'}
+                  extraContent={
+                    <div style={{
+                      height: '80px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: '#f1f5f9',
+                      borderRadius: '0.5rem',
+                      marginTop: '1rem'
+                    }}>
+                      {realtime ? (
+                        <div style={{
+                          fontSize: '2.5rem',
+                          fontWeight: 'bold',
+                          color: realtime.type.toLowerCase() === 'temperature' ? '#e74c3c'
+                            : realtime.type.toLowerCase() === 'humidity' ? '#3498db'
+                              : '#27ae60'
+                        }}>
+                          {realtime.value?.toFixed(1)}
+                          {realtime.type.toLowerCase() === 'temperature' ? '°C'
+                            : realtime.type.toLowerCase() === 'humidity' ? '%'
+                              : 'A'}
+                        </div>
+                      ) : (
+                        <div style={{
+                          fontSize: '1.5rem',
+                          fontWeight: 'normal',
+                          color: '#9ca3af'
+                        }}>
+                          No Data
+                        </div>
+                      )}
+                    </div>
+                  }
+                  hoverable={false}
+                />
+              </Col>
+            );
+          })
         ) : (
           <Col>
             <div>Seçilen klima için cihaz bulunamadı.</div>
