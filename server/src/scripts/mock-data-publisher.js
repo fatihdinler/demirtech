@@ -1,45 +1,53 @@
-// mqtt-publish-simulator.js
 const mqtt = require('mqtt');
 
-// MQTT broker URL'inizi ayarlayın (örneğin, localhost için 'mqtt://localhost')
-const client = mqtt.connect('mqtt://broker.emqx.io');
+// MQTT broker adresi (örneğin localhost)
+const client = mqtt.connect('mqtt://broker.emqx.io', { username: 'emqx', password: 'password' })
+
+// 10 adet cihaz oluşturuluyor
+const devices = [];
+for (let i = 0; i < 10; i++) {
+  // 7 haneli rastgele chipId üretimi (1000000 - 9999999)
+  const chipId = Math.floor(1000000 + Math.random() * 9000000).toString();
+  // "temperature" veya "humidity" rastgele seçiliyor
+  const type = Math.random() < 0.5 ? 'temperature' : 'humidity';
+  devices.push({ chipId, type });
+}
 
 client.on('connect', () => {
-  console.log('Connected to MQTT broker');
+  console.log('MQTT broker\'a bağlanıldı.');
 
-  // 5000000'den başlayarak 10 adet chipId oluşturuyoruz.
-  const devices = [];
-  for (let i = 0; i < 10; i++) {
-    devices.push(5000000 + i);
-  }
+  // Her saniye tüm cihazlar için yeni mesaj gönderimi
+  setInterval(() => {
+    devices.forEach(device => {
+      // Cihaz tipine göre yeni random value üretimi:
+      // temperature için: 15 - 30 arası, humidity için: 30 - 80 arası
+      let value;
+      if (device.type === 'temperature') {
+        value = parseFloat((15 + Math.random() * 15).toFixed(2));
+      } else {
+        value = parseFloat((30 + Math.random() * 50).toFixed(2));
+      }
 
-  // Her saniyede bir, tüm cihazlar için mesaj yayınlayacak fonksiyon
-  const publishMessages = () => {
-    devices.forEach(chipId => {
-      const possibleTypes = ['current', 'humidity'];
-      const type = possibleTypes[Math.floor(Math.random() * possibleTypes.length)];
-      // Örnek olarak 0-100 arasında iki ondalık basamaklı rastgele bir değer üretiyoruz.
-      const value = (Math.random() * 100).toFixed(2);
-
-      // Topic: demirtech/<chipId>/<type>
-      const topic = `demirtech/${chipId}/${type}`;
-      // Mesaj JSON formatında
-      const message = JSON.stringify({
-        chipId: chipId.toString(),
+      const payload = {
+        chipId: device.chipId,
         value: value,
-        type: type,
-      });
+        type: device.type
+      };
 
-      client.publish(topic, message, { qos: 0 }, (err) => {
+      // Topic: demirtech/{chipId}/{type}
+      const topic = `demirtech/${device.chipId}/${device.type}`;
+
+      client.publish(topic, JSON.stringify(payload), (err) => {
         if (err) {
-          console.error(`Error publishing to ${topic}:`, err);
+          console.error('Mesaj gönderilemedi:', err);
         } else {
-          console.log(`Published to ${topic}: ${message}`);
+          console.log(`Yayınlandı -> Topic: ${topic}, Payload:`, payload);
         }
       });
     });
-  };
+  }, 1000);
+});
 
-  // Her 1 saniyede bir publishMessages fonksiyonunu çalıştır
-  setInterval(publishMessages, 1000);
+client.on('error', (err) => {
+  console.error('MQTT Hatası:', err);
 });

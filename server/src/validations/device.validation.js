@@ -1,5 +1,5 @@
 const { validateIdInParams } = require('../helpers/common.helper')
-const { deviceTypes, deviceLocationTypes, deviceMeasurementTypes } = require('../../constants')
+const { deviceTypes, deviceMeasurementTypes } = require('../../constants')
 
 const createDevice = async (req, res, next) => {
   let errors = []
