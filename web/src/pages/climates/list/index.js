@@ -1,1 +1,0 @@
-export { default as ClimatesList } from './climates-list.page'

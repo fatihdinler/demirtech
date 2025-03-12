@@ -3,11 +3,16 @@ const { deviceTypes, deviceMeasurementTypes } = require('../../constants')
 
 const createDevice = async (req, res, next) => {
   let errors = []
-  const { name, chipId, deviceType, measurementType } = req.body
+  const { name, chipId, deviceType, measurementType, locationId } = req.body
 
   if (!name) {
     errors.push({
       error: `'name' field is required to create a device.`,
+    })
+  }
+  if (!locationId) {
+    errors.push({
+      error: `'locationId' field is required to create a device.`,
     })
   }
   if (!chipId) {
@@ -26,7 +31,7 @@ const createDevice = async (req, res, next) => {
   }
   if (!deviceMeasurementTypes.includes(measurementType)) {
     errors.push({
-      error: `'deviceMeasurementTypes' field should be one of ${deviceMeasurementTypes.map(type => type)}`,
+      error: `'measurementType' field should be one of ${deviceMeasurementTypes.map(type => type)}`,
     })
   }
 
@@ -47,11 +52,16 @@ const getDevice = (req, res, next) => {
 const updateDevice = (req, res, next) => {
   validateIdInParams(req, res, () => {
     let errors = []
-    const { name, chipId, branchId, deviceType, measurementType } = req.body
+    const { name, chipId, locationId, deviceType, measurementType } = req.body
 
     if (!name || name === undefined) {
       errors.push({
         error: `'name' field is required to create a device.`,
+      })
+    }
+    if (!locationId || locationId === undefined) {
+      errors.push({
+        error: `'locationId' field is required to create a device.`,
       })
     }
     if (!chipId || chipId === undefined) {

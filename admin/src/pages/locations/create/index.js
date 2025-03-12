@@ -1,0 +1,1 @@
+export { default as LocationsCreate } from './locations-create.page'

@@ -1,0 +1,1 @@
+export { default as LocationsEdit } from './locations-edit.page'

@@ -1,1 +1,0 @@
-export { default as ClimatesEdit } from './climates-edit.page'

@@ -24,12 +24,12 @@ services:
     depends_on:
       - mongodb
 
-  web:
-    build: ./web
+  admin:
+    build: ./admin
     ports:
       - "3438:3438"  # React uygulamanızın dinlediği port
     volumes:
-      - ./web:/app         # Hosttaki web dosyalarını container'a mount ediyoruz
+      - ./admin:/app         # Hosttaki admin dosyalarını container'a mount ediyoruz
       - /app/node_modules  # Container'daki node_modules klasörünü ayrı tutuyoruz
     restart: always
 

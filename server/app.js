@@ -10,7 +10,7 @@ const { initSocket } = require('./src/helpers/socket.helper.js') // socketEmitte
 
 const customerRoutes = require('./src/routes/customer.route')
 const branchRoutes = require('./src/routes/branch.route')
-const climateRoutes = require('./src/routes/climate.route')
+const locationRoutes = require('./src/routes/location.route')
 const deviceRoutes = require('./src/routes/device.route')
 
 const app = express()
@@ -62,5 +62,5 @@ server.listen(port, async () => {
 
 app.use('/api/customers', customerRoutes)
 app.use('/api/branches', branchRoutes)
-app.use('/api/climates', climateRoutes)
+app.use('/api/locations', locationRoutes)
 app.use('/api/devices', deviceRoutes)

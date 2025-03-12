@@ -25,9 +25,9 @@ const DeviceSchema = new Schema({
     trim: true,
     required: [true, 'ChipId gerekli'],
   },
-  climateId: {
+  locationId: {
     type: String,
-    ref: 'Climate',
+    ref: 'Location',
     default: null
   },
   deviceType: {
