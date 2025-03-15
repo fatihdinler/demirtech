@@ -4,6 +4,7 @@ import sidebarReducer from './sidebar/sidebar.state'
 import customersReducer from './customers/customers.reducer'
 import branchesReducer from './branches/branches.reducer'
 import locationsReducer from './locations/locations.reducer'
+import dashboardReducer from './dashboard/dashboard.reducer'
 
 const rootReducer = combineReducers({
   devices: devicesReducer,
@@ -11,6 +12,7 @@ const rootReducer = combineReducers({
   customers: customersReducer,
   branches: branchesReducer,
   locations: locationsReducer,
+  dashboard: dashboardReducer,
 })
 
 const store = configureStore({
