@@ -11,7 +11,8 @@ import {
   setMeasurementType,
   setMqttTopic,
   setCustomerId,
-  clearPage
+  clearPage,
+  setIsActive,
 } from '../../../features/devices/devices-edit.state'
 import { fetchDevice, updateDevice } from '../../../features/devices/devices.api'
 import { fetchLocations } from '../../../features/locations/locations.api'
@@ -36,6 +37,7 @@ const useDevicesEdit = () => {
     mqttTopic,
     customerId,
     branchId,
+    isActive,
   } = useSelector(state => state.devices.edit)
 
   const { data: locations, isLoading: isLocationsLoading, hasFetched: doesLocationsLoaded } = useSelector(state => state.locations.api)
@@ -92,6 +94,7 @@ const useDevicesEdit = () => {
           if (response.data.measurementType) dispatch(setMeasurementType(response.data.measurementType))
           if (response.data.mqttTopic) dispatch(setMqttTopic(response.data.mqttTopic))
           if (response.data.locationId) dispatch(setLocationId(response.data.locationId))
+          if (response.data.isActive) dispatch(setIsActive(response.data.isActive))
         }
       } catch (error) {
         console.error('Error fetching device:', error)
@@ -101,7 +104,6 @@ const useDevicesEdit = () => {
   }, [dispatch, id])
 
   const onChange = (event, field) => {
-    event.preventDefault()
     switch (field) {
       case 'name':
         dispatch(setName(event.target.value))
@@ -112,10 +114,14 @@ const useDevicesEdit = () => {
       case 'chipId':
         dispatch(setChipId(event.target.value))
         break
+      case 'isActive':
+        dispatch(setIsActive(event.target.checked))
+        break
       default:
         break
     }
   }
+
 
   const customersOptions = customers?.map(customer => ({ value: customer.id, label: customer.name }))
   const handleCustomersChange = (selectedOption) => {
@@ -159,6 +165,7 @@ const useDevicesEdit = () => {
       deviceType,
       measurementType,
       mqttTopic,
+      isActive,
     }
 
     const isValid = editDeviceValidator(postData)
@@ -194,6 +201,7 @@ const useDevicesEdit = () => {
     handleBranchesChange,
     customerId,
     branchId,
+    isActive,
   }
 }
 

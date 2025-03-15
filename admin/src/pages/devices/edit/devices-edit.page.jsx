@@ -30,6 +30,7 @@ const DevicesEdit = () => {
     handleBranchesChange,
     customerId,
     branchId,
+    isActive,
   } = useDevicesEdit()
 
   return (
@@ -126,6 +127,21 @@ const DevicesEdit = () => {
                 value={deviceMeasurementTypesOptions ? deviceMeasurementTypesOptions.find(option => option.value === measurementType) : null}
                 onChange={handleDeviceMeasurementTypesChange}
                 placeholder='Ölçüm tipi seçin'
+              />
+            </Form.Group>
+          </Col>
+        </Row>
+
+        <Row className='mt-3'>
+          <Col>
+            <Form.Group controlId='deviceDescription'>
+              <Form.Label>Cihaz Aktifliği</Form.Label>
+              <Form.Check
+                type='switch'
+                id='custom-switch'
+                label='Active'
+                checked={isActive}  // isActive'in boolean değer olması gerekiyor
+                onChange={(e) => onChange(e, 'isActive')}
               />
             </Form.Group>
           </Col>

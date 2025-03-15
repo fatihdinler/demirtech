@@ -10,6 +10,7 @@ const initialState = {
   mqttTopic: null,
   customerId: null,
   branchId: null,
+  isActive: false,
 }
 
 export const devicesEdit = createSlice({
@@ -43,6 +44,9 @@ export const devicesEdit = createSlice({
     setBranchId: (state, action) => {
       state.branchId = action.payload
     },
+    setIsActive: (state, action) => {
+      state.isActive = action.payload
+    },
     clearPage: (state) => {
       state.name = initialState.name
       state.description = initialState.description
@@ -54,6 +58,7 @@ export const devicesEdit = createSlice({
       state.mqttTopic = initialState.mqttTopic
       state.customerId = initialState.customerId
       state.branchId = initialState.branchId
+      state.isActive = initialState.isActive
     },
   },
 })
@@ -69,6 +74,7 @@ export const {
   clearPage,
   setCustomerId,
   setBranchId,
+  setIsActive,
 } = devicesEdit.actions
 
 export default devicesEdit.reducer

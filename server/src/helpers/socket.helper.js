@@ -1,8 +1,8 @@
-let ioInstance = null;
+let ioInstance = null
 
 function initSocket(io) {
-  ioInstance = io;
-  console.log('Socket.io instance initialized.');
+  ioInstance = io
+  console.log('Socket.io instance initialized.')
 }
 
 /**
@@ -11,10 +11,10 @@ function initSocket(io) {
  */
 function emitDeviceData(data) {
   if (!ioInstance) {
-    console.error('Socket.io instance not initialized.');
-    return;
+    console.error('Socket.io instance not initialized.')
+    return
   }
-  ioInstance.emit('device-data', data);
+  ioInstance.emit('device-data', data)
 }
 
-module.exports = { initSocket, emitDeviceData };
+module.exports = { initSocket, emitDeviceData }

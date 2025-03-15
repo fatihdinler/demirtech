@@ -6,3 +6,4 @@ admin/yarn.lock
 server/logs
 server/node_modules
 server/yarn.lock
+server/.env

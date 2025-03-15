@@ -20,6 +20,10 @@ const DeviceSchema = new Schema({
     trim: true,
     default: '',
   },
+  isActive: {
+    type: Boolean,
+    default: false,
+  },
   chipId: {
     type: String,
     trim: true,

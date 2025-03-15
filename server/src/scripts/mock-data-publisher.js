@@ -1,63 +1,53 @@
 const mqtt = require('mqtt');
 
-// MQTT broker adresi (örneğin broker.emqx.io)
-const client = mqtt.connect('mqtt://broker.emqx.io', { username: 'emqx', password: 'password' });
+// MQTT broker URL'nizi buraya girin. Örneğin, "mqtt://localhost" veya farklı bir broker.
+const client = mqtt.connect('mqtt://broker.emqx.io', { username: 'emqx', password: 'password' })
 
-// Chip ID'leri manuel olarak tanımlıyoruz (50 adet)
-const chipIds = [
-  "1000000", "1000001", "1000002", "1000003", "1000004",
-  "1000005", "1000006", "1000007", "1000008", "1000009",
-  "1000010", "1000011", "1000012", "1000013", "1000014",
-  "1000015", "1000016", "1000017", "1000018", "1000019",
-  "1000020", "1000021", "1000022", "1000023", "1000024",
-  "1000025", "1000026", "1000027", "1000028", "1000029",
-  "1000030", "1000031", "1000032", "1000033", "1000034",
-  "1000035", "1000036", "1000037", "1000038", "1000039",
-  "1000040", "1000041", "1000042", "1000043", "1000044",
-  "1000045", "1000046", "1000047", "1000048", "1000049"
+// Yayınlanacak topicler
+const topics = [
+  'demirtech/5048110/temperature',
+  'demirtech/5048110/humidity',
+  'demirtech/5048111/temperature',
+  'demirtech/5048112/humidity'
 ];
 
-// Her chipId için "temperature" ve "humidity" cihazları oluşturuluyor
-const devices = chipIds.flatMap(chipId => [
-  { chipId, type: 'temperature' },
-  { chipId, type: 'humidity' }
-]);
+// 20 ile 50 arasında rastgele ondalıklı değer üretir (2 basamaklı)
+function getRandomValue() {
+  return parseFloat((20 + Math.random() * 30).toFixed(2));
+}
 
 client.on('connect', () => {
   console.log('MQTT broker\'a bağlanıldı.');
 
-  // Her saniye, tüm cihazlar için random değer üreterek mesaj gönderimi
+  // Her saniye tüm topic'lere mesaj gönder
   setInterval(() => {
-    devices.forEach(device => {
-      let value;
-      // Cihaz tipine göre değer aralığı belirleniyor:
-      // temperature: 15 - 30, humidity: 30 - 80
-      if (device.type === 'temperature') {
-        value = parseFloat((15 + Math.random() * 15).toFixed(2));
-      } else {
-        value = parseFloat((30 + Math.random() * 50).toFixed(2));
+    topics.forEach(topic => {
+      // Topic formatı: "demirtech/{chipId}/{type}"
+      const parts = topic.split('/');
+      const chipId = parseInt(parts[1]);
+      const type = parts[2];
+
+      // Mesaj objesi
+      const message = {
+        value: getRandomValue(),
+        type: type,
+        chipId: chipId
       }
 
-      const payload = {
-        chipId: device.chipId,
-        value: value,
-        type: device.type
-      };
+      const payload = JSON.stringify(message)
 
-      // Topic: demirtech/{chipId}/{type} formatında
-      const topic = `demirtech/${device.chipId}/${device.type}`;
-
-      client.publish(topic, JSON.stringify(payload), (err) => {
+      client.publish(topic, payload, (err) => {
         if (err) {
-          console.error('Mesaj gönderilemedi:', err);
+          console.error(`Error publishing to ${topic}:`, err)
         } else {
-          console.log(`Yayınlandı -> Topic: ${topic}, Payload:`, payload);
+          console.log(`Published to ${topic}: ${payload}`)
         }
-      });
-    });
-  }, 1000);
-});
+      })
+    })
+  }, 5000)
+})
 
 client.on('error', (err) => {
-  console.error('MQTT Hatası:', err);
+  console.error('MQTT connection error:', err);
+  client.end();
 });

@@ -1,12 +1,13 @@
 const express = require('express')
-const http = require('http') // Node.js'in dahili modülü
+const http = require('http')
 const mqtt = require('mqtt')
 const { createLogger, transports, format } = require('winston')
 const cors = require('cors')
+require('dotenv').config();
 const { connectDb } = require('./src/helpers/database.helper')
 const config = require('./src/config')
 const { listenDevicesMqtt } = require('./src/helpers/mqtt.listener')
-const { initSocket } = require('./src/helpers/socket.helper.js') // socketEmitter modülünü dahil ediyoruz
+const { initSocket } = require('./src/helpers/socket.helper.js')
 
 const customerRoutes = require('./src/routes/customer.route')
 const branchRoutes = require('./src/routes/branch.route')
@@ -19,20 +20,19 @@ app.use(cors())
 
 const port = config.DEMIRTECH_APPLICATION_PORT || 3000
 
-// HTTP server ve Socket.IO örneğini oluşturuyoruz.
+console.log('config -->', config)
+
 const server = http.createServer(app)
 const { Server } = require('socket.io')
 const io = new Server(server, {
   cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
+    origin: '*',
+    methods: ['GET', 'POST']
   }
 })
 
-// Socket.IO'yu başlatıyoruz.
 initSocket(io)
 
-// MQTT broker bağlantısını oluşturuyoruz.
 const client = mqtt.connect('mqtt://broker.emqx.io', { username: 'emqx', password: 'password' })
 global.mqttClient = client
 
@@ -48,7 +48,6 @@ const logger = createLogger({
 })
 global.logger = logger
 
-// Veritabanına bağlanıp MQTT dinleyicisini başlatıyoruz.
 server.listen(port, async () => {
   try {
     console.log(`>>> DEMIRTECH API IS RUNNING ON http://localhost:${port}`)

@@ -1,4 +1,3 @@
-// device.service.js
 const Device = require('../models/device.model')
 const { createDeviceDataCollection, deleteDeviceDataCollection } = require('../helpers/device-data.helper')
 

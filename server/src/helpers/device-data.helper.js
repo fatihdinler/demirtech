@@ -1,4 +1,3 @@
-// device-data.helper.js
 const mongoose = require('mongoose')
 
 const DeviceDataSchema = new mongoose.Schema({
@@ -6,7 +5,7 @@ const DeviceDataSchema = new mongoose.Schema({
   value: Number,
   type: String,
   occurredTime: { type: Date, default: Date.now }
-}, { versionKey: false });
+}, { versionKey: false })
 
 function getDeviceDataModel(deviceId) {
   const collectionName = `data-${deviceId}`
@@ -29,20 +28,20 @@ async function insertDeviceData(deviceId, payload) {
 }
 
 async function createDeviceDataCollection(deviceId) {
-  getDeviceDataModel(deviceId);
-  console.log(`Collection for device ${deviceId} ensured.`);
+  getDeviceDataModel(deviceId)
+  console.log(`Collection for device ${deviceId} ensured.`)
 }
 
 async function deleteDeviceDataCollection(deviceId) {
-  const collectionName = `data-${deviceId}`;
+  const collectionName = `data-${deviceId}`
   try {
-    await mongoose.connection.dropCollection(collectionName);
-    console.log(`Collection ${collectionName} dropped.`);
+    await mongoose.connection.dropCollection(collectionName)
+    console.log(`Collection ${collectionName} dropped.`)
   } catch (err) {
     if (err.code === 26) {
-      console.log(`Collection ${collectionName} does not exist.`);
+      console.log(`Collection ${collectionName} does not exist.`)
     } else {
-      throw err;
+      throw err
     }
   }
 }
@@ -52,4 +51,4 @@ module.exports = {
   insertDeviceData,
   createDeviceDataCollection,
   deleteDeviceDataCollection,
-};
+}

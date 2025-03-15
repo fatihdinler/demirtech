@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { createDeviceValidator, retrieveSuccessMessage } from './devices-create.messager'
-import { setName, setDescription, setChipId, setLocationId, setDeviceType, setMeasurementType, clearPage, setBranchId, setCustomerId, } from '../../../features/devices/devices-create.state'
+import { setName, setDescription, setChipId, setLocationId, setDeviceType, setMeasurementType, clearPage, setBranchId, setCustomerId, setIsActive, } from '../../../features/devices/devices-create.state'
 import { fetchLocations } from '../../../features/locations/locations.api'
 import { fetchBranches } from '../../../features/branches/branches.api'
 import { fetchCustomers } from '../../../features/customers/customers.api'
@@ -13,7 +13,7 @@ import useDevicesList from '../list/devices-list.hook'
 const useDevicesCreate = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const { name, description, chipId, locationId, deviceType, measurementType, branchId, customerId, } = useSelector(state => state.devices.create)
+  const { name, description, chipId, locationId, deviceType, measurementType, branchId, customerId, isActive } = useSelector(state => state.devices.create)
 
   const { data: locations, isLoading: isLocationsLoading, hasFetched: doesLocationsLoaded } = useSelector(state => state.locations.api)
   const { data: customers, isLoading: isCustomersLoading, error: errorCustomers, hasFetched: doesCustomersLoaded } = useSelector(state => state.customers.api)
@@ -40,7 +40,6 @@ const useDevicesCreate = () => {
   }, [doesBranchesLoaded, isBranchesLoading, dispatch])
 
   const onChange = (event, field) => {
-    event.preventDefault()
     switch (field) {
       case 'name':
         dispatch(setName(event.target.value))
@@ -50,6 +49,9 @@ const useDevicesCreate = () => {
         break
       case 'chipId':
         dispatch(setChipId(event.target.value))
+        break
+      case 'isActive':
+        dispatch(setIsActive(event.target.checked))
         break
       default:
         break
@@ -90,6 +92,7 @@ const useDevicesCreate = () => {
       locationId,
       deviceType,
       measurementType,
+      isActive,
     }
 
     const isValid = createDeviceValidator(postData)
@@ -124,6 +127,7 @@ const useDevicesCreate = () => {
     handleBranchesChange,
     customerId,
     branchId,
+    isActive,
   }
 }
 
