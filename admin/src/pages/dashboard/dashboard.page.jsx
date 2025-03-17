@@ -19,7 +19,8 @@ const Dashboard = () => {
   } = useDashboard()
 
   return (
-    <>
+    <div style={{height: 'calc(100vh - 80px)', // 80px örnek header yüksekliği, ihtiyaca göre ayarlayın
+      overflowY: 'auto'}}>
       {step === 1 && (
         <DashboardCustomerSelection onCustomerSelect={handleCustomerSelect} />
       )}
@@ -46,7 +47,7 @@ const Dashboard = () => {
           onBackToLocation={handleBackToLocation}
         />
       )}
-    </>
+    </div>
   )
 }
 

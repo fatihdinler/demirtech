@@ -24,7 +24,6 @@ async function listenDevicesMqtt(mqttClient) {
     console.log(`Message received - Topic: ${receivedTopic}`)
     let payload
     try {
-      ƒ
       payload = JSON.parse(message.toString())
     } catch (parseErr) {
       console.error("Error parsing message JSON:", parseErr)

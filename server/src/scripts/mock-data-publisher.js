@@ -8,7 +8,9 @@ const topics = [
   'demirtech/5048110/temperature',
   'demirtech/5048110/humidity',
   'demirtech/5048111/temperature',
-  'demirtech/5048112/humidity'
+  'demirtech/5048111/humidity',
+  'demirtech/5048112/temperature',
+  'demirtech/5048112/humidity',
 ];
 
 // 20 ile 50 arasında rastgele ondalıklı değer üretir (2 basamaklı)

@@ -2,6 +2,7 @@
 
 admin/node_modules
 admin/yarn.lock
+admin/.env
 
 server/logs
 server/node_modules
