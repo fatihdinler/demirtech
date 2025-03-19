@@ -27,7 +27,7 @@ const DashboardDeviceSelection = ({ selectedCustomer, selectedBranch, selectedLo
         }
       }}
       arc={{
-        colorArray: ['#5BE12C', '#EA4228'],
+        colorArray: ['#35d0e5', '#3565e5'],
         subArcs: [{ limit: 10 }, { limit: 30 }, {}, {}, {}],
         padding: 0.02,
         width: 0.3
