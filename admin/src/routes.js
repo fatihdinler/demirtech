@@ -23,6 +23,7 @@ import {
   UsersCreate,
   UsersEdit,
   UsersList,
+  Login,
 } from './pages'
 
 export const routes = [
@@ -165,5 +166,12 @@ export const routes = [
     label: 'Raporlar',
     isSidebarPage: true,
     element: <ReportsList />,
+  },
+  {
+    to: '/login',
+    icon: null,
+    label: null,
+    isSidebarPage: false,
+    element: <Login />,
   },
 ]
