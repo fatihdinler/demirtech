@@ -14,8 +14,8 @@ const Layout = () => {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
-      <Row className="g-0">
-        <Col xs="auto" style={{ padding: 0, ...sidebarStyle }}>
+      <Row className='g-0'>
+        <Col xs='auto' style={{ padding: 0, ...sidebarStyle }}>
           <Sidebar
             isSidebarOpen={isSidebarOpen}
             toggleSidebar={toggleSidebar}

@@ -19,6 +19,10 @@ const Login = () => {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
 
+  console.log('auth -->', auth)
+  console.log('login -->', login)
+  console.log('loading -->', loading)
+
   useEffect(() => {
     if (!loading && auth.token) {
       navigate('/dashboard')

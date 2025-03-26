@@ -1,3 +1,5 @@
+const { validateIdInParams } = require('../helpers/common.helper')
+
 const validateCreateUser = (req, res, next) => {
   const { username } = req.body
   let errors = []
@@ -13,4 +15,11 @@ const validateCreateUser = (req, res, next) => {
   next()
 }
 
-module.exports = { validateCreateUser }
+const getUser = (req, res, next) => {
+  validateIdInParams(req, res, next)
+}
+
+module.exports = {
+  validateCreateUser,
+  getUser,
+}

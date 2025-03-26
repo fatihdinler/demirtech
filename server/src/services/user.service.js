@@ -20,4 +20,11 @@ const createUserService = async (username) => {
   return otpCode
 }
 
-module.exports = { createUserService }
+const getUser = async (id) => {
+  return await User.findOne({ id })
+}
+
+module.exports = {
+  createUserService,
+  getUser,
+}
