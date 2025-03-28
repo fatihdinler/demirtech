@@ -8,3 +8,5 @@ server/logs
 server/node_modules
 server/yarn.lock
 server/.env
+
+.todo

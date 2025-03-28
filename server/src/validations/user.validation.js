@@ -1,10 +1,23 @@
 const { validateIdInParams } = require('../helpers/common.helper')
 
 const validateCreateUser = (req, res, next) => {
-  const { username, email, branchId, role } = req.body
+  const { name, surname, username, password, email, branchId, role } = req.body
   let errors = []
+
+  if (!name) {
+    errors.push({ error: `'name' field is required to create a user.` })
+  }
+
+  if (!surname) {
+    errors.push({ error: `'surname' field is required to create a user.` })
+  }
+
   if (!username) {
     errors.push({ error: `'username' field is required to create a user.` })
+  }
+
+  if (!password) {
+    errors.push({ error: `'password' field is required to create a user.` })
   }
 
   if (!email) {
@@ -31,22 +44,35 @@ const validateCreateUser = (req, res, next) => {
 }
 
 const updateUser = (req, res, next) => {
-  const { username, email, branchId, role } = req.body
+  const { name, surname, username, password, email, branchId, role } = req.body
   let errors = []
+
+  if (!name || name === undefined) {
+    errors.push({ error: `'name' field is required to update a user.` })
+  }
+
+  if (!surname || surname === undefined) {
+    errors.push({ error: `'surname' field is required to update a user.` })
+  }
+
   if (!username || username === undefined) {
-    errors.push({ error: `'username' field is required to create a user.` })
+    errors.push({ error: `'username' field is required to update a user.` })
+  }
+
+  if (!password || password === undefined) {
+    errors.push({ error: `'password' field is required to update a user.` })
   }
 
   if (!email || email === undefined) {
-    errors.push({ error: `'email' field is required to create a user.` })
+    errors.push({ error: `'email' field is required to update a user.` })
   }
 
   if (!branchId || branchId === undefined) {
-    errors.push({ error: `'branchId' field is required to create a user.` })
+    errors.push({ error: `'branchId' field is required to update a user.` })
   }
 
   if (!role || role === undefined) {
-    errors.push({ error: `'role' field is required to create a user.` })
+    errors.push({ error: `'role' field is required to update a user.` })
   } else if (!['super', 'client'].includes(role)) {
     errors.push({ error: `'role' field should be one of [super, client]` })
   }

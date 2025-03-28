@@ -9,6 +9,14 @@ const UserSchema = new mongoose.Schema({
     required: true,
     default: uuid,
   },
+  name: {
+    type: String,
+    required: true,
+  },
+  surname: {
+    type: String,
+    required: true,
+  },
   username: {
     type: String,
     required: true,
@@ -21,6 +29,7 @@ const UserSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
+    unique: true,
   },
   branchId: {
     type: String,
@@ -32,10 +41,22 @@ const UserSchema = new mongoose.Schema({
     enum: ['super', 'client'],
     required: true
   },
-  isTempPassword: {
-    type: Boolean,
-    default: false
+  // isTempPassword: {
+  //   type: Boolean,
+  //   default: false
+  // },
+  lastLogin: {
+    type: Date,
+    default: Date.now,
   },
+  isVerified: {
+    type: Boolean,
+    default: false,
+  },
+  resetPasswordToken: String,
+  resetPasswordExpiresAt: String,
+  verificationToken: String,
+  verificationTokenExpiresAt: String,
 })
 
 UserSchema.pre('save', async function (next) {

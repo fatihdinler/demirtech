@@ -1,70 +1,78 @@
 const asyncHandler = require('express-async-handler')
 const userService = require('../services/user.service')
 const httpStatus = require('http-status-codes')
+const User = require('../models/user.model')
+const bcryptjs = require('bcryptjs')
+const { generateVerificationToken } = require('../helpers/common.helper')
+const { generateTokenAndSetCookie } = require('../helpers/jwt.helper')
+const { sendVerificationMail } = require('../helpers/mail/emails.helper')
 
 const createUser = asyncHandler(async (req, res) => {
-  const { username } = req.body
-  const otp = await userService.createUserService(username)
-  res.status(201).json({ message: 'Kullanıcı başarıyla oluşturuldu', otp })
+  const {
+    name,
+    surname,
+    username,
+    password,
+    email,
+    branchId,
+    role,
+  } = req.body
+  try {
+    const userAlreadyExists = await User.findOne({ email })
+    if (userAlreadyExists) {
+      return res.status(400).json({ success: false, message: 'User is already exists!' })
+    }
+
+    const hashedPassword = await bcryptjs.hash(password, 10)
+    const verificationToken = generateVerificationToken()
+
+    const user = new User({
+      name,
+      surname,
+      username,
+      password: hashedPassword,
+      email,
+      verificationToken,
+      verificationTokenExpiresAt: Date.now() + 24 * 60 * 60 * 1000,
+      branchId,
+      role,
+    })
+
+
+    console.log(user)
+    await user.save()
+    generateTokenAndSetCookie(res, user.id)
+    await sendVerificationMail(user.email, verificationToken)
+
+    user.toObject()
+    delete user.password
+    delete user._id
+    delete user.__v
+    return res.status(201).json({
+      success: true,
+      message: 'User is created successfully',
+      data: user,
+    })
+
+  } catch (error) {
+    console.log('error -->', error)
+  }
 })
 
 const getUsers = asyncHandler(async (req, res) => {
-  const users = await userService.getUsers()
-  res.status(httpStatus.OK).json({
-    status: 'SUCCESS',
-    message: 'Users retrieved successfully',
-    data: users,
-  })
+
 })
 
 const updateUser = asyncHandler(async (req, res) => {
-  const updatedUser = await userService.updateUser(req.params.id, req.body)
-  if (!updatedUser) {
-    global.logger.error(`User not found for update: ${req.params.id}`)
-    return res.status(httpStatus.NOT_FOUND).json({
-      status: 'FAILED',
-      message: 'User not found for update',
-    })
-  }
-  global.logger.info(`User updated: ${updatedUser.name} with id: ${updatedUser.id}`)
-  res.status(httpStatus.OK).json({
-    status: 'SUCCESS',
-    message: 'User updated successfully',
-    data: updatedUser,
-  })
+
 })
 
 const deleteUser = asyncHandler(async (req, res) => {
-  const deletedUser = await userService.deleteUser(req.params.id)
-  if (!deletedUser) {
-    global.logger.error(`User not found for delete: ${req.params.id}`)
-    return res.status(httpStatus.NOT_FOUND).json({
-      status: 'FAILED',
-      message: 'User not found for delete',
-    })
-  }
-  global.logger.info(`User deleted with id: ${req.params.id}`)
-  res.status(httpStatus.OK).json({
-    status: 'SUCCESS',
-    message: 'User deleted successfully',
-    data: deletedUser,
-  })
+
 })
 
 const getUser = asyncHandler(async (req, res) => {
-  const user = await userService.getUser(req.params.id)
-  if (!user) {
-    global.logger.error(`User not found: ${req.params.id}`)
-    return res.status(httpStatus.NOT_FOUND).json({
-      status: 'FAILED',
-      message: 'User not found',
-    })
-  }
-  res.status(httpStatus.OK).json({
-    status: 'SUCCESS',
-    message: 'User retrieved successfully',
-    data: user,
-  })
+
 })
 
 module.exports = {
