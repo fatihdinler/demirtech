@@ -8,6 +8,6 @@ router.post('/', authMiddleware('super'), userValidations.validateCreateUser, us
 router.get('/:id', userValidations.getUser, userController.getUser)
 router.get('/', userValidations.getUsers, userController.getUsers)
 router.put('/:id', authMiddleware('super'), userValidations.updateUser, userController.updateUser)
-router.delete('/:id', userValidations.delete, userController.deleteUser)
+router.delete('/:id', userValidations.deleteUser, userController.deleteUser)
 
 module.exports = router
