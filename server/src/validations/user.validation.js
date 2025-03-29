@@ -94,10 +94,29 @@ const getUser = (req, res, next) => {
   validateIdInParams(req, res, next)
 }
 
+const verifyEmail = (req, res, next) => {
+  const { code } = req.body
+  let errors = []
+
+  if (!code) {
+    errors.push({ error: `'code' field is required to verify a user.` })
+  }
+
+  if (errors.length) {
+    return res.status(400).json({
+      message: 'VALIDATION_FAILED',
+      errors,
+    })
+  } else {
+    next()
+  }
+}
+
 module.exports = {
   validateCreateUser,
   getUser,
   updateUser,
   deleteUser,
   getUsers: async (req, res, next) => next(),
+  verifyEmail,
 }

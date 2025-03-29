@@ -1,43 +1,105 @@
-const { v4: uuidv4 } = require('uuid')
+const bcryptjs = require('bcryptjs')
 const User = require('../models/user.model')
-const OTP = require('../models/otp.model')
+const { generateVerificationToken } = require('../helpers/common.helper')
+const { generateTokenAndSetCookie } = require('../helpers/jwt.helper')
+const { sendVerificationMail, sendWelcomeMail } = require('../helpers/mail/emails.helper')
 
-const createUserService = async (username) => {
-  const newUser = await User.create({
+const createUser = async (data, res) => {
+  const { name, surname, username, password, email, branchId, role } = data
+
+  const userAlreadyExists = await User.findOne({ email })
+  if (userAlreadyExists) {
+    throw new Error('Kullanıcı zaten mevcut.')
+  }
+
+  const hashedPassword = await bcryptjs.hash(password, 10)
+
+  const verificationToken = generateVerificationToken()
+  const verificationTokenExpiresAt = Date.now() + 24 * 60 * 60 * 1000
+
+  const newUser = new User({
+    name,
+    surname,
     username,
-    role: 'client',
-    isTempPassword: true,
+    password: hashedPassword,
+    email,
+    verificationToken,
+    verificationTokenExpiresAt,
+    branchId,
+    role,
   })
-  const otpCode = uuidv4().slice(0, 8)
-  await OTP.create({
-    userId: newUser.id,
-    otp: otpCode,
-    expiresAt: new Date(Date.now() + 10 * 60 * 1000),
-  })
-  return otpCode
-}
 
-const getUser = async (id) => {
-  return await User.findOne({ id })
+  await newUser.save()
+
+  generateTokenAndSetCookie(res, newUser.id)
+
+  await sendVerificationMail(newUser.email, verificationToken)
+
+  const userObj = newUser.toObject()
+  delete userObj.password
+  delete userObj._id
+  delete userObj.__v
+
+  return userObj
 }
 
 const getUsers = async () => {
   return await User.find()
 }
 
+const getUser = async (id) => {
+  const user = await User.findOne({ _id: id })
+  if (!user) {
+    throw new Error('Kullanıcı bulunamadı.')
+  }
+  return user
+}
+
 const updateUser = async (id, data) => {
-  return await User.findOneAndUpdate({ id }, data, { new: true })
+  const updatedUser = await User.findOneAndUpdate({ _id: id }, data, { new: true })
+  if (!updatedUser) {
+    throw new Error('Kullanıcı güncellenirken bir hata oluştu.')
+  }
+  return updatedUser
 }
 
 const deleteUser = async (id) => {
-  const result = await User.deleteOne({ id })
-  return result.deletedCount > 0
+  const result = await User.deleteOne({ _id: id })
+  if (result.deletedCount === 0) {
+    throw new Error('Kullanıcı silinirken bir hata oluştu.')
+  }
+  return true
+}
+
+const verifyEmail = async (code) => {
+  const user = await User.findOne({
+    verificationToken: code,
+    verificationTokenExpiresAt: { $gt: Date.now() },
+  })
+  if (!user) {
+    throw new Error('Geçersiz veya süresi dolmuş doğrulama kodu.')
+  }
+
+  user.isVerified = true
+  user.verificationToken = undefined
+  user.verificationTokenExpiresAt = undefined
+  await user.save()
+
+  await sendWelcomeMail(user.email, user.name)
+
+  const userObj = user.toObject()
+  delete userObj.password
+  delete userObj._id
+  delete userObj.__v
+
+  return userObj
 }
 
 module.exports = {
-  createUserService,
-  getUser,
+  createUser,
   getUsers,
+  getUser,
   updateUser,
   deleteUser,
+  verifyEmail,
 }

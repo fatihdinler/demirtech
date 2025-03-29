@@ -1,84 +1,112 @@
 const asyncHandler = require('express-async-handler')
-const userService = require('../services/user.service')
 const httpStatus = require('http-status-codes')
-const User = require('../models/user.model')
-const bcryptjs = require('bcryptjs')
-const { generateVerificationToken } = require('../helpers/common.helper')
-const { generateTokenAndSetCookie } = require('../helpers/jwt.helper')
-const { sendVerificationMail } = require('../helpers/mail/emails.helper')
+const userService = require('../services/user.service')
 
 const createUser = asyncHandler(async (req, res) => {
-  const {
-    name,
-    surname,
-    username,
-    password,
-    email,
-    branchId,
-    role,
-  } = req.body
   try {
-    const userAlreadyExists = await User.findOne({ email })
-    if (userAlreadyExists) {
-      return res.status(400).json({ success: false, message: 'User is already exists!' })
-    }
-
-    const hashedPassword = await bcryptjs.hash(password, 10)
-    const verificationToken = generateVerificationToken()
-
-    const user = new User({
-      name,
-      surname,
-      username,
-      password: hashedPassword,
-      email,
-      verificationToken,
-      verificationTokenExpiresAt: Date.now() + 24 * 60 * 60 * 1000,
-      branchId,
-      role,
-    })
-
-
-    console.log(user)
-    await user.save()
-    generateTokenAndSetCookie(res, user.id)
-    await sendVerificationMail(user.email, verificationToken)
-
-    user.toObject()
-    delete user.password
-    delete user._id
-    delete user.__v
-    return res.status(201).json({
+    const createdUser = await userService.createUser(req.body, res)
+    res.status(httpStatus.StatusCodes.CREATED).json({
       success: true,
-      message: 'User is created successfully',
-      data: user,
+      message: 'Kullanıcı başarıyla oluşturuldu.',
+      data: createdUser,
     })
-
   } catch (error) {
-    console.log('error -->', error)
+    res.status(httpStatus.StatusCodes.BAD_REQUEST).json({
+      success: false,
+      message: error.message || 'Kullanıcı oluşturulurken bir hata oluştu.',
+    })
   }
 })
 
 const getUsers = asyncHandler(async (req, res) => {
-
-})
-
-const updateUser = asyncHandler(async (req, res) => {
-
-})
-
-const deleteUser = asyncHandler(async (req, res) => {
-
+  try {
+    const users = await userService.getUsers()
+    res.status(httpStatus.StatusCodes.OK).json({
+      success: true,
+      message: 'Kullanıcılar başarıyla getirildi.',
+      data: users,
+    })
+  } catch (error) {
+    res.status(httpStatus.StatusCodes.BAD_REQUEST).json({
+      success: false,
+      message: error.message || 'Kullanıcılar getirilirken bir hata oluştu.',
+    })
+  }
 })
 
 const getUser = asyncHandler(async (req, res) => {
+  try {
+    const userId = req.params.id
+    const user = await userService.getUser(userId)
+    res.status(httpStatus.StatusCodes.OK).json({
+      success: true,
+      message: 'Kullanıcı başarıyla getirildi.',
+      data: user,
+    })
+  } catch (error) {
+    res.status(httpStatus.StatusCodes.BAD_REQUEST).json({
+      success: false,
+      message: error.message || 'Kullanıcı getirilirken bir hata oluştu.',
+    })
+  }
+})
 
+const updateUser = asyncHandler(async (req, res) => {
+  try {
+    const userId = req.params.id
+    const updateData = req.body
+    const updatedUser = await userService.updateUser(userId, updateData)
+    res.status(httpStatus.StatusCodes.OK).json({
+      success: true,
+      message: 'Kullanıcı başarıyla güncellendi.',
+      data: updatedUser,
+    })
+  } catch (error) {
+    res.status(httpStatus.StatusCodes.BAD_REQUEST).json({
+      success: false,
+      message: error.message || 'Kullanıcı güncellenirken bir hata oluştu.',
+    })
+  }
+})
+
+const deleteUser = asyncHandler(async (req, res) => {
+  try {
+    const userId = req.params.id
+    await userService.deleteUser(userId)
+    res.status(httpStatus.StatusCodes.OK).json({
+      success: true,
+      message: 'Kullanıcı başarıyla silindi.',
+    })
+  } catch (error) {
+    res.status(httpStatus.StatusCodes.BAD_REQUEST).json({
+      success: false,
+      message: error.message || 'Kullanıcı silinirken bir hata oluştu.',
+    })
+  }
+})
+
+const verifyEmail = asyncHandler(async (req, res) => {
+  try {
+    const { code } = req.body
+    const verifiedUser = await userService.verifyEmail(code)
+    res.status(httpStatus.StatusCodes.OK).json({
+      success: true,
+      message: 'Email doğrulama başarılı.',
+      data: verifiedUser,
+    })
+  } catch (error) {
+    res.status(httpStatus.StatusCodes.BAD_REQUEST).json({
+      success: false,
+      message: error.message || 'Email doğrulanırken bir hata oluştu.',
+    })
+  }
 })
 
 module.exports = {
   createUser,
+  getUsers,
   getUser,
   updateUser,
   deleteUser,
-  getUsers,
+  verifyEmail,
 }

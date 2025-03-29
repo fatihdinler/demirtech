@@ -1,6 +1,13 @@
 const asyncHandler = require('express-async-handler')
 const authService = require('../services/auth.service')
 
+const logout = asyncHandler(async (req, res) => {
+  res.clearCookie('token')
+  res
+    .status(200)
+    .json({ success: true, message: 'Başarıyla Çıkış Yapıldı!' })
+})
+
 const deprecatedLogin = asyncHandler(async (req, res) => {
   const { username, password } = req.body
   const token = await authService.loginService(username, password)
@@ -29,6 +36,7 @@ const deprecatedLogout = asyncHandler(async (req, res) => {
 })
 
 module.exports = {
+  logout,
   deprecatedLogin,
   deprecatedChangePassword,
   deprecatedLogout,

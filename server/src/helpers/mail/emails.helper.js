@@ -19,6 +19,26 @@ const sendVerificationMail = async (email, verificationToken) => {
   }
 }
 
+const sendWelcomeMail = async (email, username) => {
+  const recipients = [{ email }]
+
+  try {
+    const response = await client.send({
+      from: sender,
+      to: recipients,
+      subject: `${username}, Welcome to Demirtech, Your Account is Verified!`,
+      text: 'Replace this text with some informative texts',
+      category: 'Email Verification',
+    })
+    console.log(`>>> e-mail is sent successfully to the user:`, response)
+  } catch (error) {
+    console.log(`>>> Error sending email: ${error}`)
+    throw new Error(`Error sending email: ${error}`)
+  }
+}
+
+
 module.exports = {
   sendVerificationMail,
+  sendWelcomeMail,
 }

@@ -11,5 +11,6 @@ const authMiddleware = require('../middlewares/auth.middleware')
 // router.delete('/:id', userValidations.deleteUser, userController.deleteUser)
 
 router.post('/', userValidations.validateCreateUser, userController.createUser)
+router.post('/verify-email', userValidations.verifyEmail, userController.verifyEmail)
 
 module.exports = router
