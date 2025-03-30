@@ -117,53 +117,47 @@ const PASSWORD_RESET_SUCCESS_TEMPLATE = `
 
 const PASSWORD_RESET_REQUEST_TEMPLATE = `
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reset Your Password</title>
+  <title>Şifre Sıfırlama Talebi</title>
+  <style>
+    body { margin: 0; padding: 0; background-color: #e0f7fa; font-family: Arial, sans-serif; }
+    .container { width: 100%; background-color: #e0f7fa; padding: 20px 0; }
+    .content { max-width: 600px; margin: auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .header { background: linear-gradient(90deg, #2196f3, #1e88e5); padding: 20px; text-align: center; }
+    .header h1 { color: #ffffff; font-size: 24px; margin: 0; }
+    .body { padding: 30px 40px; color: #333333; }
+    .body p { font-size: 16px; margin-bottom: 20px; }
+    .button { text-align: center; margin: 30px 0; }
+    .button a { background-color: #2196f3; color: #ffffff; text-decoration: none; padding: 12px 30px; border-radius: 4px; font-size: 16px; }
+    .footer { background-color: #f1f1f1; padding: 15px; text-align: center; font-size: 12px; color: #888888; }
+  </style>
 </head>
-<body style="margin:0;padding:0;background-color:#f2f2f2;font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;">
-  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#f2f2f2;padding:20px 0;">
-    <tr>
-      <td align="center">
-        <table width="600" border="0" cellspacing="0" cellpadding="0" style="background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.1);">
-          <!-- Header -->
-          <tr>
-            <td align="center" style="background: linear-gradient(90deg, #4CAF50, #45a049); padding:20px;">
-              <h1 style="color:#ffffff;font-size:24px;margin:0;">Password Reset</h1>
-            </td>
-          </tr>
-          <!-- Body -->
-          <tr>
-            <td style="padding:30px 40px;">
-              <p style="font-size:16px;color:#333333;margin-bottom:20px;">Hello,</p>
-              <p style="font-size:16px;color:#333333;margin-bottom:20px;">
-                We received a request to reset your password. If you didn't make this request, please ignore this email.
-              </p>
-              <div style="text-align:center;margin:30px 0;">
-                <a href="{resetURL}" style="background-color:#4CAF50;color:#ffffff;text-decoration:none;padding:12px 30px;border-radius:4px;font-size:16px;">
-                  Reset Password
-                </a>
-              </div>
-              <p style="font-size:14px;color:#777777;margin-bottom:20px;">
-                This link will expire in 1 hour for security reasons.
-              </p>
-              <p style="font-size:16px;color:#333333;">Best regards,<br>Your App Team</p>
-            </td>
-          </tr>
-          <!-- Footer -->
-          <tr>
-            <td align="center" style="background-color:#f9f9f9;padding:15px;">
-              <p style="font-size:12px;color:#888888;margin:0;">
-                This is an automated message, please do not reply to this email.
-              </p>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
+<body>
+  <div class="container">
+    <div class="content">
+      <div class="header">
+        <h1>🔒 Şifre Sıfırlama Talebi</h1>
+      </div>
+      <div class="body">
+        <p>Merhaba,</p>
+        <p>Sistemde hesabınız için bir şifre sıfırlama talebi alındı. Eğer bu isteği siz yapmadıysanız, lütfen bu e-postayı görmezden gelin.</p>
+        <p>Yeni şifrenizi belirlemek için aşağıdaki butona tıklayınız. 🚀</p>
+        <div class="button">
+          <a href="{resetURL}">Şifremi Sıfırla</a>
+        </div>
+        <p>Bu bağlantı güvenlik nedeniyle 1 saat içerisinde geçersiz hale gelecektir.</p>
+        <p>Bağlantıya tıkladıktan sonra karşınıza çıkacak form üzerinden yeni şifrenizi belirleyebilirsiniz. Herhangi bir sorun yaşarsanız destek ekibimizle iletişime geçebilirsiniz. 💬</p>
+        <p>İyi günler dileriz,</p>
+        <p><strong>Your App Team</strong></p>
+      </div>
+      <div class="footer">
+        <p>Bu e-posta otomatik olarak gönderilmiştir. Lütfen bu e-postaya yanıt vermeyiniz.</p>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
 `

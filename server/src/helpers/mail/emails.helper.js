@@ -37,8 +37,45 @@ const sendWelcomeMail = async (email, username) => {
   }
 }
 
+const sendPasswordResetEmail = async (email, resetUrl) => {
+  const recipients = [{ email }]
+
+  try {
+    const response = await client.send({
+      from: sender,
+      to: recipients,
+      subject: 'Your Reset Password Link is Ready! 🔑',
+      html: PASSWORD_RESET_REQUEST_TEMPLATE.replace('{resetURL}', resetUrl),
+      category: 'Password Reset',
+    })
+    console.log(`>>> E-posta başarıyla gönderildi:`, response)
+  } catch (error) {
+    console.log(`>>> E-posta gönderilirken hata oluştu: ${error}`)
+    throw new Error(`E-posta gönderilirken hata: ${error}`)
+  }
+}
+
+const sendResetSuccessEmail = async (email) => {
+  const recipients = [{ email }]
+
+  try {
+    const response = await client.send({
+      from: sender,
+      to: recipients,
+      subject: 'Password Reset Successfully! 🔑',
+      html: PASSWORD_RESET_SUCCESS_TEMPLATE,
+      category: 'Password Reset',
+    })
+    console.log(`>>> E-posta başarıyla gönderildi:`, response)
+  } catch (error) {
+    console.log(`>>> E-posta gönderilirken hata oluştu: ${error}`)
+    throw new Error(`E-posta gönderilirken hata: ${error}`)
+  }
+}
 
 module.exports = {
   sendVerificationMail,
   sendWelcomeMail,
+  sendPasswordResetEmail,
+  sendResetSuccessEmail,
 }

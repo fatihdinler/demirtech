@@ -4,6 +4,8 @@ const mqtt = require('mqtt')
 const { createLogger, transports, format } = require('winston')
 const cors = require('cors')
 require('dotenv').config()
+const cookieParser = require('cookie-parser')
+
 const { connectDb } = require('./src/helpers/database.helper')
 const config = require('./src/config')
 const { listenDevicesMqtt } = require('./src/helpers/mqtt.listener')
@@ -20,6 +22,7 @@ const userRoutes = require('./src/routes/user.route.js')
 const app = express()
 app.use(express.json())
 app.use(cors())
+app.use(cookieParser())
 
 const port = config.DEMIRTECH_APPLICATION_PORT || 3000
 
