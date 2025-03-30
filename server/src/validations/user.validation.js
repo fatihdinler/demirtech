@@ -24,10 +24,6 @@ const validateCreateUser = (req, res, next) => {
     errors.push({ error: `'email' field is required to create a user.` })
   }
 
-  if (!branchId) {
-    errors.push({ error: `'branchId' field is required to create a user.` })
-  }
-
   if (!role) {
     errors.push({ error: `'role' field is required to create a user.` })
   } else if (!['super', 'client'].includes(role)) {
@@ -65,10 +61,6 @@ const updateUser = (req, res, next) => {
 
   if (!email || email === undefined) {
     errors.push({ error: `'email' field is required to update a user.` })
-  }
-
-  if (!branchId || branchId === undefined) {
-    errors.push({ error: `'branchId' field is required to update a user.` })
   }
 
   if (!role || role === undefined) {
