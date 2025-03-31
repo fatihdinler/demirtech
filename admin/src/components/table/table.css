@@ -1,127 +1,135 @@
-/* Ant Design benzeri tablo kartı */
-.antd-table-card {
-  border: 1px solid #f0f0f0;
-  border-radius: 4px;
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+/* Table Card */
+.pro-table-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   overflow: hidden;
+  transition: box-shadow 0.3s ease;
+}
+
+.pro-table-card:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
 }
 
 /* Tablo düzeni */
-.antd-table {
+.pro-table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.antd-table thead {
-  background: #fafafa;
+.pro-table thead {
+  background: #e3f2fd;
 }
 
-.antd-table th,
-.antd-table td {
+.pro-table th,
+.pro-table td {
   padding: 16px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #e0e0e0;
   text-align: left;
+  transition: background 0.2s ease;
 }
 
-.antd-table th:first-child,
-.antd-table td:first-child {
+.pro-table th:first-child,
+.pro-table td:first-child {
   padding-left: 24px;
 }
 
-.antd-table th:last-child,
-.antd-table td:last-child {
+.pro-table th:last-child,
+.pro-table td:last-child {
   padding-right: 24px;
 }
 
-/* Sütun başlıklarının düzeni */
-.antd-column-header {
+/* Sütun başlık düzeni */
+.pro-column-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
 /* Filtre butonu */
-.antd-filter-button {
+.pro-filter-button {
   background: none;
   border: none;
   cursor: pointer;
-  color: rgba(0, 0, 0, 0.45);
+  color: #1976d2;
   font-size: 14px;
   padding: 0;
+  transition: color 0.2s ease;
 }
 
-.antd-filter-button:hover {
-  color: rgba(0, 0, 0, 0.85);
+.pro-filter-button:hover {
+  color: #1565c0;
 }
 
-/* Filtre input alanı */
-.antd-filter-input {
-  margin-top: 8px;
+/* Sıralama ikonları */
+.pro-sort-icon {
+  margin-left: 8px;
+  font-size: 12px;
+  vertical-align: middle;
+}
+
+.pro-sort-icon.inactive {
+  opacity: 0.3;
 }
 
 /* Kayıt bulunamadı mesajı */
-.antd-no-data {
+.pro-no-data {
   text-align: center;
   padding: 16px;
-  color: rgba(0, 0, 0, 0.45);
-}
-
-/* Satır hover efekti */
-.antd-table tbody tr:hover {
-  background: #f5f5f5;
+  color: #757575;
 }
 
 /* Tablo alt bilgisi (footer) */
-.antd-table-footer {
+.pro-table-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  background: #fafafa;
-  border-top: 1px solid #f0f0f0;
+  background: #e3f2fd;
+  border-top: 1px solid #e0e0e0;
 }
 
 /* Sayfalama düzeni */
-.antd-pagination {
+.pro-pagination {
   margin: 0;
   display: flex;
   align-items: center;
 }
 
-.antd-pagination .page-item a {
-  color: rgba(0, 0, 0, 0.45);
+.pro-pagination .page-item a {
+  color: #1976d2;
 }
 
-.antd-pagination .page-item.active a {
-  background-color: #1890ff;
-  border-color: #1890ff;
-  color: #fff;
+.pro-pagination .page-item.active a {
+  background-color: #1976d2;
+  border-color: #1976d2;
+  color: #ffffff;
 }
 
-/* Sayfa başına gösterim seçeneği */
-.antd-page-size {
+/* Sayfa başına gösterim */
+.pro-page-size {
   display: flex;
   align-items: center;
   font-size: 14px;
 }
 
-.antd-page-size .page-size-select {
+.pro-page-size .page-size-select {
   margin-left: 8px;
   width: auto;
-  display: inline-block;
 }
 
-/* Dropdown butonu (Actions) */
-.antd-dropdown-button {
+/* Dropdown butonu (aksiyonlar) */
+.pro-dropdown-button {
   background: none;
   border: none;
   cursor: pointer;
   font-size: 16px;
-  color: rgba(0, 0, 0, 0.45);
+  color: #1976d2;
   padding: 0;
+  transition: color 0.2s ease;
 }
 
-.antd-dropdown-button:hover {
-  color: rgba(0, 0, 0, 0.85);
+.pro-dropdown-button:hover {
+  color: #1565c0;
 }

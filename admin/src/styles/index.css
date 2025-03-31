@@ -5,6 +5,44 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.app-navbar {
+  flex: 0 0 60px;
+  z-index: 1000;
+}
+
+.app-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.app-sidebar {
+  flex: 0 0 auto;
+  min-width: 250px;
+  border-right: 1px solid #dee2e6;
+  background: #ffffff;
+}
+
+.app-content {
+  flex: 1;
+  overflow-y: auto;
+  background: #f8f9fa;
+  padding: 1rem;
+}
+
 @import url(create-button.component.css);
 @import url(loading.component.css);
 @import url(page-footer.component.css);

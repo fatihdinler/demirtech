@@ -2,12 +2,8 @@ import React, { useContext } from 'react'
 import { Navbar as RBNavbar, Container, Nav, Badge, Dropdown } from 'react-bootstrap'
 import { FaBell, FaUserCircle, FaSignOutAlt } from 'react-icons/fa'
 import DemirtekLogoSecondary from '../../assets/demirtek-logo-secondary.png'
-import useUser from '../../hooks/user.hook'
-import { AuthContext } from '../../contexts/auth.context'
 
 const Navbar = () => {
-  const { user } = useUser()
-  const { logout } = useContext(AuthContext)
 
   return (
     <RBNavbar
@@ -68,11 +64,12 @@ const Navbar = () => {
               <span
                 className='ms-2 d-none d-sm-inline'
                 style={{ fontWeight: 500, color: '#495057' }}>
-                {user?.username}
+                {/* {user?.username} */}
               </span>
             </Dropdown.Toggle>
             <Dropdown.Menu style={{ minWidth: '150px' }}>
-              <Dropdown.Item onClick={logout} className='d-flex align-items-center'>
+              {/** Add logout functionality here for later on! */}
+              <Dropdown.Item onClick={() => null} className='d-flex align-items-center'>
                 <FaSignOutAlt size={16} color='#dc3545' className='me-2' />
                 Logout
               </Dropdown.Item>
