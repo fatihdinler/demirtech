@@ -1,0 +1,162 @@
+/* Table Card */
+.pro-table-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: box-shadow 0.3s ease;
+}
+
+.pro-table-card:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* Scrollable container with fixed height */
+.pro-table-container {
+  max-height: 440px;
+  overflow-y: auto;
+}
+
+/* Table düzeni */
+.pro-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.pro-table thead {
+  background: #e3f2fd;
+}
+
+/* Sticky header */
+.pro-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #e3f2fd;
+  box-shadow: 0px 2px 2px -1px rgba(0, 0, 0, 0.2);
+}
+
+.pro-table th,
+.pro-table td {
+  padding: 16px;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: left;
+  transition: background 0.2s ease;
+}
+
+.pro-table th:first-child,
+.pro-table td:first-child {
+  padding-left: 24px;
+}
+
+.pro-table th:last-child,
+.pro-table td:last-child {
+  padding-right: 24px;
+}
+
+/* Sütun başlık düzeni */
+.pro-column-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Filtre butonu */
+.pro-filter-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #1976d2;
+  font-size: 14px;
+  padding: 0;
+  transition: color 0.2s ease;
+}
+
+.pro-filter-button:hover {
+  color: #1565c0;
+}
+
+/* Sıralama ikonları */
+.pro-sort-icon {
+  margin-left: 8px;
+  font-size: 12px;
+  vertical-align: middle;
+}
+
+.pro-sort-icon.inactive {
+  opacity: 0.3;
+}
+
+/* Kayıt bulunamadı mesajı */
+.pro-no-data {
+  text-align: center;
+  padding: 16px;
+  color: #757575;
+}
+
+/* Tablo alt bilgisi (footer) */
+.pro-table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #e3f2fd;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* Pagination düzeni: compact pagination */
+.pro-pagination {
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.pro-pagination .page-item a {
+  color: #1976d2;
+}
+
+.pro-pagination .page-item.active a {
+  background-color: #1976d2;
+  border-color: #1976d2;
+  color: #ffffff;
+}
+
+/* Sayfa başına gösterim */
+.pro-page-size {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.pro-page-size .page-size-select {
+  margin-left: 8px;
+  width: auto;
+}
+
+/* Actions cell: narrower width */
+.pro-actions-cell {
+  width: 60px;
+  text-align: center;
+  padding: 8px;
+}
+
+/* Dropdown button (actions) - narrower */
+.pro-dropdown-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: #1976d2;
+  padding: 4px;
+  transition: color 0.2s ease;
+}
+
+.pro-dropdown-button:hover {
+  color: #1565c0;
+}
+
+/* Ensure dropdown menu appears above table */
+.pro-dropdown-menu {
+  z-index: 9999 !important;
+}

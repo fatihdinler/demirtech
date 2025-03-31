@@ -4,6 +4,10 @@ admin/node_modules
 admin/yarn.lock
 admin/.env
 
+client-web/node_modules
+client-web/yarn.lock
+client-web/.env
+
 server/logs
 server/node_modules
 server/yarn.lock
