@@ -1,10 +1,9 @@
 import React from 'react'
-import { Nav, Button } from 'react-bootstrap'
+import { Nav } from 'react-bootstrap'
 import { Link, useLocation } from 'react-router-dom'
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 import { routes } from '../../routes'
 
-const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
+const Sidebar = ({ isSidebarOpen }) => {
   const location = useLocation()
   const sidebarWidth = isSidebarOpen ? 250 : 80
 
@@ -13,32 +12,14 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
       style={{
         width: sidebarWidth,
         minHeight: '100vh',
-        backgroundColor: '#ffffff', // Açık tema için beyaz arka plan
+        backgroundColor: '#ffffff',
         color: '#343a40',
         padding: '1rem',
         transition: 'width 0.3s ease',
         borderRight: '1px solid #dee2e6'
       }}
     >
-      <div className="d-flex justify-content-end mb-3">
-        <Button
-          variant="outline-secondary"
-          onClick={toggleSidebar}
-          style={{
-            width: '40px',
-            height: '40px',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          {isSidebarOpen ? <FaChevronLeft /> : <FaChevronRight />}
-        </Button>
-      </div>
-
-      {/* Rotalar */}
-      <Nav className="flex-column">
+      <Nav className='flex-column'>
         {routes.map((route) => {
           if (!route.isSidebarPage) return null
           const active = location.pathname === route.to

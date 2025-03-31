@@ -1,10 +1,9 @@
-import React, { useContext } from 'react'
-import { Navbar as RBNavbar, Container, Nav, Badge, Dropdown } from 'react-bootstrap'
-import { FaBell, FaUserCircle, FaSignOutAlt } from 'react-icons/fa'
+import React from 'react'
+import { Navbar as RBNavbar, Container, Nav, Badge, Dropdown, Button } from 'react-bootstrap'
+import { FaBell, FaUserCircle, FaSignOutAlt, FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 import DemirtekLogoSecondary from '../../assets/demirtek-logo-secondary.png'
 
-const Navbar = () => {
-
+const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
   return (
     <RBNavbar
       style={{
@@ -15,7 +14,24 @@ const Navbar = () => {
       className='py-1'
     >
       <Container fluid className='d-flex justify-content-between align-items-center'>
-        <div style={{ width: '40px' }}></div>
+        {/* Sidebar toggle butonu */}
+        <div>
+          <Button
+            variant='outline-secondary'
+            onClick={toggleSidebar}
+            style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            {isSidebarOpen ? <FaChevronLeft /> : <FaChevronRight />}
+          </Button>
+        </div>
+
         <RBNavbar.Brand className='mx-auto'>
           <img
             src={DemirtekLogoSecondary}
@@ -27,6 +43,7 @@ const Navbar = () => {
             }}
           />
         </RBNavbar.Brand>
+
         <Nav className='d-flex align-items-center'>
           <div
             style={{
@@ -68,7 +85,6 @@ const Navbar = () => {
               </span>
             </Dropdown.Toggle>
             <Dropdown.Menu style={{ minWidth: '150px' }}>
-              {/** Add logout functionality here for later on! */}
               <Dropdown.Item onClick={() => null} className='d-flex align-items-center'>
                 <FaSignOutAlt size={16} color='#dc3545' className='me-2' />
                 Logout

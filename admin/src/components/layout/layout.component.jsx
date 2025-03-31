@@ -14,7 +14,7 @@ const Layout = () => {
   return (
     <div className='app-container'>
       <header className='app-navbar'>
-        <Navbar />
+        <Navbar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
       </header>
       <div className='app-body'>
         <aside className='app-sidebar' style={sidebarStyle}>
