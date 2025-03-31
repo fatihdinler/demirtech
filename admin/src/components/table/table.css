@@ -12,7 +12,13 @@
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
 }
 
-/* Tablo düzeni */
+/* Scrollable container with fixed height */
+.pro-table-container {
+  max-height: 440px;
+  overflow-y: auto;
+}
+
+/* Table düzeni */
 .pro-table {
   width: 100%;
   border-collapse: collapse;
@@ -20,6 +26,15 @@
 
 .pro-table thead {
   background: #e3f2fd;
+}
+
+/* Sticky header */
+.pro-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #e3f2fd;
+  box-shadow: 0px 2px 2px -1px rgba(0, 0, 0, 0.2);
 }
 
 .pro-table th,
@@ -90,7 +105,7 @@
   border-top: 1px solid #e0e0e0;
 }
 
-/* Sayfalama düzeni */
+/* Pagination düzeni: compact pagination */
 .pro-pagination {
   margin: 0;
   display: flex;
@@ -119,17 +134,29 @@
   width: auto;
 }
 
-/* Dropdown butonu (aksiyonlar) */
+/* Actions cell: narrower width */
+.pro-actions-cell {
+  width: 60px;
+  text-align: center;
+  padding: 8px;
+}
+
+/* Dropdown button (actions) - narrower */
 .pro-dropdown-button {
   background: none;
   border: none;
   cursor: pointer;
   font-size: 16px;
   color: #1976d2;
-  padding: 0;
+  padding: 4px;
   transition: color 0.2s ease;
 }
 
 .pro-dropdown-button:hover {
   color: #1565c0;
+}
+
+/* Ensure dropdown menu appears above table */
+.pro-dropdown-menu {
+  z-index: 9999 !important;
 }

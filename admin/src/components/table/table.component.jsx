@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react'
 import {
   Card,
   Form,
@@ -7,16 +7,17 @@ import {
   OverlayTrigger,
   Tooltip,
   Table as BootstrapTable,
-} from 'react-bootstrap';
+} from 'react-bootstrap'
 import {
   FaFilter,
   FaSort,
   FaSortUp,
   FaSortDown,
-  FaEllipsisV,
-} from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
-import './table.css';
+  FaPencilAlt,
+  FaTrash,
+} from 'react-icons/fa'
+import { useNavigate } from 'react-router-dom'
+import './table.css'
 
 const Table = ({
   data,
@@ -26,72 +27,72 @@ const Table = ({
   editRoute,
   handleDelete,
 }) => {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
-  // Filtre ve sıralama durumları
-  const [filterValues, setFilterValues] = useState({});
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const [filterValues, setFilterValues] = useState({})
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' })
 
-  // Sayfalama durumları
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(defaultPageSize);
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(defaultPageSize)
 
-  // Filtre değerlerini günceller
   const handleFilterChange = (accessor, value) => {
-    setFilterValues((prev) => ({ ...prev, [accessor]: value }));
-    setCurrentPage(1);
-  };
+    setFilterValues((prev) => ({ ...prev, [accessor]: value }))
+    setCurrentPage(1)
+  }
 
-  // Sıralama işlemini gerçekleştirir
   const handleSort = (accessor) => {
     if (sortConfig.key === accessor) {
       setSortConfig({
         key: accessor,
         direction: sortConfig.direction === 'asc' ? 'desc' : 'asc',
-      });
+      })
     } else {
-      setSortConfig({ key: accessor, direction: 'asc' });
+      setSortConfig({ key: accessor, direction: 'asc' })
     }
-  };
+  }
 
-  // Veriyi filtrele
   const filteredData = useMemo(() => {
     return data.filter((item) =>
       columns.every((col) => {
         if (col.filterable && filterValues[col.accessor]) {
-          const filterVal = filterValues[col.accessor].toLowerCase();
-          const itemVal = (item[col.accessor] || '').toString().toLowerCase();
-          return itemVal.includes(filterVal);
+          const filterVal = filterValues[col.accessor].toLowerCase()
+          const itemVal = (item[col.accessor] || '').toString().toLowerCase()
+          return itemVal.includes(filterVal)
         }
-        return true;
+        return true
       })
-    );
-  }, [data, columns, filterValues]);
+    )
+  }, [data, columns, filterValues])
 
-  // Filtrelenmiş veriyi sıralama
   const sortedData = useMemo(() => {
-    if (!sortConfig.key) return filteredData;
+    if (!sortConfig.key) return filteredData
     return [...filteredData].sort((a, b) => {
-      const aVal = a[sortConfig.key];
-      const bVal = b[sortConfig.key];
-      if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
-      if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
-      return 0;
-    });
-  }, [filteredData, sortConfig]);
+      const aVal = a[sortConfig.key]
+      const bVal = b[sortConfig.key]
+      if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1
+      if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1
+      return 0
+    })
+  }, [filteredData, sortConfig])
 
-  // Sayfalama: sıralanmış veriden sadece o sayfadakileri alır
-  const totalPages = Math.ceil(sortedData.length / pageSize);
+  const totalPages = Math.ceil(sortedData.length / pageSize)
   const paginatedData = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return sortedData.slice(startIndex, startIndex + pageSize);
-  }, [sortedData, currentPage, pageSize]);
+    const startIndex = (currentPage - 1) * pageSize
+    return sortedData.slice(startIndex, startIndex + pageSize)
+  }, [sortedData, currentPage, pageSize])
 
-  // Sayfa numaralarını oluşturur
-  const renderPaginationItems = () => {
-    const items = [];
-    for (let i = 1; i <= totalPages; i++) {
-      items.push(
+  const renderPagination = () => {
+    const visiblePages = 3
+    let startPage = currentPage - Math.floor(visiblePages / 2)
+    if (startPage < 1) startPage = 1
+    let endPage = startPage + visiblePages - 1
+    if (endPage > totalPages) {
+      endPage = totalPages
+      startPage = Math.max(1, endPage - visiblePages + 1)
+    }
+    const pages = []
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
         <Pagination.Item
           key={i}
           active={i === currentPage}
@@ -99,43 +100,89 @@ const Table = ({
         >
           {i}
         </Pagination.Item>
-      );
+      )
     }
-    return items;
-  };
+    return (
+      <>
+        <Pagination.First
+          onClick={() => setCurrentPage(1)}
+          disabled={currentPage === 1}
+        >
+          {'<<'}
+        </Pagination.First>
+        <Pagination.Prev
+          onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
+          disabled={currentPage === 1}
+        >
+          {'<'}
+        </Pagination.Prev>
+        {pages}
+        <Pagination.Next
+          onClick={() =>
+            currentPage < totalPages && setCurrentPage(currentPage + 1)
+          }
+          disabled={currentPage === totalPages}
+        >
+          {'>'}
+        </Pagination.Next>
+        <Pagination.Last
+          onClick={() => setCurrentPage(totalPages)}
+          disabled={currentPage === totalPages}
+        >
+          {'>>'}
+        </Pagination.Last>
+      </>
+    )
+  }
 
-  // Her satır için aksiyon menüsü (Düzenle, Sil)
   const ActionsMenu = ({ row }) => {
     const editOperation = () => {
-      navigate(`${editRoute[0]}/${row.id}${editRoute[1]}`);
-    };
+      navigate(`${editRoute[0]}/${row.id}${editRoute[1]}`)
+    }
 
     const deleteOperation = () => {
-      handleDelete(row.id);
-    };
+      handleDelete(row.id)
+    }
 
     return (
-      <Dropdown align="end">
-        <Dropdown.Toggle as="button" className="pro-dropdown-button">
-          <FaEllipsisV />
+      <Dropdown align='end'>
+        <Dropdown.Toggle as='button' className='pro-dropdown-button'>
+          <span style={{ fontSize: '1rem' }}>⋮</span>
         </Dropdown.Toggle>
-        <Dropdown.Menu>
-          <Dropdown.Item onClick={editOperation}>Düzenle</Dropdown.Item>
-          <Dropdown.Item onClick={deleteOperation}>Sil</Dropdown.Item>
+        <Dropdown.Menu
+          renderMenuOnMount
+          style={{ zIndex: 1000 }}
+          popperConfig={{
+            modifiers: [
+              { name: 'offset', options: { offset: [0, 0] } },
+              { name: 'flip', enabled: false },
+              { name: 'preventOverflow', options: { boundary: 'viewport', padding: 8 } },
+            ],
+          }}
+          className='pro-dropdown-menu'
+        >
+          <Dropdown.Item onClick={editOperation} className='d-flex align-items-center'>
+            <FaPencilAlt size={16} className='me-2' style={{ color: '#28a745' }} />
+            Düzenle
+          </Dropdown.Item>
+          <Dropdown.Item onClick={deleteOperation} className='d-flex align-items-center'>
+            <FaTrash size={16} className='me-2' style={{ color: '#dc3545' }} />
+            Sil
+          </Dropdown.Item>
         </Dropdown.Menu>
       </Dropdown>
-    );
-  };
+    )
+  }
 
   return (
-    <Card className="pro-table-card">
-      <Card.Body className="p-0">
-        <BootstrapTable bordered hover responsive className="pro-table">
+    <Card className='pro-table-card'>
+      <div className='pro-table-container'>
+        <BootstrapTable bordered hover responsive className='pro-table'>
           <thead>
             <tr>
               {columns.map((col) => (
-                <th key={col.accessor}>
-                  <div className="pro-column-header">
+                <th key={col.accessor} style={{ minWidth: col.minWidth }}>
+                  <div className='pro-column-header'>
                     <span
                       onClick={() =>
                         col.sortable !== false && handleSort(col.accessor)
@@ -148,27 +195,27 @@ const Table = ({
                       {col.sortable !== false &&
                         sortConfig.key === col.accessor && (
                           sortConfig.direction === 'asc' ? (
-                            <FaSortUp className="pro-sort-icon" />
+                            <FaSortUp className='pro-sort-icon' />
                           ) : (
-                            <FaSortDown className="pro-sort-icon" />
+                            <FaSortDown className='pro-sort-icon' />
                           )
                         )}
                       {col.sortable !== false &&
                         sortConfig.key !== col.accessor && (
-                          <FaSort className="pro-sort-icon inactive" />
+                          <FaSort className='pro-sort-icon inactive' />
                         )}
                     </span>
                     {col.filterable && (
                       <OverlayTrigger
-                        trigger="click"
-                        placement="bottom"
+                        trigger='click'
+                        placement='bottom'
                         rootClose
                         overlay={
                           <Tooltip id={`tooltip-${col.accessor}`}>
                             <Form.Control
-                              size="sm"
-                              type="text"
-                              placeholder="Filtre..."
+                              size='sm'
+                              type='text'
+                              placeholder='Filtre...'
                               value={filterValues[col.accessor] || ''}
                               onChange={(e) =>
                                 handleFilterChange(col.accessor, e.target.value)
@@ -178,7 +225,7 @@ const Table = ({
                           </Tooltip>
                         }
                       >
-                        <button className="pro-filter-button">
+                        <button className='pro-filter-button'>
                           <FaFilter />
                         </button>
                       </OverlayTrigger>
@@ -191,64 +238,54 @@ const Table = ({
           <tbody>
             {paginatedData.length > 0 ? (
               paginatedData.map((row, rowIndex) => (
-                <tr key={row.id || rowIndex} className="pro-table-row">
+                <tr key={row.id || rowIndex} className='pro-table-row'>
                   {columns.map((col) => {
                     if (col.render) {
                       return (
                         <td key={`${row.id || rowIndex}-${col.accessor}`}>
                           {col.render(row[col.accessor], row)}
                         </td>
-                      );
+                      )
                     }
                     if (col.accessor === 'actions') {
                       return (
-                        <td key={`actions-${rowIndex}`}>
+                        <td key={`actions-${rowIndex}`} className='pro-actions-cell'>
                           <ActionsMenu row={row} />
                         </td>
-                      );
+                      )
                     }
                     return (
                       <td key={`${row.id || rowIndex}-${col.accessor}`}>
                         {row[col.accessor]}
                       </td>
-                    );
+                    )
                   })}
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={columns.length} className="pro-no-data">
+                <td colSpan={columns.length} className='pro-no-data'>
                   Kayıt bulunamadı.
                 </td>
               </tr>
             )}
           </tbody>
         </BootstrapTable>
-      </Card.Body>
-      <Card.Footer className="pro-table-footer">
-        <Pagination className="pro-pagination">
-          <Pagination.Prev
-            disabled={currentPage === 1}
-            onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
-          />
-          {renderPaginationItems()}
-          <Pagination.Next
-            disabled={currentPage === totalPages}
-            onClick={() =>
-              currentPage < totalPages && setCurrentPage(currentPage + 1)
-            }
-          />
+      </div>
+      <Card.Footer className='pro-table-footer'>
+        <Pagination className='pro-pagination'>
+          {renderPagination()}
         </Pagination>
-        <div className="pro-page-size">
+        <div className='pro-page-size'>
           <span>Sayfa Başına:</span>
           <Form.Control
-            as="select"
+            as='select'
             value={pageSize}
             onChange={(e) => {
-              setPageSize(Number(e.target.value));
-              setCurrentPage(1);
+              setPageSize(Number(e.target.value))
+              setCurrentPage(1)
             }}
-            className="page-size-select"
+            className='page-size-select'
           >
             {pageSizeOptions.map((opt) => (
               <option key={opt} value={opt}>
@@ -259,7 +296,7 @@ const Table = ({
         </div>
       </Card.Footer>
     </Card>
-  );
-};
+  )
+}
 
-export default Table;
+export default Table
