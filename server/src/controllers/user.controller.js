@@ -6,7 +6,7 @@ const createUser = asyncHandler(async (req, res) => {
   try {
     const createdUser = await userService.createUser(req.body, res)
     res.status(httpStatus.StatusCodes.CREATED).json({
-      success: true,
+      status: 'SUCCESS',
       message: 'Kullanıcı başarıyla oluşturuldu.',
       data: createdUser,
     })
@@ -22,7 +22,7 @@ const getUsers = asyncHandler(async (req, res) => {
   try {
     const users = await userService.getUsers()
     res.status(httpStatus.StatusCodes.OK).json({
-      success: true,
+      status: 'SUCCESS',
       message: 'Kullanıcılar başarıyla getirildi.',
       data: users,
     })
@@ -39,7 +39,7 @@ const getUser = asyncHandler(async (req, res) => {
     const userId = req.params.id
     const user = await userService.getUser(userId)
     res.status(httpStatus.StatusCodes.OK).json({
-      success: true,
+      status: 'SUCCESS',
       message: 'Kullanıcı başarıyla getirildi.',
       data: user,
     })
@@ -57,7 +57,7 @@ const updateUser = asyncHandler(async (req, res) => {
     const updateData = req.body
     const updatedUser = await userService.updateUser(userId, updateData)
     res.status(httpStatus.StatusCodes.OK).json({
-      success: true,
+      status: 'SUCCESS',
       message: 'Kullanıcı başarıyla güncellendi.',
       data: updatedUser,
     })
@@ -74,7 +74,7 @@ const deleteUser = asyncHandler(async (req, res) => {
     const userId = req.params.id
     await userService.deleteUser(userId)
     res.status(httpStatus.StatusCodes.OK).json({
-      success: true,
+      status: 'SUCCESS',
       message: 'Kullanıcı başarıyla silindi.',
     })
   } catch (error) {
@@ -90,7 +90,7 @@ const verifyEmail = asyncHandler(async (req, res) => {
     const { code } = req.body
     const verifiedUser = await userService.verifyEmail(code)
     res.status(httpStatus.StatusCodes.OK).json({
-      success: true,
+      status: 'SUCCESS',
       message: 'Email doğrulama başarılı.',
       data: verifiedUser,
     })

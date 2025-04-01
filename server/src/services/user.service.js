@@ -33,7 +33,12 @@ const createUser = async (data, res) => {
 
   generateTokenAndSetCookie(res, newUser.id)
 
-  await sendVerificationMail(newUser.email, verificationToken)
+  try {
+    await sendVerificationMail(newUser.email, verificationToken)
+  } catch (error) {
+    console.error("Error sending verification email:", error)
+    throw new Error(error)
+  }
 
   const userObj = newUser.toObject()
   delete userObj.password
@@ -48,7 +53,7 @@ const getUsers = async () => {
 }
 
 const getUser = async (id) => {
-  const user = await User.findOne({ _id: id })
+  const user = await User.findOne({ id: id })
   if (!user) {
     throw new Error('Kullanıcı bulunamadı.')
   }
@@ -56,7 +61,7 @@ const getUser = async (id) => {
 }
 
 const updateUser = async (id, data) => {
-  const updatedUser = await User.findOneAndUpdate({ _id: id }, data, { new: true })
+  const updatedUser = await User.findOneAndUpdate({ id: id }, data, { new: true })
   if (!updatedUser) {
     throw new Error('Kullanıcı güncellenirken bir hata oluştu.')
   }
@@ -64,7 +69,7 @@ const updateUser = async (id, data) => {
 }
 
 const deleteUser = async (id) => {
-  const result = await User.deleteOne({ _id: id })
+  const result = await User.deleteOne({ id: id })
   if (result.deletedCount === 0) {
     throw new Error('Kullanıcı silinirken bir hata oluştu.')
   }

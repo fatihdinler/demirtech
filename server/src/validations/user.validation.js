@@ -55,10 +55,6 @@ const updateUser = (req, res, next) => {
     errors.push({ error: `'username' field is required to update a user.` })
   }
 
-  if (!password || password === undefined) {
-    errors.push({ error: `'password' field is required to update a user.` })
-  }
-
   if (!email || email === undefined) {
     errors.push({ error: `'email' field is required to update a user.` })
   }
