@@ -43,7 +43,7 @@ export const updateUser = createAsyncThunk('users/updateUser', async ({ id, upda
   }
 })
 
-export const removeBranch = createAsyncThunk('users/removeBranch', async (id, { rejectWithValue }) => {
+export const removeUser = createAsyncThunk('users/removeUser', async (id, { rejectWithValue }) => {
   try {
     return await _deleteUser(id)
   } catch (error) {

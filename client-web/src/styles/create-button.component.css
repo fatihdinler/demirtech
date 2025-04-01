@@ -1,0 +1,10 @@
+.create-button {
+  border-width: 0;
+  background-color: var(--blue);
+  color: white;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.create-button:hover {
+  background-color: #5dbfe9;
+}

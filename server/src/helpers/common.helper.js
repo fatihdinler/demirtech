@@ -16,6 +16,11 @@ const validateIdInParams = (req, res, next) => {
   next()
 }
 
+const generateVerificationToken = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString()
+}
+
 module.exports = {
   validateIdInParams,
+  generateVerificationToken,
 }

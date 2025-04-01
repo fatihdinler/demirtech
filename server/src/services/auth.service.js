@@ -1,66 +1,84 @@
-const jwt = require('jsonwebtoken')
+const bcryptjs = require('bcryptjs')
 const { v4: uuid } = require('uuid')
-const User = require('../models/user.model')
-const Token = require('../models/token.model')
-const OTP = require('../models/otp.model')
+const config = require('../config')
+const userModel = require('../models/user.model')
+const { generateTokenAndSetCookie } = require('../helpers/jwt.helper')
+const { sendPasswordResetEmail, sendResetSuccessEmail } = require('../helpers/mail/emails.helper')
 
-const loginService = async (username, password) => {
-  const user = await User.findOne({ username })
-  if (!user || !(await user.comparePassword(password))) {
-    throw new Error('Geçersiz kimlik bilgileri')
-  }
-  // Eğer kullanıcı henüz kalıcı şifre belirlememişse
-  if (user.isTempPassword || !user.password) {
-    throw new Error('Lütfen şifrenizi değiştirin')
-  }
-
-  // Eğer aktif bir token varsa (yani kullanıcı zaten login olmuşsa) hata fırlatıyoruz
-  const activeToken = await Token.findOne({ userId: user.id, expiresAt: { $gt: new Date() } })
-  if (activeToken) {
-    throw new Error('Kullanıcı zaten giriş yapmış.')
-  }
-
-  // 1 saat geçerli token oluşturuluyor
-  const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN
-  })
-
-  // Oluşturulan token'ı database'e kaydediyoruz
-  await Token.create({
-    id: uuid(),
-    userId: user.id,
-    token,
-    expiresAt: new Date(Date.now() + 3600 * 1000)
-  })
-
-  return token
-}
-
-const changePasswordService = async (username, otp, newPassword) => {
-  const user = await User.findOne({ username })
+const login = async (credentials, res) => {
+  const { email, password } = credentials
+  const user = await userModel.findOne({ email })
   if (!user) {
-    throw new Error('Kullanıcı bulunamadı')
+    throw new Error('Invalid credentials - kullanıcı bulunamadı')
   }
-  // OTP kaydı ilgili kullanıcıya ait kontrol ediliyor
-  const otpRecord = await OTP.findOne({ userId: user.id, otp })
-  if (!otpRecord) {
-    throw new Error('Geçersiz OTP')
+  const isPasswordValid = await bcryptjs.compare(password, user.password)
+  if (!isPasswordValid) {
+    throw new Error('Invalid credentials - şifre hatalı')
   }
-  if (otpRecord.expiresAt < new Date()) {
-    throw new Error('OTP süresi dolmuş')
-  }
-  // Yeni şifre ataması ve kullanıcı güncellemesi
-  user.password = newPassword
-  user.isTempPassword = false
+
+  generateTokenAndSetCookie(res, user.id)
+
+  user.lastLogin = new Date()
   await user.save()
-  // OTP kaydı siliniyor
-  await OTP.deleteOne({ id: otpRecord.id })
+
+  const userObj = user.toObject()
+  delete userObj.__v
+  delete userObj._id
+  delete userObj.password
+  return userObj
 }
 
-const logoutService = async (token) => {
-  if (token) {
-    await Token.deleteOne({ token })
+const forgotPassword = async (email) => {
+  const user = await userModel.findOne({ email })
+  if (!user) {
+    throw new Error('User Not Found')
   }
+  const resetToken = uuid()
+  const resetTokenExpiresAt = Date.now() + 1 * 60 * 60 * 1000 // 1 Saat
+
+  user.resetPasswordToken = resetToken
+  user.resetPasswordExpiresAt = resetTokenExpiresAt
+  await user.save()
+
+  await sendPasswordResetEmail(user.email, `${config.DEMIRTECH_CLIENT_URL}/reset-password/${resetToken}`)
+  return { message: 'Password reset link sent to your email' }
 }
 
-module.exports = { loginService, changePasswordService, logoutService }
+const resetPassword = async (token, newPassword) => {
+  const user = await userModel.findOne({
+    resetPasswordToken: token,
+    resetPasswordExpiresAt: { $gt: Date.now() },
+  })
+  if (!user) {
+    throw new Error('Invalid or expired reset token.')
+  }
+
+  const hashedPassword = await bcryptjs.hash(newPassword, 10)
+  user.password = hashedPassword
+  user.resetPasswordToken = undefined
+  user.resetPasswordExpiresAt = undefined
+  await user.save()
+
+  await sendResetSuccessEmail(user.email)
+
+  const userObj = user.toObject()
+  delete userObj.__v
+  delete userObj._id
+  delete userObj.password
+  return userObj
+}
+
+const checkAuth = async (userId) => {
+  const user = await userModel.findOne({ id: userId }).lean()
+  if (!user) {
+    throw new Error('User Not Found')
+  }
+  return user
+}
+
+module.exports = {
+  login,
+  forgotPassword,
+  resetPassword,
+  checkAuth,
+}

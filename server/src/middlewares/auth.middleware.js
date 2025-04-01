@@ -1,35 +1,39 @@
-// src/middleware/authMiddleware.js
-const jwt = require('jsonwebtoken');
-const Token = require('../models/token.model');
+const jwt = require('jsonwebtoken')
+const config = require('../config')
 
-const authMiddleware = (allowedRoles = []) => {
-  if (typeof allowedRoles === 'string') allowedRoles = [allowedRoles];
+const verifyToken = (req, res, next) => {
+  const token = req.cookies.token
+  if (!token) {
+    return res
+      .status(401)
+      .json({
+        success: false,
+        message: 'Unauthorized request, no token provided. Please login first!',
+      })
+  }
 
-  return async (req, res, next) => {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ message: 'Token bulunamadı' });
+  try {
+    const decodedToken = jwt.verify(token, config.DEMIRTECH_JWT_SECRET)
+    if (!decodedToken) {
+      return res
+        .status(401)
+        .json({
+          success: false,
+          message: 'Unauthorized request, invalid token detected. Please re-login!',
+        })
     }
 
-    const token = authHeader.split(' ')[1];
+    req.userId = decodedToken.userId
+    next()
+  } catch (error) {
+    console.log('>>> ERROR IN MIDDLEWARE: VERIFYTOKEN(): ', error)
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: 'Server Error',
+      })
+  }
+}
 
-    // Önce token'ın database'de var olup olmadığını kontrol ediyoruz
-    const tokenRecord = await Token.findOne({ token });
-    if (!tokenRecord) {
-      return res.status(401).json({ message: 'Token geçersiz veya iptal edilmiş' });
-    }
-
-    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-      if (err) {
-        return res.status(401).json({ message: 'Token doğrulanamadı' });
-      }
-      if (allowedRoles.length && !allowedRoles.includes(decoded.role)) {
-        return res.status(403).json({ message: 'Yetkiniz yok' });
-      }
-      req.user = decoded;
-      next();
-    });
-  };
-};
-
-module.exports = authMiddleware;
+module.exports = verifyToken
