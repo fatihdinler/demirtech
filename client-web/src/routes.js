@@ -2,6 +2,7 @@ import { FaHome } from 'react-icons/fa'
 import {
   Dashboard,
   Login,
+  VerifyEmail,
 } from './pages'
 
 export const routes = [
@@ -12,11 +13,18 @@ export const routes = [
     isSidebarPage: true,
     element: <Dashboard />,
   },
-  {
-    to: '/login',
-    icon: null,
-    label: null,
-    isSidebarPage: false,
-    element: <Login />,
-  },
+  // {
+  //   to: '/login',
+  //   icon: null,
+  //   label: null,
+  //   isSidebarPage: false,
+  //   element: <Login />,
+  // },
+  // {
+  //   to: '/verify-email',
+  //   icon: null,
+  //   label: null,
+  //   isSidebarPage: false,
+  //   element: <VerifyEmail />,
+  // },
 ]

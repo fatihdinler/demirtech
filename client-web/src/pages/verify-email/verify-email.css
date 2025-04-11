@@ -1,0 +1,38 @@
+.verify-container {
+  background-color: #ffffff;
+}
+
+.verify-card {
+  border: none;
+  border-radius: 30px;
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+.code-input {
+  font-size: 1.5rem;
+  height: 3rem;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.verify-btn {
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  border: none;
+  transition: background 0.3s ease;
+}
+
+.verify-btn:hover {
+  background: linear-gradient(45deg, #5a67d8, #6b46c1);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  } 
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

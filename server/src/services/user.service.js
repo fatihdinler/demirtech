@@ -88,9 +88,9 @@ const verifyEmail = async (code) => {
   user.isVerified = true
   user.verificationToken = undefined
   user.verificationTokenExpiresAt = undefined
-  await user.save()
 
   await sendWelcomeMail(user.email, user.name)
+  await user.save()
 
   const userObj = user.toObject()
   delete userObj.password
