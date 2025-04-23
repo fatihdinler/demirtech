@@ -20,6 +20,22 @@ async function listenDevicesMqtt(mqttClient) {
 
   await subscribeToWildcardTopic(mqttClient)
 
+  mqttClient.on('connect', () => {
+    console.log("MQTT connection established successfully")
+  })
+
+  mqttClient.on('reconnect', () => {
+    console.log("Attempting to reconnect to MQTT broker...")
+  })
+
+  mqttClient.on('close', () => {
+    console.log("MQTT connection closed")
+  })
+
+  mqttClient.on('error', (error) => {
+    console.error("MQTT connection error:", error)
+  })
+
   mqttClient.on('message', async (receivedTopic, message) => {
     console.log(`Message received - Topic: ${receivedTopic}`)
     let payload
