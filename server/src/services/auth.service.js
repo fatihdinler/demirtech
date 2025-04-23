@@ -2,7 +2,7 @@ const bcryptjs = require('bcryptjs')
 const { v4: uuid } = require('uuid')
 const config = require('../config')
 const userModel = require('../models/user.model')
-const { generateTokenAndSetCookie } = require('../helpers/jwt.helper')
+const { generateToken } = require('../helpers/jwt.helper')
 const { sendPasswordResetEmail, sendResetSuccessEmail } = require('../helpers/mail/emails.helper')
 
 const login = async (credentials, res) => {
@@ -16,7 +16,7 @@ const login = async (credentials, res) => {
     throw new Error('Invalid credentials - şifre hatalı')
   }
 
-  generateTokenAndSetCookie(res, user.id)
+  const token = generateToken(user.id)
 
   user.lastLogin = new Date()
   await user.save()
@@ -25,7 +25,7 @@ const login = async (credentials, res) => {
   delete userObj.__v
   delete userObj._id
   delete userObj.password
-  return userObj
+  return { user: userObj, token }
 }
 
 const forgotPassword = async (email) => {

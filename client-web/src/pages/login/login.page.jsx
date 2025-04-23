@@ -1,17 +1,22 @@
 import React, { useState } from 'react'
 import { Container, Row, Col, Card, Form, Button } from 'react-bootstrap'
+import { useDispatch, useSelector } from 'react-redux'
+import { login } from '../../features/auth/auth.api'
 import DemirtechLogo from '../../assets/demirtek-logo-secondary.png'
 import './login.css'
 
 const Login = () => {
+  const dispatch = useDispatch()
+  const { user, isAuthenticated, error, isLoading, isCheckingAuth } = useSelector(state => state.auth.api)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
   const handleSubmit = (e) => {
     e.preventDefault()
+    dispatch(login({ email, password }))
     console.log('Logging in with:', email, password)
   }
-
+  console.log('user, isAuthenticated, error, isLoading, isCheckingAuth', user, isAuthenticated, error, isLoading, isCheckingAuth)
   return (
     <Container fluid className='login-container'>
       <Row className='justify-content-center align-items-center vh-100'>

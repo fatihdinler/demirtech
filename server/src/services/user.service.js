@@ -29,15 +29,21 @@ const createUser = async (data, res) => {
     role,
   })
 
+  if (role === 'super') {
+    newUser.isVerified = true
+  }
+
   await newUser.save()
 
   generateTokenAndSetCookie(res, newUser.id)
 
-  try {
-    await sendVerificationMail(newUser.email, verificationToken)
-  } catch (error) {
-    console.error("Error sending verification email:", error)
-    throw new Error(error)
+  if (role !== 'super') {
+    try {
+      await sendVerificationMail(newUser.email, verificationToken)
+    } catch (error) {
+      console.error("Error sending verification email:", error)
+      throw new Error(error)
+    }
   }
 
   const userObj = newUser.toObject()
