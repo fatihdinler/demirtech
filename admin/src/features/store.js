@@ -6,6 +6,8 @@ import branchesReducer from './branches/branches.reducer'
 import locationsReducer from './locations/locations.reducer'
 import dashboardReducer from './dashboard/dashboard.reducer'
 import usersReducer from './users/users.reducer'
+import authReducer from './auth/auth.reducer'
+import loginReducer from './login/login.state'
 
 const rootReducer = combineReducers({
   devices: devicesReducer,
@@ -15,6 +17,8 @@ const rootReducer = combineReducers({
   locations: locationsReducer,
   dashboard: dashboardReducer,
   users: usersReducer,
+  auth: authReducer,
+  login: loginReducer,
 })
 
 const store = configureStore({

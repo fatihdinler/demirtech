@@ -1,4 +1,46 @@
 .login-container {
-  background-color: #f8f9fa; /* Açık gri arka plan */
-  padding: 0;
+  background-color: #ffffff;
+}
+
+.login-card {
+  border-radius: 30px;
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+.logo {
+  width: 150px;
+}
+
+.login-btn {
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  border: none;
+  transition: background 0.3s ease;
+}
+
+.login-btn:hover {
+  background: linear-gradient(45deg, #5a67d8, #6b46c1);
+}
+
+.forgot-link {
+  color: #6c757d;
+  text-decoration: none;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+}
+
+.login-container h4 {
+  font-weight: 200;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  } 
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
