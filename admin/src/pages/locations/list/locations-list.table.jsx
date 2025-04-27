@@ -25,11 +25,6 @@ const LocationListTable = ({ locations, branches, }) => {
       }
     },
     {
-      header: 'Model',
-      accessor: 'model',
-      filterable: true,
-    },
-    {
       header: 'Aksiyonlar',
       accessor: 'actions',
     },
