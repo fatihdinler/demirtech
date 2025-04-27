@@ -38,7 +38,7 @@ const devicesSlice = createSlice({
       })
       .addCase(fetchDevices.fulfilled, (state, action) => {
         state.isLoading = false
-        state.data = action.payload.data
+        state.data = action.payload.data.data
         state.hasFetched = true
       })
       .addCase(fetchDevices.rejected, (state, action) => {

@@ -1,0 +1,78 @@
+.device-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.5rem;
+}
+
+.device-card {
+  position: relative;
+  background: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 1px solid #e5e7eb;
+  height: 180px;
+  display: flex;
+  flex-direction: column;
+}
+
+.device-card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Seçili kart vurgusu */
+.device-card.active {
+  border: 2px solid #3b82f6;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+}
+
+.device-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.device-name {
+  font-weight: 600;
+  font-size: 1.125rem;
+  color: #1f2937;
+  flex-grow: 1;
+}
+
+.device-chip {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.device-description {
+  margin-top: auto;
+  font-size: 0.75rem;
+  color: #6b7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Sağ üst köşedeki location pill */
+.device-location {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  background-color: #5dbfe9;
+  padding: 0.25rem 0.5rem;
+  border-top-right-radius: 1rem;
+  border-bottom-left-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #374151;
+  white-space: nowrap;
+}
+
+.device-location-name {
+  color: white;
+}

@@ -35,7 +35,7 @@ const locationsSlice = createSlice({
       })
       .addCase(fetchLocations.fulfilled, (state, action) => {
         state.isLoading = false
-        state.data = action.payload.data
+        state.data = action.payload.data.data
         state.hasFetched = true
       })
       .addCase(fetchLocations.rejected, (state, action) => {

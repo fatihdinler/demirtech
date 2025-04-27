@@ -1,11 +1,13 @@
 import { useEffect, useCallback } from 'react'
 import { useDispatch, useSelector, shallowEqual } from 'react-redux'
-import { fetchDevices, resetApi } from '../../features/devices/devices.api'
+import { fetchDevices, resetApi as resetDevicesApi } from '../../features/devices/devices.api'
+import { fetchLocations, resetApi as resetLocationsApi } from '../../features/locations/locations.api'
 
 const useDevicesList = () => {
   const dispatch = useDispatch()
 
-  const { data: devices, isLoading, error, hasFetched } = useSelector(
+  const { data: locations, isLoading: isLocationsLoading, error: errorLocations, hasFetched: doesLocationsLoaded } = useSelector(state => state.locations.api)
+  const { data: devices, isLoading: isDevicesLoading, error: errorDevices, hasFetched: doesDevicesLoaded } = useSelector(
     (state) => state.devices.api,
     shallowEqual
   )
@@ -15,10 +17,16 @@ const useDevicesList = () => {
   }, [dispatch])
 
   useEffect(() => {
-    if (!hasFetched && !isLoading) {
+    if (!doesDevicesLoaded && !isDevicesLoading) {
       loadDevices()
     }
-  }, [hasFetched, isLoading, loadDevices])
+  }, [doesDevicesLoaded, isDevicesLoading, loadDevices])
+
+  useEffect(() => {
+    if (!doesLocationsLoaded && !isLocationsLoading) {
+      dispatch(fetchLocations())
+    }
+  }, [doesLocationsLoaded, isLocationsLoading, dispatch])
 
   const refetch = useCallback(() => {
     loadDevices()
@@ -26,15 +34,16 @@ const useDevicesList = () => {
 
   useEffect(() => {
     return () => {
-      dispatch(resetApi())
+      dispatch(resetDevicesApi())
+      dispatch(resetLocationsApi())
     }
   }, [dispatch])
 
-  const isPageLoading = isLoading
+  const isPageLoading = isDevicesLoading
 
   return {
     devices,
-    error,
+    locations,
     refetch,
     isPageLoading,
   }
