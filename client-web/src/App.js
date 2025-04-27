@@ -1,41 +1,36 @@
 import React, { useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
-import { Layout } from './components'
+import { useDispatch, useSelector } from 'react-redux'
+import { checkAuth, logout } from './features/auth/auth.api'
 import { Login, VerifyEmail } from './pages'
+import { Layout } from './components'
 import { routes } from './routes'
 import { ToastContainer } from 'react-toastify'
-import { useSelector, useDispatch } from 'react-redux'
-import { checkAuth } from './features/auth/auth.api'
 import 'react-toastify/dist/ReactToastify.css'
 
-const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, user } = useSelector(state => state.auth.api)
-  if (!isAuthenticated) {
-    return <Navigate to='/login' replace />
-  }
-  if (!user.isVerified) {
-    return <Navigate to='verify-email' replace />
-  }
-
+function ProtectedRoute({ children }) {
+  const { isAuthenticated, user } = useSelector(s => s.auth.api)
+  if (!isAuthenticated) return <Navigate to='/login' replace />
+  if (!user.isVerified) return <Navigate to='/verify-email' replace />
   return children
 }
 
-const RedirectAuthenticatedUser = ({ children }) => {
-  const { isAuthenticated, user } = useSelector(state => state.auth.api)
-  if (isAuthenticated && user.isVerified) {
-    return <Navigate to='/' replace />
-  }
-
+function RedirectAuthenticatedUser({ children }) {
+  const { isAuthenticated, user } = useSelector(s => s.auth.api)
+  if (isAuthenticated && user.isVerified) return <Navigate to='/' replace />
   return children
 }
 
-const App = () => {
+export default function App() {
   const dispatch = useDispatch()
-  const { user, isAuthenticated, error, isLoading, isCheckingAuth } = useSelector(state => state.auth.api)
+  const { isCheckingAuth } = useSelector(s => s.auth.api)
 
   useEffect(() => {
     dispatch(checkAuth())
   }, [dispatch])
+
+  // checkAuth sürerken bir yükleme yapabilirsiniz
+  if (isCheckingAuth) return null
 
   return (
     <Router>
@@ -44,19 +39,14 @@ const App = () => {
           element={
             <RedirectAuthenticatedUser>
               <Login />
-            </RedirectAuthenticatedUser>}
+            </RedirectAuthenticatedUser>
+          }
         />
         <Route path='/verify-email' element={<VerifyEmail />} />
         <Route element={<Layout />}>
-          {routes.map((route, index) => (
-            <Route
-              key={index}
-              path={route.to}
-              element={
-                <ProtectedRoute>
-                  {route.element}
-                </ProtectedRoute>
-              }
+          {routes.map((r, i) => (
+            <Route key={i} path={r.to}
+              element={<ProtectedRoute>{r.element}</ProtectedRoute>}
             />
           ))}
           <Route path='/' element={<Navigate to='/dashboard' replace />} />
@@ -64,8 +54,6 @@ const App = () => {
         </Route>
       </Routes>
       <ToastContainer />
-    </Router >
+    </Router>
   )
 }
-
-export default App

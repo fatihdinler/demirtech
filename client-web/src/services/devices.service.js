@@ -1,9 +1,7 @@
-import axios from 'axios'
+import apiClient from '../utils/api-client'
 
-// API base URL
-const API_BASE_URL = `${process.env.REACT_APP_API_URL}/devices`
-
-export const _getDevicesByUserId = async () => {
-  const response = await axios.get(`${API_BASE_URL}/get-devices-by-user-id`)
-  return response.data
+// GET /api/devices/get-devices-by-user-id
+// (req.userId, verifyToken middleware ile geliyor)
+export function _getDevicesByUserId() {
+  return apiClient.get('/devices/get-devices-by-user-id')
 }

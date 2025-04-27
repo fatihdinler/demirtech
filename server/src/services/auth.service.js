@@ -1,3 +1,5 @@
+// src/services/auth.service.js
+
 const bcryptjs = require('bcryptjs')
 const { v4: uuid } = require('uuid')
 const config = require('../config')
@@ -5,15 +7,15 @@ const userModel = require('../models/user.model')
 const { generateToken } = require('../helpers/jwt.helper')
 const { sendPasswordResetEmail, sendResetSuccessEmail } = require('../helpers/mail/emails.helper')
 
-const login = async (credentials, res) => {
-  const { email, password } = credentials
+async function login({ email, password }) {
   const user = await userModel.findOne({ email })
   if (!user) {
-    throw new Error('Invalid credentials - kullanıcı bulunamadı')
+    throw new Error('Invalid credentials – kullanıcı bulunamadı')
   }
-  const isPasswordValid = await bcryptjs.compare(password, user.password)
-  if (!isPasswordValid) {
-    throw new Error('Invalid credentials - şifre hatalı')
+
+  const isPasswordMatched = await bcryptjs.compare(password, user.password)
+  if (!isPasswordMatched) {
+    throw new Error('Invalid credentials – şifre hatalı')
   }
 
   const token = generateToken(user.id)
@@ -22,39 +24,45 @@ const login = async (credentials, res) => {
   await user.save()
 
   const userObj = user.toObject()
+  delete userObj.password
   delete userObj.__v
   delete userObj._id
-  delete userObj.password
+
   return { user: userObj, token }
 }
 
-const forgotPassword = async (email) => {
+async function forgotPassword(email) {
   const user = await userModel.findOne({ email })
   if (!user) {
     throw new Error('User Not Found')
   }
   const resetToken = uuid()
-  const resetTokenExpiresAt = Date.now() + 1 * 60 * 60 * 1000
+  const resetExpires = Date.now() + 1 * 60 * 60 * 1000
 
   user.resetPasswordToken = resetToken
-  user.resetPasswordExpiresAt = resetTokenExpiresAt
+  user.resetPasswordExpiresAt = resetExpires
   await user.save()
 
-  await sendPasswordResetEmail(user.email, `${config.DEMIRTECH_CLIENT_URL}/reset-password/${resetToken}`)
+  await sendPasswordResetEmail(
+    user.email,
+    `${config.DEMIRTECH_CLIENT_URL}/reset-password/${resetToken}`
+  )
   return { message: 'Password reset link sent to your email' }
 }
 
-const resetPassword = async (token, newPassword) => {
+/**
+ * Şifre sıfırlama
+ */
+async function resetPassword(token, newPassword) {
   const user = await userModel.findOne({
     resetPasswordToken: token,
-    resetPasswordExpiresAt: { $gt: Date.now() },
+    resetPasswordExpiresAt: { $gt: Date.now() }
   })
   if (!user) {
     throw new Error('Invalid or expired reset token.')
   }
 
-  const hashedPassword = await bcryptjs.hash(newPassword, 10)
-  user.password = hashedPassword
+  user.password = await bcryptjs.hash(newPassword, 10)
   user.resetPasswordToken = undefined
   user.resetPasswordExpiresAt = undefined
   await user.save()
@@ -68,7 +76,10 @@ const resetPassword = async (token, newPassword) => {
   return userObj
 }
 
-const checkAuth = async (userId) => {
+/**
+ * Token’daki userId hâlâ geçerliyse o user’a ait verileri döner.
+ */
+async function checkAuth(userId) {
   const user = await userModel.findOne({ id: userId }).lean()
   if (!user) {
     throw new Error('User Not Found')

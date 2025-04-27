@@ -72,15 +72,11 @@ const deleteDevice = asyncHandler(async (req, res) => {
 })
 
 const getDevicesByUserId = asyncHandler(async (req, res) => {
-  const { locationId } = req.body
-
-  const devices = await DeviceService.getDevicesByUserId(
-    req.userId,
-    locationId
-  )
+  const userId = req.userId
+  const devices = await DeviceService.getDevicesByUserId(userId)
   res.status(httpStatus.StatusCodes.OK).json({
     status: 'SUCCESS',
-    message: 'Devices retrieved successfully for this user and location',
+    message: 'Devices retrieved successfully for current user',
     data: devices,
   })
 })

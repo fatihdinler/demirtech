@@ -2,8 +2,22 @@ import React from 'react'
 import { Navbar as RBNavbar, Container, Nav, Badge, Dropdown, Button } from 'react-bootstrap'
 import { FaBell, FaUserCircle, FaSignOutAlt, FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 import DemirtekLogoSecondary from '../../assets/demirtek-logo-secondary.png'
+import { useSelector, useDispatch } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
+import { logout } from '../../features/auth/auth.api'
 
 const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const { user } = useSelector(state => state.auth.api)
+
+  const logoutFromApplication = () => {
+    // dispatch logout action (also clears token in reducer)
+    dispatch(logout())
+    // navigate back to login screen
+    navigate('/login')
+  }
+
   return (
     <RBNavbar
       style={{
@@ -14,7 +28,7 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
       className='py-1'
     >
       <Container fluid className='d-flex justify-content-between align-items-center'>
-        {/* Sidebar toggle butonu */}
+        {/* Sidebar toggle */}
         <div>
           <Button
             variant='outline-secondary'
@@ -80,12 +94,16 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
               <FaUserCircle size={28} color='#6c757d' />
               <span
                 className='ms-2 d-none d-sm-inline'
-                style={{ fontWeight: 500, color: '#495057' }}>
-                {/* {user?.username} */}
+                style={{ fontWeight: 500, color: '#495057' }}
+              >
+                {user?.name} {user?.surname}
               </span>
             </Dropdown.Toggle>
             <Dropdown.Menu style={{ minWidth: '150px' }}>
-              <Dropdown.Item onClick={() => null} className='d-flex align-items-center'>
+              <Dropdown.Item
+                onClick={logoutFromApplication}
+                className='d-flex align-items-center'
+              >
                 <FaSignOutAlt size={16} color='#dc3545' className='me-2' />
                 Logout
               </Dropdown.Item>

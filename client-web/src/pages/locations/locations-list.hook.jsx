@@ -1,6 +1,6 @@
 import { useEffect, useCallback } from 'react'
 import { useDispatch, useSelector, shallowEqual } from 'react-redux'
-import { fetchLocations } from '../../../features/locations/locations.api'
+import { fetchLocations, resetApi } from '../../features/locations/locations.api'
 
 const useLocationsList = () => {
   const dispatch = useDispatch()
@@ -23,6 +23,12 @@ const useLocationsList = () => {
   const refetch = useCallback(() => {
     loadLocations()
   }, [loadLocations])
+
+  useEffect(() => {
+    return () => {
+      dispatch(resetApi())
+    }
+  }, [dispatch])
 
   const isPageLoading = isLoading
 

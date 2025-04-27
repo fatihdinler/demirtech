@@ -1,16 +1,14 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import axios from 'axios'
-
-const API_URL = `http://localhost:3000/api`
+import apiClient from '../../utils/api-client'
 
 export const verifyEmail = createAsyncThunk(
   'auth/verifyEmail',
   async (verificationCode, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/users/verify-email`, { code: verificationCode })
-      return response.data
-    } catch (error) {
-      return rejectWithValue(error.response?.data || 'Error while verifying email')
+      const { data } = await apiClient.post('/users/verify-email', { code: verificationCode })
+      return data
+    } catch (err) {
+      return rejectWithValue(err.response?.data || 'Email doğrulama hatası')
     }
   }
 )
@@ -19,10 +17,11 @@ export const checkAuth = createAsyncThunk(
   'auth/checkAuth',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/auth/check-auth`)
-      return response.data
-    } catch (error) {
-      return rejectWithValue(error.response?.data || 'Error while verifying email')
+      const { data } = await apiClient.get('/auth/check-auth')
+      return data
+    } catch (err) {
+      // 401 zaten interceptor ile handle ediliyor
+      return rejectWithValue(err.response?.data || 'Oturum doğrulama hatası')
     }
   }
 )
@@ -31,10 +30,13 @@ export const login = createAsyncThunk(
   'auth/login',
   async (credentials, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/auth/login`, { email: credentials.email, password: credentials.password })
-      return response.data
-    } catch (error) {
-      return rejectWithValue(error.response?.data || 'Error while verifying email')
+      const { data } = await apiClient.post('/auth/login', {
+        email: credentials.email,
+        password: credentials.password
+      })
+      return data
+    } catch (err) {
+      return rejectWithValue(err.response?.data || 'Giriş hatası')
     }
   }
 )
@@ -49,59 +51,53 @@ const authSlice = createSlice({
     isCheckingAuth: true,
   },
   reducers: {
-
+    logout(state) {
+      state.user = null
+      state.isAuthenticated = false
+      state.error = null
+      state.isLoading = false
+      localStorage.removeItem('authToken')
+    }
   },
-  extraReducers: (builder) => {
+  extraReducers: builder => {
     builder
-      .addCase(verifyEmail.pending, (state) => {
-        state.isLoading = true
-        state.error = null
-      })
-      .addCase(verifyEmail.fulfilled, (state, action) => {
-        state.isLoading = false
-        state.user = action.payload.data
+      // verifyEmail…
+      .addCase(verifyEmail.fulfilled, (state, { payload }) => {
+        state.user = payload.data
         state.isAuthenticated = true
-      })
-      .addCase(verifyEmail.rejected, (state, action) => {
-        state.isLoading = false
-        state.error = action.payload
-      })
-
-      .addCase(checkAuth.pending, (state) => {
-        state.isCheckingAuth = true
         state.error = null
-      })
-      .addCase(checkAuth.fulfilled, (state, action) => {
         state.isLoading = false
-        state.user = action.payload.data
+      })
+      // checkAuth…
+      .addCase(checkAuth.fulfilled, (state, { payload }) => {
+        state.user = payload.data
         state.isAuthenticated = true
         state.isCheckingAuth = false
+        state.error = null
       })
-      .addCase(checkAuth.rejected, (state, action) => {
-        state.isLoading = false
-        state.error = action.payload
+      .addCase(checkAuth.rejected, state => {
         state.isCheckingAuth = false
         state.isAuthenticated = false
+        // hata zaten interceptor’da yönlendirdi
       })
-
-      .addCase(login.pending, (state) => {
+      // login…
+      .addCase(login.fulfilled, (state, { payload }) => {
+        const { user, token } = payload.data
+        state.user = user
+        state.isAuthenticated = true
+        state.isLoading = false
+        localStorage.setItem('authToken', token)
+      })
+      .addCase(login.pending, state => {
         state.isLoading = true
         state.error = null
       })
-      .addCase(login.fulfilled, (state, action) => {
-        const { user, token } = action.payload.data
-        state.user = user;
-        state.isAuthenticated = true;
-        // localStorage veya sessionStorage
-        localStorage.setItem('authToken', token)
-      })
-      .addCase(login.rejected, (state, action) => {
+      .addCase(login.rejected, (state, { payload }) => {
         state.isLoading = false
-        state.error = action.payload
+        state.error = payload
       })
-  },
+  }
 })
 
-export const {
-} = authSlice.actions
+export const { logout } = authSlice.actions
 export default authSlice.reducer

@@ -27,6 +27,7 @@ const devicesSlice = createSlice({
       state.data = []
       state.isLoading = false
       state.error = null
+      state.hasFetched = false
     }
   },
   extraReducers: (builder) => {

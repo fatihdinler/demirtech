@@ -1,6 +1,6 @@
 import useLocationsList from './locations-list.hook'
 import { Container } from 'react-bootstrap'
-import { SelectableLocationCard, ListPagesHeader } from '../../../components'
+import { SelectableLocationCard, ListPagesHeader } from '../../components'
 
 const LocationsList = () => {
   const {

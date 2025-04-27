@@ -8,11 +8,11 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import './styles/index.css'
 import 'react-toastify/dist/ReactToastify.css'
 
-axios.interceptors.request.use(config => {
-  const token = localStorage.getItem('authToken');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-})
+// axios.interceptors.request.use(config => {
+//   const token = localStorage.getItem('authToken');
+//   if (token) config.headers.Authorization = `Bearer ${token}`;
+//   return config;
+// })
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(

@@ -100,23 +100,7 @@ const deleteDevice = (req, res, next) => {
 }
 
 const getDevicesByUserId = (req, res, next) => {
-  let errors = []
-  const { locationId } = req.body
-
-  if (!locationId) {
-    errors.push({
-      error: `'locationId' field is required to create a device.`,
-    })
-  }
-
-  if (errors.length) {
-    return res.status(404).send({
-      message: 'VALIDATION_FAILED',
-      errors: errors,
-    })
-  } else {
-    next()
-  }
+  next()
 }
 
 module.exports = {

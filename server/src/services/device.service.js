@@ -1,5 +1,6 @@
 const Device = require('../models/device.model')
 const User = require('../models/user.model')
+const Location = require('../models/location.model')
 const { createDeviceDataCollection, deleteDeviceDataCollection } = require('../helpers/device-data.helper')
 
 const createDevice = async (data) => {
@@ -39,17 +40,15 @@ const deleteDevice = async (id) => {
   return false
 }
 
-const getDevicesByUserId = async (userId, locationId) => {
+async function getDevicesByUserId(userId) {
   const user = await User.findOne({ id: userId })
   if (!user) return []
 
-  const location = await Location.findOne({
-    id: locationId,
-    branchId: user.branchId
-  })
-  if (!location) return []
+  const locations = await Location.find({ branchId: user.branchId }).select('id')
+  if (!locations.length) return []
 
-  return await Device.find({ locationId })
+  const locationIds = locations.map(loc => loc.id)
+  return await Device.find({ locationId: { $in: locationIds } })
 }
 
 module.exports = {
