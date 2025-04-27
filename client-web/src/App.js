@@ -37,10 +37,6 @@ const App = () => {
     dispatch(checkAuth())
   }, [dispatch])
 
-  console.log('isAuthenticated -->', isAuthenticated)
-  console.log('user -->', user)
-  console.log('error -->', error)
-
   return (
     <Router>
       <Routes>

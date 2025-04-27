@@ -1,137 +1,30 @@
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { editUserValidator, retrieveSuccessMessage, retrieveErrorMessage } from './users-edit.messager'
-import { setName, setSurname, setUsername, setBranchId, setEmail, setPassword, setRole, setCustomerId, clearPage } from '../../../features/users/users-edit.state'
+import {
+  setName,
+  setSurname,
+  setUsername,
+  setBranchId,
+  setEmail,
+  setPassword,
+  setRole,
+  setCustomerId,
+  clearPage
+} from '../../../features/users/users-edit.state'
 import { fetchUser, updateUser } from '../../../features/users/users.api'
 import { fetchCustomers } from '../../../features/customers/customers.api'
 import { fetchBranches } from '../../../features/branches/branches.api'
 import { useNavigate, useParams } from 'react-router-dom'
 import useUsersList from '../list/users-list.hook'
+import { editUserValidator, retrieveSuccessMessage, retrieveErrorMessage } from './users-edit.messager'
 
 const useUsersEdit = () => {
   const { id } = useParams()
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const { name, surname, username, branchId, email, password, role, customerId } = useSelector(state => state.users.edit)
-
-  const { data: customers, isLoading: isCustomersLoading, hasFetched: doesCustomersLoaded } = useSelector(state => state.customers.api)
-  const { data: branches, isLoading: isBranchesLoading, hasFetched: doesBranchesLoaded } = useSelector(state => state.branches.api)
   const { refetch: refetchUsersAfterEditing } = useUsersList()
 
-  useEffect(() => {
-    if (!doesCustomersLoaded && !isCustomersLoading) {
-      dispatch(fetchCustomers())
-    }
-  }, [doesCustomersLoaded, isCustomersLoading, dispatch])
-
-  useEffect(() => {
-    if (!doesBranchesLoaded && !isBranchesLoading) {
-      dispatch(fetchBranches())
-    }
-  }, [doesBranchesLoaded, isBranchesLoading, dispatch])
-
-  useEffect(() => {
-    const trimmedName = name?.trim()
-    const trimmedSurname = surname?.trim()
-    if (trimmedName && trimmedSurname) {
-      dispatch(setUsername(`${trimmedName}.${trimmedSurname}`))
-    } else {
-      dispatch(setUsername(''))
-    }
-  }, [name, surname, dispatch])
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await dispatch(fetchUser(id)).unwrap()
-        if (response.status === 'SUCCESS' && response.data) {
-          const userData = response.data
-          if (userData.name) dispatch(setName(userData.name))
-          if (userData.surname) dispatch(setSurname(userData.surname))
-          if (userData.email) dispatch(setEmail(userData.email))
-          if (userData.branchId) dispatch(setBranchId(userData.branchId))
-          if (userData.role) dispatch(setRole(userData.role))
-          if (userData.customerId) dispatch(setCustomerId(userData.customerId))
-        }
-      } catch (error) {
-        console.error('Error fetching user data:', error)
-      }
-    }
-    if (id) fetchUserData()
-  }, [dispatch, id])
-
-  useEffect(() => {
-    if (branchId && branches && branches.length > 0) {
-      const selectedBranch = branches.find(branch => branch.id === branchId)
-      if (selectedBranch && selectedBranch.customerId && selectedBranch.customerId !== customerId) {
-        dispatch(setCustomerId(selectedBranch.customerId))
-      }
-    }
-  }, [branchId, branches, customerId, dispatch])
-
-  const onChange = (event, field) => {
-    event.preventDefault()
-    switch (field) {
-      case 'name':
-        dispatch(setName(event.target.value))
-        break
-      case 'surname':
-        dispatch(setSurname(event.target.value))
-        break
-      case 'email':
-        dispatch(setEmail(event.target.value))
-        break
-      case 'password':
-        dispatch(setPassword(event.target.value))
-        break
-      default:
-        break
-    }
-  }
-
-  const customersOptions = customers?.map(customer => ({ value: customer.id, label: customer.name }))
-  const handleCustomersChange = (selectedOption) => dispatch(setCustomerId(selectedOption.value))
-
-  const branchesOptions = customerId
-    ? branches?.filter(branch => branch.customerId === customerId)
-      .map(branch => ({ value: branch.id, label: branch.name }))
-    : []
-  const handleBranchesChange = (selectedOption) => dispatch(setBranchId(selectedOption.value))
-
-  const roleOptions = ['super', 'client'].map(r => ({ value: r, label: r }))
-  const handleRolesChange = (selectedOption) => dispatch(setRole(selectedOption.value))
-
-  const clearPageHandler = () => {
-    dispatch(clearPage())
-    navigate('/users')
-  }
-
-  const editUser = async () => {
-    try {
-      const postData = {
-        name,
-        surname,
-        username,
-        password,
-        email,
-        branchId,
-        role,
-        customerId,
-      }
-      const isValid = editUserValidator(postData)
-      if (isValid) {
-        const response = await dispatch(updateUser({ id, updatedData: postData })).unwrap()
-        retrieveSuccessMessage(response)
-        clearPageHandler()
-        refetchUsersAfterEditing()
-        navigate('/users')
-      }
-    } catch (error) {
-      retrieveErrorMessage(error)
-    }
-  }
-
-  return {
+  const {
     name,
     surname,
     username,
@@ -139,16 +32,156 @@ const useUsersEdit = () => {
     email,
     password,
     role,
+    customerId
+  } = useSelector(state => state.users.edit)
+
+  const {
+    data: customers,
+    isLoading: isCustomersLoading,
+    hasFetched: doesCustomersLoaded
+  } = useSelector(state => state.customers.api)
+
+  const {
+    data: branches,
+    isLoading: isBranchesLoading,
+    hasFetched: doesBranchesLoaded
+  } = useSelector(state => state.branches.api)
+
+  // Load customers
+  useEffect(() => {
+    if (!doesCustomersLoaded && !isCustomersLoading) {
+      dispatch(fetchCustomers())
+    }
+  }, [doesCustomersLoaded, isCustomersLoading, dispatch])
+
+  // Load branches
+  useEffect(() => {
+    if (!doesBranchesLoaded && !isBranchesLoading) {
+      dispatch(fetchBranches())
+    }
+  }, [doesBranchesLoaded, isBranchesLoading, dispatch])
+
+  // Auto-generate username from name + surname
+  useEffect(() => {
+    const n = name?.trim()
+    const s = surname?.trim()
+    if (n && s) dispatch(setUsername(`${n}.${s}`))
+    else dispatch(setUsername(''))
+  }, [name, surname, dispatch])
+
+  // Fetch existing user data
+  useEffect(() => {
+    if (!id) return
+    const load = async () => {
+      try {
+        const resp = await dispatch(fetchUser(id)).unwrap()
+        if (resp.status === 'SUCCESS' && resp.data) {
+          const u = resp.data
+          u.name && dispatch(setName(u.name))
+          u.surname && dispatch(setSurname(u.surname))
+          u.email && dispatch(setEmail(u.email))
+          u.branchId && dispatch(setBranchId(u.branchId))
+          u.role && dispatch(setRole(u.role))
+          u.customerId && dispatch(setCustomerId(u.customerId))
+        }
+      } catch (err) {
+        console.error('Error fetching user data:', err)
+      }
+    }
+    load()
+  }, [id, dispatch])
+
+  // Keep customerId in sync if branch changes
+  useEffect(() => {
+    if (branchId && branches?.length) {
+      const b = branches.find(b => b.id === branchId)
+      if (b?.customerId && b.customerId !== customerId) {
+        dispatch(setCustomerId(b.customerId))
+      }
+    }
+  }, [branchId, branches, customerId, dispatch])
+
+  // Form field handlers
+  const onChange = (e, field) => {
+    const v = e.target.value
+    switch (field) {
+      case 'name': return dispatch(setName(v))
+      case 'surname': return dispatch(setSurname(v))
+      case 'email': return dispatch(setEmail(v))
+      case 'password': return dispatch(setPassword(v))
+      default: return
+    }
+  }
+
+  // Select options
+  const customersOptions = customers?.map(c => ({
+    value: c.id,
+    label: c.name
+  })) || []
+
+  const branchesOptions = customerId
+    ? branches
+      .filter(b => b.customerId === customerId)
+      .map(b => ({ value: b.id, label: b.name }))
+    : []
+
+  // Fix: clearable selects must handle null
+  const handleCustomersChange = selectedOption => {
+    const newCustomerId = selectedOption?.value || ''
+    dispatch(setCustomerId(newCustomerId))
+    // Clear branch when customer changes/cleared
+    dispatch(setBranchId(''))
+  }
+
+  const handleBranchesChange = selectedOption => {
+    const newBranchId = selectedOption?.value || ''
+    dispatch(setBranchId(newBranchId))
+  }
+
+  const roleOptions = ['super', 'client'].map(r => ({ value: r, label: r }))
+  const handleRolesChange = selectedOption => {
+    const newRole = selectedOption?.value || ''
+    dispatch(setRole(newRole))
+  }
+
+  const clearPageHandler = () => {
+    dispatch(clearPage())
+    navigate('/users')
+  }
+
+  // Submit
+  const editUser = async () => {
+    try {
+      const postData = { name, surname, username, password, email, branchId, role, customerId }
+      if (!editUserValidator(postData)) return
+      const resp = await dispatch(updateUser({ id, updatedData: postData })).unwrap()
+      retrieveSuccessMessage(resp)
+      clearPageHandler()
+      refetchUsersAfterEditing()
+      navigate('/users')
+    } catch (err) {
+      retrieveErrorMessage(err)
+    }
+  }
+
+  return {
+    name,
+    surname,
+    username,
+    email,
+    password,
+    branchId,
     customerId,
-    onChange,
+    role,
     customersOptions,
-    handleCustomersChange,
     branchesOptions,
-    handleBranchesChange,
     roleOptions,
+    onChange,
+    handleCustomersChange,
+    handleBranchesChange,
     handleRolesChange,
     editUser,
-    clearPageHandler,
+    clearPageHandler
   }
 }
 

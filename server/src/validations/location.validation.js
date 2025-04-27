@@ -60,9 +60,13 @@ const deleteLocation = (req, res, next) => {
   validateIdInParams(req, res, next)
 }
 
+const getLocations = (req, res, next) => {
+  next()
+}
+
 module.exports = {
   createLocation,
-  getLocations: async (req, res, next) => next(),
+  getLocations,
   getLocation,
   updateLocation,
   deleteLocation,

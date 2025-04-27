@@ -1,4 +1,5 @@
 const Device = require('../models/device.model')
+const User = require('../models/user.model')
 const { createDeviceDataCollection, deleteDeviceDataCollection } = require('../helpers/device-data.helper')
 
 const createDevice = async (data) => {
@@ -38,8 +39,17 @@ const deleteDevice = async (id) => {
   return false
 }
 
-const getDevicesByUserId = async () => {
+const getDevicesByUserId = async (userId, locationId) => {
+  const user = await User.findOne({ id: userId })
+  if (!user) return []
 
+  const location = await Location.findOne({
+    id: locationId,
+    branchId: user.branchId
+  })
+  if (!location) return []
+
+  return await Device.find({ locationId })
 }
 
 module.exports = {

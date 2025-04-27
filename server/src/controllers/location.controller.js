@@ -71,10 +71,20 @@ const deleteLocation = asyncHandler(async (req, res) => {
   })
 })
 
+const getLocationsByUserId = asyncHandler(async (req, res) => {
+  const locations = await LocationService.getLocationsByUserId(req.userId)
+  res.status(httpStatus.StatusCodes.OK).json({
+    status: 'SUCCESS',
+    message: 'Locations retrieved successfully for current user',
+    data: locations,
+  })
+})
+
 module.exports = {
   createLocation,
   getLocation,
   getLocations,
   updateLocation,
   deleteLocation,
+  getLocationsByUserId,
 }

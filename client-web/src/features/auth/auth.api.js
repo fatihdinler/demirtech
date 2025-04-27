@@ -7,7 +7,6 @@ export const verifyEmail = createAsyncThunk(
   'auth/verifyEmail',
   async (verificationCode, { rejectWithValue }) => {
     try {
-      console.log('verificationCode')
       const response = await axios.post(`${API_URL}/users/verify-email`, { code: verificationCode })
       return response.data
     } catch (error) {
@@ -21,7 +20,6 @@ export const checkAuth = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await axios.get(`${API_URL}/auth/check-auth`)
-      console.log(response)
       return response.data
     } catch (error) {
       return rejectWithValue(error.response?.data || 'Error while verifying email')

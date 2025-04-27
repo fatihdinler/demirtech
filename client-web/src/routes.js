@@ -1,8 +1,8 @@
 import { FaHome } from 'react-icons/fa'
+import { MdAcUnit } from 'react-icons/md'
 import {
   Dashboard,
-  Login,
-  VerifyEmail,
+  LocationsList,
 } from './pages'
 
 export const routes = [
@@ -13,18 +13,11 @@ export const routes = [
     isSidebarPage: true,
     element: <Dashboard />,
   },
-  // {
-  //   to: '/login',
-  //   icon: null,
-  //   label: null,
-  //   isSidebarPage: false,
-  //   element: <Login />,
-  // },
-  // {
-  //   to: '/verify-email',
-  //   icon: null,
-  //   label: null,
-  //   isSidebarPage: false,
-  //   element: <VerifyEmail />,
-  // },
+  {
+    to: '/locations',
+    icon: <MdAcUnit />,
+    label: 'Lokasyonlar',
+    isSidebarPage: true,
+    element: <LocationsList />,
+  },
 ]

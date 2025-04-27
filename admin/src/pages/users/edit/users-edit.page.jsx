@@ -107,6 +107,7 @@ const UsersEdit = () => {
                 value={customersOptions ? customersOptions.find(option => option.value === customerId) : null}
                 onChange={handleCustomersChange}
                 placeholder='Müşteri seçin'
+                isClearable
               />
             </Form.Group>
           </Col>
@@ -119,6 +120,7 @@ const UsersEdit = () => {
                 onChange={handleBranchesChange}
                 placeholder={!customerId ? 'Lütfen önce müşteri seçin' : 'Şube seçin'}
                 isDisabled={!customerId}
+                isClearable
               />
             </Form.Group>
           </Col>

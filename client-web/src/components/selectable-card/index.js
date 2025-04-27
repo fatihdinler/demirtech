@@ -1,0 +1,1 @@
+export { default as SelectableLocationCard } from './selectable-location-card.component'

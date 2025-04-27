@@ -1,4 +1,5 @@
 const Location = require('../models/location.model')
+const User = require('../models/user.model')
 
 const createLocation = async (data) => {
   const location = new Location(data)
@@ -22,10 +23,17 @@ const deleteLocation = async (id) => {
   return result.deletedCount > 0
 }
 
+const getLocationsByUserId = async (userId) => {
+  const user = await User.findOne({ id: userId })
+  if (!user) return []
+  return await Location.find({ branchId: user.branchId })
+}
+
 module.exports = {
   createLocation,
   getLocations,
   getLocation,
   updateLocation,
   deleteLocation,
+  getLocationsByUserId,
 }

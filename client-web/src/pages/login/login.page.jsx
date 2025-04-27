@@ -14,9 +14,8 @@ const Login = () => {
   const handleSubmit = (e) => {
     e.preventDefault()
     dispatch(login({ email, password }))
-    console.log('Logging in with:', email, password)
   }
-  console.log('user, isAuthenticated, error, isLoading, isCheckingAuth', user, isAuthenticated, error, isLoading, isCheckingAuth)
+
   return (
     <Container fluid className='login-container'>
       <Row className='justify-content-center align-items-center vh-100'>
