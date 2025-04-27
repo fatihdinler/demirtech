@@ -10,7 +10,6 @@ const { connectDb } = require('./src/helpers/database.helper')
 const config = require('./src/config')
 const { listenDevicesMqtt } = require('./src/helpers/mqtt.listener')
 const { initSocket } = require('./src/helpers/socket.helper.js')
-const createSuperUser = require('./src/helpers/db-scripts/create-super-user.helper.js')
 
 const customerRoutes = require('./src/routes/customer.route')
 const branchRoutes = require('./src/routes/branch.route')
@@ -57,7 +56,7 @@ server.listen(port, async () => {
     console.log(`>>> DEMIRTECH API IS RUNNING ON http://localhost:${port}`)
     const { connection: db } = await connectDb()
     global.db = db
-    await createSuperUser()
+    await require('./src/helpers/db-scripts/index.js')()
     listenDevicesMqtt(global.mqttClient)
   } catch (error) {
     console.error(`Error in app.js: ${error.message}`)

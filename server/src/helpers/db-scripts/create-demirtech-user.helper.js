@@ -1,7 +1,9 @@
+// src/helpers/db-scripts/create-super-user.helper.js
+
 const User = require('../../models/user.model')
 const Branch = require('../../models/branch.model')
 const asyncHandler = require('express-async-handler')
-const bcrypt = require('bcryptjs')   // ← bcryptjs’i ekliyoruz
+const bcrypt = require('bcryptjs')
 
 const createSuperUser = asyncHandler(async () => {
   const superUsername = process.env.DEMIRTECH_SUPER_USER_USERNAME
@@ -20,37 +22,36 @@ const createSuperUser = asyncHandler(async () => {
     return
   }
 
-  // System Branch’in varlığı
-  let systemBranch = await Branch.findOne({ name: 'System Branch' })
-  if (!systemBranch) {
-    systemBranch = await Branch.create({
-      customerId: 'system-customer',
-      name: 'System Branch',
-      address: 'N/A',
-      contactInfo: 'N/A'
-    })
-    console.log('System Branch başarıyla oluşturuldu.')
-  } else {
-    console.log('System Branch zaten mevcut.')
+  // Daha önce pipeline ile oluşturduğumuz branch'i bul
+  const branch = await Branch.findOne({ name: 'Demirtech - System Branch' })
+  if (!branch) {
+    console.error('Demirtech - System Branch bulunamadı. Önce branch script\'ini çalıştırın.')
+    return
   }
 
-  // ——— Burada parolayı hash’liyoruz ———
+  // Parolayı hash’le
   const hashedPassword = await bcrypt.hash(superPassword, 10)
 
-  // Süper kullanıcıyı oluşturuyoruz, ancak düz parola yerine hash’lenmişi gönderiyoruz
+  // Süper kullanıcıyı oluştur
   const superUser = new User({
     name: 'System',
     surname: 'User',
     username: superUsername,
-    password: hashedPassword,    // ← hash’lenmiş parola
+    password: hashedPassword,
     email: superEmail,
     role: 'super',
     isVerified: true,
-    branchId: systemBranch.id,
+    branchId: branch.id,
   })
-
   await superUser.save()
   console.log('Super user başarıyla oluşturuldu.')
+
+  // Branch.userIds dizisine ekle (duplicate önlemi için $addToSet)
+  await Branch.findOneAndUpdate(
+    { id: branch.id },
+    { $addToSet: { userIds: superUser.id } }
+  )
+  console.log('Super user, Demirtech - System Branch kullanıcılarına eklendi.')
 })
 
 module.exports = createSuperUser
