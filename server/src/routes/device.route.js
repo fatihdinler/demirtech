@@ -9,5 +9,6 @@ router.get('/', verifyToken, deviceValidator.getDevices, deviceController.getDev
 router.get('/:id', verifyToken, deviceValidator.getDevice, deviceController.getDevice)
 router.put('/:id', verifyToken, deviceValidator.updateDevice, deviceController.updateDevice)
 router.delete('/:id', verifyToken, deviceValidator.deleteDevice, deviceController.deleteDevice)
+router.get('/get-devices-by-user-id', verifyToken, deviceValidator.getDevice, deviceController.getDevicesByUserId)
 
 module.exports = router

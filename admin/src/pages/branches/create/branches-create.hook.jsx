@@ -1,17 +1,43 @@
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { createBranchValidator, retrieveSuccessMessage, } from './branches-create.messager'
-import { setName, setAddress, setRegionManagerId, setCustomerId, setContactInfo, clearPage } from '../../../features/branches/branches-create.state'
+import {
+  setName,
+  setAddress,
+  setUserIds,
+  setCustomerId,
+  setContactInfo,
+  clearPage
+} from '../../../features/branches/branches-create.state'
 import { fetchCustomers } from '../../../features/customers/customers.api'
+import { fetchUsers } from '../../../features/users/users.api'
 import { addBranch } from '../../../features/branches/branches.api'
+import { createBranchValidator, retrieveSuccessMessage } from './branches-create.messager'
 import { useNavigate } from 'react-router-dom'
 import useBranchesList from '../list/branches-list.hook'
 
 const useBranchesCreate = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const { name, customerId, regionManagerId, address, contactInfo } = useSelector(state => state.branches.create)
-  const { data: customers, isLoading: isCustomersLoading, error: errorCustomers, hasFetched: doesCustomersLoaded } = useSelector(state => state.customers.api)
+  const {
+    name,
+    customerId,
+    address,
+    contactInfo,
+    userIds
+  } = useSelector(state => state.branches.create)
+
+  const {
+    data: customers,
+    isLoading: isCustomersLoading,
+    hasFetched: doesCustomersLoaded
+  } = useSelector(state => state.customers.api)
+
+  const {
+    data: users,
+    isLoading: isUsersLoading,
+    hasFetched: doesUsersLoaded
+  } = useSelector(state => state.users.api)
+
   const { refetch: refetchBranchesAfterCreation } = useBranchesList()
 
   useEffect(() => {
@@ -20,29 +46,36 @@ const useBranchesCreate = () => {
     }
   }, [doesCustomersLoaded, isCustomersLoading, dispatch])
 
+  useEffect(() => {
+    if (!doesUsersLoaded && !isUsersLoading) {
+      dispatch(fetchUsers())
+    }
+  }, [doesUsersLoaded, isUsersLoading, dispatch])
+
   const onChange = (event, field) => {
     event.preventDefault()
-    switch (field) {
-      case 'name':
-        dispatch(setName(event.target.value))
-        break
-      case 'address':
-        dispatch(setAddress(event.target.value))
-        break
-      case 'contactInfo':
-        dispatch(setContactInfo(event.target.value))
-      default:
-        break
-    }
+    const val = event.target.value
+    if (field === 'name') dispatch(setName(val))
+    else if (field === 'address') dispatch(setAddress(val))
+    else if (field === 'contactInfo') dispatch(setContactInfo(val))
   }
 
-  const customersOptions = customers?.map(customer => ({ value: customer.id, label: customer.name }))
-  const handleCustomersChange = (selectedOption) => dispatch(setCustomerId(selectedOption.value))
+  const customersOptions = customers?.map(c => ({ value: c.id, label: c.name })) || []
+  const handleCustomersChange = (selected) => {
+    dispatch(setCustomerId(selected?.value || ''))
+  }
 
-  const regionManagers = [{ id: '123123123', name: 'User 1' }, { id: '934880345', name: 'User 2' }]
-  const mockDataForRegionManagerOptions = regionManagers.map(regionManager => ({ value: regionManager.id, label: regionManager.name }))
-  const handleRegionManagerChange = (selectedOption) => dispatch(setRegionManagerId(selectedOption.value))
-
+  const usersOptions = users?.map(u => ({
+    value: u.id,
+    label: `${u.name} ${u.surname}`
+  })) || []
+  const handleUsersChange = (selectedOptions) => {
+    // selectedOptions bir array, tekil veya boş olabilir
+    const values = Array.isArray(selectedOptions)
+      ? selectedOptions.map(opt => opt.value)
+      : []
+    dispatch(setUserIds(values))
+  }
 
   const clearPageHandler = () => {
     dispatch(clearPage())
@@ -53,36 +86,33 @@ const useBranchesCreate = () => {
     const postData = {
       name,
       customerId,
-      // regionManagerId,
+      userIds,
       address,
       contactInfo,
     }
 
-    const isValid = createBranchValidator(postData)
-    if (isValid) {
-      const response = await dispatch(addBranch(postData)).unwrap()
-      retrieveSuccessMessage(response)
-      clearPageHandler()
-      refetchBranchesAfterCreation()
-      return navigate('/branches')
-    }
+    if (!createBranchValidator(postData)) return
+
+    const response = await dispatch(addBranch(postData)).unwrap()
+    retrieveSuccessMessage(response)
+    clearPageHandler()
+    refetchBranchesAfterCreation()
+    navigate('/branches')
   }
 
   return {
     name,
     customerId,
-    regionManagerId,
     address,
     contactInfo,
+    userIds,
     onChange,
     createBranch,
     clearPageHandler,
     customersOptions,
     handleCustomersChange,
-    customers,
-    regionManagers,
-    mockDataForRegionManagerOptions,
-    handleRegionManagerChange,
+    usersOptions,
+    handleUsersChange,
   }
 }
 

@@ -1,6 +1,7 @@
 const User = require('../../models/user.model')
 const Branch = require('../../models/branch.model')
 const asyncHandler = require('express-async-handler')
+const bcrypt = require('bcryptjs')   // ← bcryptjs’i ekliyoruz
 
 const createSuperUser = asyncHandler(async () => {
   const superUsername = process.env.DEMIRTECH_SUPER_USER_USERNAME
@@ -12,12 +13,14 @@ const createSuperUser = asyncHandler(async () => {
     return
   }
 
+  // Zaten varsa çık
   const existingSuper = await User.findOne({ role: 'super' })
   if (existingSuper) {
     console.log('Super user zaten mevcut.')
     return
   }
 
+  // System Branch’in varlığı
   let systemBranch = await Branch.findOne({ name: 'System Branch' })
   if (!systemBranch) {
     systemBranch = await Branch.create({
@@ -31,17 +34,22 @@ const createSuperUser = asyncHandler(async () => {
     console.log('System Branch zaten mevcut.')
   }
 
-  const superUser = await User.create({
+  // ——— Burada parolayı hash’liyoruz ———
+  const hashedPassword = await bcrypt.hash(superPassword, 10)
+
+  // Süper kullanıcıyı oluşturuyoruz, ancak düz parola yerine hash’lenmişi gönderiyoruz
+  const superUser = new User({
     name: 'System',
     surname: 'User',
     username: superUsername,
-    password: superPassword,
+    password: hashedPassword,    // ← hash’lenmiş parola
     email: superEmail,
     role: 'super',
     isVerified: true,
     branchId: systemBranch.id,
   })
 
+  await superUser.save()
   console.log('Super user başarıyla oluşturuldu.')
 })
 

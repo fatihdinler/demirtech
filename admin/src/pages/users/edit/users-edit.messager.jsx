@@ -44,13 +44,6 @@ export const editUserValidator = (postData) => {
     })
     return false
   }
-  if (!postData.branchId) {
-    toast.error('Şube alanı boş bırakılamaz', {
-      position: 'top-right',
-      autoClose: 3000,
-    })
-    return false
-  }
   return true
 }
 

@@ -1,7 +1,20 @@
 const Branch = require('../models/branch.model')
 
 const createBranch = async (data) => {
-  const branch = new Branch(data)
+  const userIds = Array.isArray(data.userIds)
+    ? data.userIds
+    : data.userIds
+      ? [data.userIds]
+      : []
+
+  const branch = new Branch({
+    name: data.name,
+    customerId: data.customerId,
+    userIds,
+    address: data.address,
+    contactInfo: data.contactInfo,
+  })
+
   return await branch.save()
 }
 
@@ -14,7 +27,19 @@ const getBranch = async (id) => {
 }
 
 const updateBranch = async (id, data) => {
-  return await Branch.findOneAndUpdate({ id }, data, { new: true })
+  if ('userIds' in data) {
+    data.userIds = Array.isArray(data.userIds)
+      ? data.userIds
+      : data.userIds
+        ? [data.userIds]
+        : []
+  }
+
+  return await Branch.findOneAndUpdate(
+    { id },
+    data,
+    { new: true }
+  )
 }
 
 const deleteBranch = async (id) => {

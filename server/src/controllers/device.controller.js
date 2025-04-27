@@ -71,10 +71,16 @@ const deleteDevice = asyncHandler(async (req, res) => {
   })
 })
 
+const getDevicesByUserId = asyncHandler(async (req, res) => {
+  console.log('req --->', req)
+  const devices = await DeviceService.getDevicesByUserId(req)
+})
+
 module.exports = {
   createDevice,
   getDevices,
   getDevice,
   updateDevice,
   deleteDevice,
+  getDevicesByUserId,
 }

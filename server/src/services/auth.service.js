@@ -34,7 +34,7 @@ const forgotPassword = async (email) => {
     throw new Error('User Not Found')
   }
   const resetToken = uuid()
-  const resetTokenExpiresAt = Date.now() + 1 * 60 * 60 * 1000 // 1 Saat
+  const resetTokenExpiresAt = Date.now() + 1 * 60 * 60 * 1000
 
   user.resetPasswordToken = resetToken
   user.resetPasswordExpiresAt = resetTokenExpiresAt

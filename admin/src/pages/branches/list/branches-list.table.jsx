@@ -1,7 +1,7 @@
 import { Table } from '../../../components'
 import useBranchesListRemover from './branches-list.remover'
 
-const BranchesListTable = ({ branches, customers }) => {
+const BranchesListTable = ({ branches, customers, users, }) => {
   const { removeBranchData } = useBranchesListRemover()
 
   const columns = [
@@ -20,9 +20,13 @@ const BranchesListTable = ({ branches, customers }) => {
       }
     },
     {
-      header: 'Bölge Müdürü',
-      accessor: 'regionManagerId',
+      header: 'Kullanıcı',
+      accessor: 'userIds',
       filterable: true,
+      render: (value, row) => {
+        const user = users.find(user => user.id === value)
+        return user ? user.name : value
+      }
     },
     {
       header: 'Adres',
@@ -44,7 +48,7 @@ const BranchesListTable = ({ branches, customers }) => {
     <Table
       data={branches}
       columns={columns}
-      defaultPageSize={5}
+      defaultPageSize={20}
       pageSizeOptions={[5, 10, 20]}
       editRoute={['/branches', '/edit']}
       handleDelete={removeBranchData}

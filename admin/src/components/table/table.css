@@ -1,48 +1,101 @@
-/* Table Card */
+/* Modern Table Card */
 .pro-table-card {
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
+  border: none;
+  border-radius: 12px;
   background: #ffffff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   overflow: hidden;
   transition: box-shadow 0.3s ease;
+  margin-bottom: 1.5rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .pro-table-card:hover {
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
 }
 
-/* Scrollable container with fixed height */
+/* Table container that expands to fill available space */
 .pro-table-container {
-  max-height: 440px;
-  overflow-y: auto;
+  position: relative;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #b0bec5 #f5f5f5;
+  flex-grow: 1;
 }
 
-/* Table düzeni */
+.pro-table-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* Custom scrollbar */
+.pro-table-container::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.pro-table-container::-webkit-scrollbar-track {
+  background: #f5f5f5;
+  border-radius: 3px;
+}
+
+.pro-table-container::-webkit-scrollbar-thumb {
+  background: #b0bec5;
+  border-radius: 3px;
+}
+
+.pro-table-container::-webkit-scrollbar-thumb:hover {
+  background: #90a4ae;
+}
+
+/* Table layout */
 .pro-table {
   width: 100%;
-  border-collapse: collapse;
-}
-
-.pro-table thead {
-  background: #e3f2fd;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-bottom: 0;
 }
 
 /* Sticky header */
+.pro-table-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #f8faff;
+}
+
 .pro-table thead th {
   position: sticky;
   top: 0;
-  z-index: 2;
-  background: #e3f2fd;
-  box-shadow: 0px 2px 2px -1px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+  background: #f8faff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  font-weight: 600;
+  color: #455a64;
+  font-size: 0.875rem;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .pro-table th,
 .pro-table td {
-  padding: 16px;
-  border-bottom: 1px solid #e0e0e0;
+  padding: 14px 16px;
+  border-bottom: 1px solid #eceff1;
   text-align: left;
   transition: background 0.2s ease;
+}
+
+.pro-table tbody tr {
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.pro-table tbody tr:hover {
+  background-color: #f9fbfd;
+  transform: translateY(-1px);
 }
 
 .pro-table th:first-child,
@@ -55,83 +108,190 @@
   padding-right: 24px;
 }
 
-/* Sütun başlık düzeni */
+/* Column header layout */
 .pro-column-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-/* Filtre butonu */
+.pro-sortable-header {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  color: #455a64;
+  transition: color 0.2s ease;
+}
+
+.pro-sortable-header:hover {
+  color: #1976d2;
+}
+
+/* Sort icon wrapper */
+.pro-sort-wrapper {
+  display: inline-flex;
+  margin-left: 6px;
+  height: 16px;
+  width: 16px;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Filter button */
 .pro-filter-button {
   background: none;
   border: none;
   cursor: pointer;
-  color: #1976d2;
+  color: #607d8b;
   font-size: 14px;
-  padding: 0;
-  transition: color 0.2s ease;
+  padding: 6px;
+  margin-left: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
 }
 
 .pro-filter-button:hover {
-  color: #1565c0;
+  color: #1976d2;
+  background-color: rgba(25, 118, 210, 0.08);
 }
 
-/* Sıralama ikonları */
+/* Filter tooltip and input */
+.pro-filter-tooltip {
+  padding: 6px !important;
+  border-radius: 6px !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15) !important;
+  z-index: 9999 !important;
+}
+
+.pro-filter-input {
+  border-radius: 4px;
+  min-width: 180px;
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+}
+
+.pro-filter-input:focus {
+  border-color: #1976d2;
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+}
+
+/* Sort icons */
 .pro-sort-icon {
-  margin-left: 8px;
-  font-size: 12px;
+  font-size: 14px;
   vertical-align: middle;
 }
 
-.pro-sort-icon.inactive {
-  opacity: 0.3;
+.pro-sort-icon.active {
+  color: #1976d2;
 }
 
-/* Kayıt bulunamadı mesajı */
+.pro-sort-icon.inactive {
+  opacity: 0.35;
+}
+
+/* Empty state styling */
+.pro-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.pro-empty-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+  opacity: 0.7;
+}
+
 .pro-no-data {
   text-align: center;
-  padding: 16px;
-  color: #757575;
+  color: #78909c;
+  font-weight: 500;
 }
 
-/* Tablo alt bilgisi (footer) */
+/* Table footer */
 .pro-table-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
-  background: #e3f2fd;
-  border-top: 1px solid #e0e0e0;
+  padding: 14px 24px;
+  background: #fcfcfc;
+  border-top: 1px solid #eceff1;
+  flex-wrap: wrap;
+  gap: 12px;
+  z-index: 5;
+  position: relative;
 }
 
-/* Pagination düzeni: compact pagination */
+/* Footer info section */
+.pro-footer-info {
+  color: #607d8b;
+  font-size: 0.875rem;
+}
+
+/* Pagination layout: compact pagination */
 .pro-pagination {
   margin: 0;
   display: flex;
   align-items: center;
 }
 
-.pro-pagination .page-item a {
+.pro-pagination .page-link {
+  border-radius: 6px;
+  margin: 0 2px;
+  padding: 4px 10px;
+  color: #455a64;
+  border: 1px solid #e0e0e0;
+  background-color: #fff;
+  transition: all 0.2s ease;
+}
+
+.pro-pagination .page-link:hover {
+  background-color: #f5f5f5;
+  border-color: #cfd8dc;
   color: #1976d2;
 }
 
-.pro-pagination .page-item.active a {
+.pro-pagination .page-item.active .page-link {
   background-color: #1976d2;
   border-color: #1976d2;
   color: #ffffff;
+  font-weight: 600;
 }
 
-/* Sayfa başına gösterim */
+.pro-pagination .page-item.disabled .page-link {
+  color: #b0bec5;
+  background-color: #f5f5f5;
+  border-color: #eceff1;
+}
+
+/* Page size selector */
 .pro-page-size {
   display: flex;
   align-items: center;
-  font-size: 14px;
+  font-size: 0.875rem;
+  color: #607d8b;
 }
 
-.pro-page-size .page-size-select {
+.pro-page-size-select {
   margin-left: 8px;
   width: auto;
+  padding: 4px 12px;
+  border-radius: 6px;
+  border-color: #e0e0e0;
+  cursor: pointer;
+  background-color: #fff;
+  transition: all 0.2s ease;
+}
+
+.pro-page-size-select:focus {
+  border-color: #1976d2;
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
 }
 
 /* Actions cell: narrower width */
@@ -141,22 +301,166 @@
   padding: 8px;
 }
 
-/* Dropdown button (actions) - narrower */
+/* Dropdown button (actions) */
 .pro-dropdown-button {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 16px;
-  color: #1976d2;
-  padding: 4px;
-  transition: color 0.2s ease;
+  color: #607d8b;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
 }
 
 .pro-dropdown-button:hover {
-  color: #1565c0;
+  color: #1976d2;
+  background-color: rgba(25, 118, 210, 0.08);
 }
 
 /* Ensure dropdown menu appears above table */
 .pro-dropdown-menu {
+  z-index: 99999 !important;
+  border: none !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+  padding: 6px !important;
+  min-width: 160px !important;
+  position: relative !important;
+}
+
+/* Dropdown items styling */
+.pro-dropdown-item {
+  display: flex !important;
+  align-items: center !important;
+  padding: 8px 12px !important;
+  border-radius: 6px !important;
+  transition: background-color 0.2s ease !important;
+  color: #455a64 !important;
+}
+
+.pro-dropdown-item:hover {
+  background-color: #f5f5f5 !important;
+}
+
+.pro-dropdown-icon {
+  margin-right: 8px;
+  font-size: 14px;
+}
+
+.pro-dropdown-icon.edit {
+  color: #2196f3;
+}
+
+.pro-dropdown-icon.delete {
+  color: #f44336;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .pro-table-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pro-page-size {
+    margin-top: 12px;
+    align-self: flex-end;
+  }
+
+  .pro-footer-info {
+    order: -1;
+    margin-bottom: 12px;
+  }
+}
+
+@media (max-width: 576px) {
+
+  .pro-table th,
+  .pro-table td {
+    padding: 12px 8px;
+  }
+
+  .pro-table th:first-child,
+  .pro-table td:first-child {
+    padding-left: 12px;
+  }
+
+  .pro-table th:last-child,
+  .pro-table td:last-child {
+    padding-right: 12px;
+  }
+
+  .pro-pagination .page-link {
+    padding: 4px 8px;
+    font-size: 0.875rem;
+  }
+}
+
+.pro-dropdown-container {
+  position: relative;
+  display: inline-block;
+}
+
+.pro-dropdown-menu-custom {
+  /* position: absolute; */
+  right: 0;
+  top: 100%;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  min-width: 160px;
   z-index: 9999 !important;
+  margin-top: 5px;
+  overflow: hidden;
+  padding: 6px;
+}
+
+.pro-dropdown-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+  color: #455a64;
+  cursor: pointer;
+  z-index: 9999 !important;
+}
+
+.pro-dropdown-item:hover {
+  background-color: #f5f5f5;
+}
+
+.pro-dropdown-icon {
+  margin-right: 8px;
+  font-size: 14px;
+}
+
+.pro-dropdown-icon.edit {
+  color: #2196f3;
+}
+
+.pro-dropdown-icon.delete {
+  color: #f44336;
+}
+
+.pro-table-row {
+  height: 56px;
+  /* Sabit bir yükseklik belirleyelim */
+}
+
+/* Table container'ın scroll davranışını iyileştirme */
+.pro-table-container {
+  overflow: auto;
+  position: relative;
+  scrollbar-width: thin;
+  scrollbar-color: #b0bec5 #f5f5f5;
+}
+
+/* Dropdown menünün table container'ın scroll'undan etkilenmemesi için */
+.pro-actions-cell {
+  position: relative;
+  overflow: visible;
 }

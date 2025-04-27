@@ -3,7 +3,7 @@ import { createSlice } from '@reduxjs/toolkit'
 const initialState = {
   name: null,
   customerId: null,
-  regionManagerId: null,
+  userIds: null,
   address: null,
   contactInfo: null,
 }
@@ -18,8 +18,8 @@ export const branchesEdit = createSlice({
     setCustomerId: (state, action) => {
       state.customerId = action.payload
     },
-    setRegionManagerId: (state, action) => {
-      state.regionManagerId = action.payload
+    setUserIds: (state, action) => {
+      state.userIds = action.payload
     },
     setAddress: (state, action) => {
       state.address = action.payload
@@ -30,7 +30,7 @@ export const branchesEdit = createSlice({
     clearPage: (state) => {
       state.name = initialState.name
       state.customerId = initialState.customerId
-      state.regionManagerId = initialState.regionManagerId
+      state.userIds = initialState.userIds
       state.address = initialState.address
       state.contactInfo = initialState.contactInfo
     },
@@ -42,7 +42,7 @@ export const {
   setAddress,
   setContactInfo,
   setCustomerId,
-  setRegionManagerId,
+  setUserIds,
   clearPage,
 } = branchesEdit.actions
 

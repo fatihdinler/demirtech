@@ -1,7 +1,7 @@
 const bcryptjs = require('bcryptjs')
 const User = require('../models/user.model')
 const { generateVerificationToken } = require('../helpers/common.helper')
-const { generateTokenAndSetCookie } = require('../helpers/jwt.helper')
+const { generateToken } = require('../helpers/jwt.helper')
 const { sendVerificationMail, sendWelcomeMail } = require('../helpers/mail/emails.helper')
 
 const createUser = async (data, res) => {
@@ -35,7 +35,7 @@ const createUser = async (data, res) => {
 
   await newUser.save()
 
-  generateTokenAndSetCookie(res, newUser.id)
+  generateToken(res, newUser.id)
 
   if (role !== 'super') {
     try {

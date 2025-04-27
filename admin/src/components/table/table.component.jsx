@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect, useRef } from 'react'
 import {
   Card,
   Form,
@@ -15,6 +15,7 @@ import {
   FaSortDown,
   FaPencilAlt,
   FaTrash,
+  FaEllipsisV,
 } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
 import './table.css'
@@ -28,12 +29,13 @@ const Table = ({
   handleDelete,
 }) => {
   const navigate = useNavigate()
-
+  const tableContainerRef = useRef(null)
+  
   const [filterValues, setFilterValues] = useState({})
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' })
-
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(defaultPageSize)
+  const [containerHeight, setContainerHeight] = useState('auto')
 
   const handleFilterChange = (accessor, value) => {
     setFilterValues((prev) => ({ ...prev, [accessor]: value }))
@@ -80,6 +82,39 @@ const Table = ({
     const startIndex = (currentPage - 1) * pageSize
     return sortedData.slice(startIndex, startIndex + pageSize)
   }, [sortedData, currentPage, pageSize])
+
+  // filteredData tanımlandıktan sonra useEffect'i çalıştır
+  useEffect(() => {
+    const updateHeight = () => {
+      if (tableContainerRef.current) {
+        const windowHeight = window.innerHeight
+        const tableTop = tableContainerRef.current.getBoundingClientRect().top
+        const footerHeight = 60 // Tahmini footer yüksekliği
+        const offset = 40 // Ekstra boşluk
+        
+        // Toplam veri sayısını kontrol et
+        const rowsToDisplay = Math.min(pageSize, filteredData.length)
+        const minRowHeight = 56 // Tahmini satır yüksekliği
+        const headerHeight = 48 // Header yüksekliği
+        
+        // Gösterilecek içeriğe göre minumum yükseklik hesapla
+        const contentHeight = (rowsToDisplay * minRowHeight) + headerHeight
+        
+        // Görünür alanın tablodan footer'a kadar olan yüksekliği
+        const availableHeight = windowHeight - tableTop - footerHeight - offset
+        
+        // İçerik az ise içeriğe göre, çok ise maksimum alana göre boyutlandır
+        setContainerHeight(`${Math.min(Math.max(contentHeight, 200), availableHeight)}px`)
+      }
+    }
+
+    updateHeight()
+    window.addEventListener('resize', updateHeight)
+    
+    return () => {
+      window.removeEventListener('resize', updateHeight)
+    }
+  }, [pageSize, filteredData.length]) // pageSize ve filteredData değiştiğinde yeniden hesapla
 
   const renderPagination = () => {
     const visiblePages = 3
@@ -136,6 +171,9 @@ const Table = ({
   }
 
   const ActionsMenu = ({ row }) => {
+    const [show, setShow] = useState(false)
+    const dropdownRef = useRef(null)
+
     const editOperation = () => {
       navigate(`${editRoute[0]}/${row.id}${editRoute[1]}`)
     }
@@ -144,155 +182,190 @@ const Table = ({
       handleDelete(row.id)
     }
 
+    useEffect(() => {
+      // Dropdown dışına tıklandığında menüyü kapat
+      const handleClickOutside = (event) => {
+        if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+          setShow(false)
+        }
+      }
+
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside)
+      }
+    }, [])
+
     return (
-      <Dropdown align='end'>
-        <Dropdown.Toggle as='button' className='pro-dropdown-button'>
-          <span style={{ fontSize: '1rem' }}>⋮</span>
-        </Dropdown.Toggle>
-        <Dropdown.Menu
-          renderMenuOnMount
-          style={{ zIndex: 1000 }}
-          popperConfig={{
-            modifiers: [
-              { name: 'offset', options: { offset: [0, 0] } },
-              { name: 'flip', enabled: false },
-              { name: 'preventOverflow', options: { boundary: 'viewport', padding: 8 } },
-            ],
+      <div className="pro-dropdown-container" ref={dropdownRef}>
+        <button
+          className="pro-dropdown-button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setShow(!show);
           }}
-          className='pro-dropdown-menu'
         >
-          <Dropdown.Item onClick={editOperation} className='d-flex align-items-center'>
-            <FaPencilAlt size={16} className='me-2' style={{ color: '#28a745' }} />
-            Düzenle
-          </Dropdown.Item>
-          <Dropdown.Item onClick={deleteOperation} className='d-flex align-items-center'>
-            <FaTrash size={16} className='me-2' style={{ color: '#dc3545' }} />
-            Sil
-          </Dropdown.Item>
-        </Dropdown.Menu>
-      </Dropdown>
+          <FaEllipsisV />
+        </button>
+        {show && (
+          <div className="pro-dropdown-menu-custom">
+            <div
+              className="pro-dropdown-item"
+              onClick={(e) => {
+                e.stopPropagation();
+                editOperation();
+                setShow(false);
+              }}
+            >
+              <FaPencilAlt className="pro-dropdown-icon edit" />
+              <span>Düzenle</span>
+            </div>
+            <div
+              className="pro-dropdown-item"
+              onClick={(e) => {
+                e.stopPropagation();
+                deleteOperation();
+                setShow(false);
+              }}
+            >
+              <FaTrash className="pro-dropdown-icon delete" />
+              <span>Sil</span>
+            </div>
+          </div>
+        )}
+      </div>
     )
   }
 
   return (
-    <Card className='pro-table-card'>
-      <div className='pro-table-container'>
-        <BootstrapTable bordered hover responsive className='pro-table'>
-          <thead>
-            <tr>
-              {columns.map((col) => (
-                <th key={col.accessor} style={{ minWidth: col.minWidth }}>
-                  <div className='pro-column-header'>
-                    <span
-                      onClick={() =>
-                        col.sortable !== false && handleSort(col.accessor)
-                      }
-                      style={{
-                        cursor: col.sortable !== false ? 'pointer' : 'default',
-                      }}
-                    >
-                      {col.header}
-                      {col.sortable !== false &&
-                        sortConfig.key === col.accessor && (
-                          sortConfig.direction === 'asc' ? (
-                            <FaSortUp className='pro-sort-icon' />
-                          ) : (
-                            <FaSortDown className='pro-sort-icon' />
-                          )
-                        )}
-                      {col.sortable !== false &&
-                        sortConfig.key !== col.accessor && (
-                          <FaSort className='pro-sort-icon inactive' />
-                        )}
-                    </span>
-                    {col.filterable && (
-                      <OverlayTrigger
-                        trigger='click'
-                        placement='bottom'
-                        rootClose
-                        overlay={
-                          <Tooltip id={`tooltip-${col.accessor}`}>
-                            <Form.Control
-                              size='sm'
-                              type='text'
-                              placeholder='Filtre...'
-                              value={filterValues[col.accessor] || ''}
-                              onChange={(e) =>
-                                handleFilterChange(col.accessor, e.target.value)
-                              }
-                              style={{ minWidth: '150px' }}
-                            />
-                          </Tooltip>
+    <Card className='pro-table-card d-flex flex-column'>
+      <div
+        className='pro-table-container flex-grow-1'
+        ref={tableContainerRef}
+        style={{ height: containerHeight }}
+      >
+        <div className='pro-table-wrapper'>
+          <BootstrapTable bordered hover responsive className='pro-table'>
+            <thead className='pro-table-header'>
+              <tr>
+                {columns.map((col) => (
+                  <th key={col.accessor} style={{ minWidth: col.minWidth }}>
+                    <div className='pro-column-header'>
+                      <span
+                        onClick={() =>
+                          col.sortable !== false && handleSort(col.accessor)
                         }
+                        className={col.sortable !== false ? 'pro-sortable-header' : ''}
                       >
-                        <button className='pro-filter-button'>
-                          <FaFilter />
-                        </button>
-                      </OverlayTrigger>
-                    )}
-                  </div>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedData.length > 0 ? (
-              paginatedData.map((row, rowIndex) => (
-                <tr key={row.id || rowIndex} className='pro-table-row'>
-                  {columns.map((col) => {
-                    if (col.render) {
+                        {col.header}
+                        {col.sortable !== false && (
+                          <span className='pro-sort-wrapper'>
+                            {sortConfig.key === col.accessor ? (
+                              sortConfig.direction === 'asc' ? (
+                                <FaSortUp className='pro-sort-icon active' />
+                              ) : (
+                                <FaSortDown className='pro-sort-icon active' />
+                              )
+                            ) : (
+                              <FaSort className='pro-sort-icon inactive' />
+                            )}
+                          </span>
+                        )}
+                      </span>
+                      {col.filterable && (
+                        <OverlayTrigger
+                          trigger='click'
+                          placement='bottom'
+                          rootClose
+                          overlay={
+                            <Tooltip id={`tooltip-${col.accessor}`} className='pro-filter-tooltip'>
+                              <Form.Control
+                                size='sm'
+                                type='text'
+                                placeholder='Filtre...'
+                                value={filterValues[col.accessor] || ''}
+                                onChange={(e) =>
+                                  handleFilterChange(col.accessor, e.target.value)
+                                }
+                                className='pro-filter-input'
+                              />
+                            </Tooltip>
+                          }
+                        >
+                          <button className='pro-filter-button'>
+                            <FaFilter />
+                          </button>
+                        </OverlayTrigger>
+                      )}
+                    </div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedData.length > 0 ? (
+                paginatedData.map((row, rowIndex) => (
+                  <tr key={row.id || rowIndex} className='pro-table-row'>
+                    {columns.map((col) => {
+                      if (col.render) {
+                        return (
+                          <td key={`${row.id || rowIndex}-${col.accessor}`}>
+                            {col.render(row[col.accessor], row)}
+                          </td>
+                        )
+                      }
+                      if (col.accessor === 'actions') {
+                        return (
+                          <td key={`actions-${rowIndex}`} className='pro-actions-cell'>
+                            <ActionsMenu row={row} />
+                          </td>
+                        )
+                      }
                       return (
                         <td key={`${row.id || rowIndex}-${col.accessor}`}>
-                          {col.render(row[col.accessor], row)}
+                          {row[col.accessor]}
                         </td>
                       )
-                    }
-                    if (col.accessor === 'actions') {
-                      return (
-                        <td key={`actions-${rowIndex}`} className='pro-actions-cell'>
-                          <ActionsMenu row={row} />
-                        </td>
-                      )
-                    }
-                    return (
-                      <td key={`${row.id || rowIndex}-${col.accessor}`}>
-                        {row[col.accessor]}
-                      </td>
-                    )
-                  })}
+                    })}
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={columns.length} className='pro-no-data'>
+                    <div className='pro-empty-state'>
+                      <span className='pro-empty-icon'>📋</span>
+                      <p>Kayıt bulunamadı.</p>
+                    </div>
+                  </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={columns.length} className='pro-no-data'>
-                  Kayıt bulunamadı.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </BootstrapTable>
+              )}
+            </tbody>
+          </BootstrapTable>
+        </div>
       </div>
       <Card.Footer className='pro-table-footer'>
+        <div className='pro-footer-info'>
+          <span>Toplam: <strong>{sortedData.length}</strong> kayıt</span>
+        </div>
         <Pagination className='pro-pagination'>
           {renderPagination()}
         </Pagination>
         <div className='pro-page-size'>
           <span>Sayfa Başına:</span>
-          <Form.Control
-            as='select'
+          <Form.Select
             value={pageSize}
             onChange={(e) => {
               setPageSize(Number(e.target.value))
               setCurrentPage(1)
             }}
-            className='page-size-select'
+            className='pro-page-size-select'
           >
             {pageSizeOptions.map((opt) => (
               <option key={opt} value={opt}>
                 {opt}
               </option>
             ))}
-          </Form.Control>
+          </Form.Select>
         </div>
       </Card.Footer>
     </Card>

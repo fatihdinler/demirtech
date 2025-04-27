@@ -38,10 +38,15 @@ const deleteDevice = async (id) => {
   return false
 }
 
+const getDevicesByUserId = async () => {
+
+}
+
 module.exports = {
   createDevice,
   getDevices,
   getDevice,
   updateDevice,
   deleteDevice,
+  getDevicesByUserId,
 }

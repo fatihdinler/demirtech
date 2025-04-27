@@ -1,3 +1,4 @@
+import React from 'react'
 import { Form, Container, Row, Col } from 'react-bootstrap'
 import { Breadcrumb, PageFooter } from '../../../components'
 import Select from 'react-select'
@@ -7,7 +8,6 @@ const BranchesEdit = () => {
   const {
     name,
     customerId,
-    regionManagerId,
     address,
     contactInfo,
     onChange,
@@ -15,8 +15,9 @@ const BranchesEdit = () => {
     clearPageHandler,
     customersOptions,
     handleCustomersChange,
-    mockDataForRegionManagerOptions,
-    handleRegionManagerChange,
+    userIds,
+    usersOptions,
+    handleUsersChange,
   } = useBranchesEdit()
 
   return (
@@ -59,18 +60,23 @@ const BranchesEdit = () => {
               <Form.Label>Müşteri</Form.Label>
               <Select
                 options={customersOptions}
-                value={customersOptions.find(option => option.value === customerId)}
+                value={customersOptions.find(opt => opt.value === customerId)}
                 onChange={handleCustomersChange}
+                placeholder="Müşteri seçin"
               />
             </Form.Group>
           </Col>
           <Col md={6}>
-            <Form.Group controlId='branchRegionManager'>
-              <Form.Label>Bölge Müdürü</Form.Label>
+            <Form.Group controlId='branchUserIds'>
+              <Form.Label>Sorumlu Kullanıcılar</Form.Label>
               <Select
-                options={mockDataForRegionManagerOptions}
-                value={mockDataForRegionManagerOptions.find(option => option.value === regionManagerId)}
-                onChange={handleRegionManagerChange}
+                isMulti
+                options={usersOptions}
+                value={usersOptions.filter(opt => userIds?.includes(opt.value))}
+                onChange={handleUsersChange}
+                closeMenuOnSelect={false}
+                hideSelectedOptions={false}
+                placeholder="Kullanıcı(lar) seçin"
               />
             </Form.Group>
           </Col>

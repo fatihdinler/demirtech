@@ -14,10 +14,10 @@ const BranchSchema = new Schema({
     ref: 'Customer',
     required: [true, 'Müşteri bilgisi gerekli']
   },
-  regionManagerId: {
+  userIds: [{
     type: String,
     ref: 'User'
-  },
+  }],
   name: {
     type: String,
     required: [true, 'Şube adı gerekli'],

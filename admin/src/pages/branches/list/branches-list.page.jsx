@@ -9,6 +9,7 @@ const BranchesList = () => {
     isLoading,
     error,
     customers,
+    users,
   } = useBranchesList()
   return (
     <Container fluid>
@@ -21,7 +22,7 @@ const BranchesList = () => {
               breadcrumbItems={[{ label: 'Şubeler', link: '/branches' }]}
               navigateTo='/branches/create'
             />
-            <BranchesListTable branches={branches} customers={customers} />
+            <BranchesListTable branches={branches} customers={customers} users={users} />
           </>
         )}
       </>

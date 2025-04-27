@@ -9,6 +9,7 @@ const CreateButton = ({ link }) => {
   return (
     <div className=''>
       <Button
+        style={{ backgroundColor: '#1976d2' }}
         className='primary-button mb-2'
         onClick={navigationHandler}>
         Oluştur

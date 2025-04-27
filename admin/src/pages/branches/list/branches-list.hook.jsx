@@ -2,6 +2,7 @@ import { useEffect, useCallback } from 'react'
 import { useDispatch, useSelector, shallowEqual } from 'react-redux'
 import { fetchBranches } from '../../../features/branches/branches.api'
 import { fetchCustomers } from '../../../features/customers/customers.api'
+import { fetchUsers } from '../../../features/users/users.api'
 
 const useBranchesList = () => {
   const dispatch = useDispatch()
@@ -11,6 +12,7 @@ const useBranchesList = () => {
     shallowEqual
   )
   const { data: customers, isLoading: isCustomersLoading, error: errorCustomers, hasFetched: doesCustomersLoaded } = useSelector(state => state.customers.api)
+  const { data: users, isLoading: isUsersLoading, error: errorUsers, hasFetched: doesUsersLoaded } = useSelector(state => state.users.api)
 
   const loadBranches = useCallback(() => {
     dispatch(fetchBranches())
@@ -21,6 +23,12 @@ const useBranchesList = () => {
       dispatch(fetchCustomers())
     }
   }, [doesCustomersLoaded, isCustomersLoading, dispatch])
+
+  useEffect(() => {
+    if (!doesUsersLoaded && !isUsersLoading) {
+      dispatch(fetchUsers())
+    }
+  }, [doesUsersLoaded, isUsersLoading, dispatch])
 
   useEffect(() => {
     if (!hasFetched && !isLoading) {
@@ -39,6 +47,7 @@ const useBranchesList = () => {
     error,
     refetch,
     customers,
+    users,
   }
 }
 
