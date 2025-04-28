@@ -19,7 +19,7 @@ Bu proje ile sıcaklık ve nem takibinin hayati önem taşıdığı sektörlerde
 
 ### Frontend
 - **React**: Modern ve kullanıcı dostu web arayüzleri geliştirme.
-- **Redux Toolkit**: Durum yönetimi ve uygulama veri akışı kontrolü.
+- **Redux Toolkit**: State yönetimi ve uygulama veri akışı kontrolü.
 - **Müşteri ve Admin Panelleri**: Kullanıcı rollerine özel deneyim sunulması.
 
 ---
