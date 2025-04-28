@@ -83,14 +83,14 @@ Giriş yaptıktan sonra açılan menüden doğrudan uygulamaya erişim sağlayab
 3. Sayfanın sağ üst köşesinde bulunan **Oluştur** butonuna tıklayın.
 4. **/customers/create** sayfasına giderek yeni bir müşteri kaydı oluşturabilirsiniz.
 5. Aşağıda bulunan resimde de görüleceği üzere Müşteri Adı girilmesi yeterli olacaktır.
-![alt text](image.png)
+![alt text](assets/images/image.png)
 
 ### B. Şubeler
 1. Şubeler, bir müşteriye ait olan farklı şubeleri temsil etmesi için geliştirilmiş modeldir (ör: Maltepe Şubesi.).
 2. Yeni bir şube oluşturmak için **Şubeler** sekmesine tıklayarak şube yönetim ekranına geçiş yapın.
 3. Sayfanın sağ üst köşesinde bulunan **Oluştur** butonuna tıklayın.
 4. **branches/create** sayfasına yönlendirileceksiniz. Bu sayfada aşağıdaki bir form çıkacaktır. Form'u doldururken bir önceki adımda oluşturmuş olduğunuz müşteriyi seçin.
-![alt text](image-1.png)
+![alt text](assets/images/image-1.png)
 5. Bu sayfada sistemde migrate edilerek oluşturulan **System User** kullanıcısını tanımlamanız yeterli olacaktır. Bu ilişki müşteri panelinde hangi kullanıcının hangi şubeye ait olduğunu ayırt etmek için kullanılmaktadır.
 
 ### C. Lokasyonlar
@@ -98,7 +98,7 @@ Giriş yaptıktan sonra açılan menüden doğrudan uygulamaya erişim sağlayab
 2. Yeni bir lokasyon oluşturmak için **Lokasyonlar** sekmesine tıklayarak lokasyon yönetim ekranına geçiş yapın.
 3. Sayfanın sağ üst köşesinde bulunan **Oluştur** butonuna tıklayın.
 4. **locations/create** sayfasına yönlendirileceksiniz. Bu sayfada aşağıdaki gibi bir form çıkacaktır. Bu adımda, Lokasyon adı, Müşteri ve Şube seçmeniz gerekecektir. Adım A ve Adım B kısımlarında tanımladığımız müşteri ve şubeleri bu adımda seçin, bu şekilde oluşturmuş olduğunuz lokasyonu ilgili şube ile ilişkilendirmiş olacaksınız.
-![alt text](image-2.png)
+![alt text](assets/images/image-2.png)
 
 ### D. Cihazlar
 1. Cihazlar, biz tarafından hazırlanan fiziksel cihazları temsil etmektedir. Burada amaç, fiziksel donanım cihazlarını sistem üzerinde tanımlamaktır. 
@@ -123,7 +123,7 @@ Giriş yaptıktan sonra açılan menüden doğrudan uygulamaya erişim sağlayab
   ```
 6. Kaydettikten sonra, `TEMPERATURE` ölçüm tipi için bir cihaz tanımlamış olacaksınız.
 7. Tekrardan Cihazlar sayfasından oluştur butonuna tıklayarak, aynı bilgileri girip, `Ölçüm tipi` için `HUMIDITY` seçiniz. Bu aynı cihaza ait nem sensörlerini okumamızı sağlayacaktır.
-![alt text](image-3.png)
+![alt text](assets/images/image-3.png)
 
 ### E. Ana Sayfa
 
@@ -132,10 +132,10 @@ Giriş yaptıktan sonra açılan menüden doğrudan uygulamaya erişim sağlayab
 3. Örnek bir senaryo üzerinden ilerleyelim:  
    Sistemde kayıtlı olan `Norm Bitkisel` müşterisinin, `Sultanbeyli Şubesi`ne ait `Meyve & Sebze Reyonu` lokasyonundaki cihazları görüntüleyeceğiz.
 4. İlk olarak, aşağıdaki alandan müşteri seçimi yapılır:  
-   ![Müşteri Seçimi](image-4.png)
+   ![Müşteri Seçimi](assets/images/image-4.png)
 5. Müşteri seçildikten sonra, sisteme kayıtlı olan ilgili şubeler listelenir ve uygun olan şube seçilir:  
-   ![Şube Seçimi](image-5.png)
+   ![Şube Seçimi](assets/images/image-5.png)
 6. Seçilen şubeye ait lokasyonlar listelenir. Buradan cihazı tanımladığımız lokasyon seçilir:  
-   ![Lokasyon Seçimi](image-6.png)
+   ![Lokasyon Seçimi](assets/images/image-6.png)
 7. WebSocket bağlantısı sağlandıktan sonra ekranda seçilen lokasyona ait cihazların **anlık sıcaklık** ve **nem verileri** görüntülenir:  
-   ![Canlı Veri Görüntüleme](image-7.png)
+   ![Canlı Veri Görüntüleme](assets/images/image-7.png)
