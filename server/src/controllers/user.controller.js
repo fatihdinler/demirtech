@@ -5,13 +5,13 @@ const userService = require('../services/user.service')
 const createUser = asyncHandler(async (req, res) => {
   try {
     const createdUser = await userService.createUser(req.body, res)
-    res.status(httpStatus.StatusCodes.CREATED).json({
+    return res.status(httpStatus.StatusCodes.CREATED).json({
       status: 'SUCCESS',
       message: 'Kullanıcı başarıyla oluşturuldu.',
       data: createdUser,
     })
   } catch (error) {
-    res.status(httpStatus.StatusCodes.BAD_REQUEST).json({
+    return res.status(httpStatus.StatusCodes.BAD_REQUEST).json({
       success: false,
       message: error.message || 'Kullanıcı oluşturulurken bir hata oluştu.',
     })

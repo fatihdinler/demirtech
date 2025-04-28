@@ -49,6 +49,13 @@ const authSlice = createSlice({
     isCheckingAuth: true,
   },
   reducers: {
+    logout(state) {
+      state.user = null
+      state.isAuthenticated = false
+      state.error = null
+      state.isLoading = false
+      localStorage.removeItem('authToken')
+    },
     clearState: (state) => {
       state.error = null
     }
@@ -106,5 +113,6 @@ const authSlice = createSlice({
 
 export const {
   clearState,
+  logout,
 } = authSlice.actions
 export default authSlice.reducer

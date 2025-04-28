@@ -29,7 +29,6 @@ export default function App() {
     dispatch(checkAuth())
   }, [dispatch])
 
-  // checkAuth sürerken bir yükleme yapabilirsiniz
   if (isCheckingAuth) return null
 
   return (

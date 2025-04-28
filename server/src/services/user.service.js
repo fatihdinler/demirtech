@@ -32,7 +32,7 @@ async function createUser(data, res) {
   }
 
   await newUser.save()
-  generateToken(res, newUser.id)
+  generateToken(newUser.id)
 
   if (branchId) {
     await Branch.findOneAndUpdate(
