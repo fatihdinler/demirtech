@@ -32,7 +32,7 @@ const DashboardDeviceSelection = ({
   }
 
   const renderBreadcrumbs = () => (
-    <Breadcrumb className='mb-4'>
+    <Breadcrumb className='d-flex justify-content-between align-items-center mx-2'>
       <Breadcrumb.Item onClick={onBackToLocation}>
         Lokasyonlar
       </Breadcrumb.Item>
@@ -107,7 +107,7 @@ const DashboardDeviceSelection = ({
   }
 
   return (
-    <Container fluid className='dashboard-container'>
+    <Container fluid className=''>
       {renderBreadcrumbs()}
       <div className='dashboard-content'>{renderDevices()}</div>
     </Container>

@@ -7,7 +7,7 @@ const DashboardBranchSelection = ({ selectedCustomer, onBranchSelect, onBackToCu
   const { branches, isBranchesLoading, errorBranches } = useDashboard()
 
   const renderBreadcrumbs = () => (
-    <Breadcrumb>
+    <Breadcrumb className='d-flex justify-content-between align-items-center mx-2'>
       <Breadcrumb.Item onClick={onBackToCustomer}>Müşteriler</Breadcrumb.Item>
       <Breadcrumb.Item active>{selectedCustomer.name}</Breadcrumb.Item>
     </Breadcrumb>

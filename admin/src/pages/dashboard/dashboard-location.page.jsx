@@ -7,7 +7,7 @@ const DashboardLocationSelection = ({ selectedCustomer, selectedBranch, onLocati
   const { locations, isLocationsLoading, errorLocations } = useDashboard()
 
   const renderBreadcrumbs = () => (
-    <Breadcrumb>
+    <Breadcrumb className='d-flex justify-content-between align-items-center mx-2'>
       <Breadcrumb.Item onClick={onBackToBranch}>Şubeler</Breadcrumb.Item>
       <Breadcrumb.Item active>{selectedBranch.name}</Breadcrumb.Item>
     </Breadcrumb>
@@ -22,7 +22,7 @@ const DashboardLocationSelection = ({ selectedCustomer, selectedBranch, onLocati
     return (
       <Row>
         {filteredLocations.map((location) => (
-          <Col key={location.id} xs={12} sm={6} md={4} lg={3} className='mb-4'>
+          <Col key={location.id} xs={12} sm={6} md={4} lg={3} className=''>
             <Card
               title={location.name}
               description={location.description || 'Açıklama bulunamadı'}

@@ -7,7 +7,7 @@ const DashboardCustomerSelection = ({ onCustomerSelect }) => {
   const { customers, isCustomersLoading, errorCustomers } = useDashboard()
 
   const renderBreadcrumbs = () => (
-    <Breadcrumb>
+    <Breadcrumb className='d-flex justify-content-between align-items-center mx-2'>
       <Breadcrumb.Item active>Müşteriler</Breadcrumb.Item>
     </Breadcrumb>
   )
