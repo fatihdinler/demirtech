@@ -15,7 +15,7 @@ const SelectableDeviceCard = ({
   }
 
   return (
-    <div className="device-grid">
+    <div className='device-grid'>
       {devices.map(device => {
         const isSelected = selectedIds.includes(device.id)
         const loc = locations.find(l => l.id === device.locationId)
@@ -25,16 +25,16 @@ const SelectableDeviceCard = ({
             className={`device-card ${isSelected ? 'active' : ''}`}
             onClick={() => toggle(device.id)}>
             {loc && (
-              <div className="device-location">
+              <div className='device-location'>
                 <span className='device-location-name'>{loc.name}</span>
               </div>
             )}
-            <div className="device-header">
-              <div className="device-name">{device.name}</div>
-              <div className="device-chip">{device.chipId}</div>
+            <div className='device-header'>
+              <div className='device-name'>{device.name}</div>
+              <div className='device-chip'>{device.chipId}</div>
             </div>
             {device.description && (
-              <div className="device-description">
+              <div className='device-description'>
                 {device.description}
               </div>
             )}

@@ -1,0 +1,19 @@
+.get-report-btn {
+  background-color: #3b82f6;
+  border-color:     #3b82f6;
+  color:            #ffffff;
+}
+
+/* Hover, focus ve active durumları için biraz daha koyu bir mavi seçtik */
+.get-report-btn:hover,
+.get-report-btn:focus,
+.get-report-btn:active {
+  background-color: #2563eb;
+  border-color:     #2563eb;
+  color:            #ffffff;
+}
+
+/* Opsiyonel: focus outline’ı da mavi tonuna çekmek istersen */
+.get-report-btn:focus {
+  box-shadow: 0 0 0 0.2rem rgba(56, 139, 230, 0.5);
+}

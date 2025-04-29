@@ -13,7 +13,7 @@ const Breadcrumb = ({ paths }) => {
             active={isLast}
             linkAs={isLast ? 'span' : Link}
             linkProps={isLast ? {} : { to: path.link }}>
-            {path.label}
+            <span style={{fontSize: '1.5rem'}}>{path.label}</span>
           </RBBreadcrumb.Item>
         )
       })}

@@ -6,6 +6,8 @@ import store from './features/store'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './styles/index.css'
 import 'react-toastify/dist/ReactToastify.css'
+import 'bootstrap-daterangepicker/daterangepicker.css';
+
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(

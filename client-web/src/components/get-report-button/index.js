@@ -1,0 +1,1 @@
+export { default as GetReportButton } from './get-report-button.component'
