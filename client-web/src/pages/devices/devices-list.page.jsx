@@ -47,8 +47,7 @@ const DevicesList = () => {
                   separator: ' → ',
                   applyLabel: 'Uygula',
                   cancelLabel: 'İptal',
-                }}
-              >
+                }}>
                 <Button variant='outline-secondary'>
                   {startTime && endTime
                     ? `${moment(startTime).format('DD.MM.YYYY HH.mm')} → ${moment(endTime).format('DD.MM.YYYY HH.mm')}`
