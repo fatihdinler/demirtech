@@ -81,6 +81,26 @@ const getDevicesByUserId = asyncHandler(async (req, res) => {
   })
 })
 
+const getReportsForDevices = asyncHandler(async (req, res) => {
+  const { deviceIds, startTime, endTime } = req.body;
+
+  if (!Array.isArray(deviceIds) || !startTime || !endTime) {
+    return res.status(httpStatus.BAD_REQUEST).json({
+      status: 'FAILED',
+      message: 'deviceIds (array), startTime ve endTime zorunludur.'
+    });
+  }
+
+  const start = new Date(startTime);
+  const end = new Date(endTime);
+
+  // servis çağrısı
+  const reports = await DeviceService.getReportsForDevices(deviceIds, start, end);
+
+  // doğrudan istediğiniz JSON yapısını döndürüyoruz
+  return res.status(httpStatus.OK).json(reports);
+});
+
 module.exports = {
   createDevice,
   getDevices,
@@ -88,4 +108,5 @@ module.exports = {
   updateDevice,
   deleteDevice,
   getDevicesByUserId,
+  getReportsForDevices,
 }

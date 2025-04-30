@@ -1,15 +1,17 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import {
-  _getLocationsByUserId,
-} from '../../services/locations.service'
+import { _getLocationsByUserId } from '../../services/locations.service'
 
-export const fetchLocations = createAsyncThunk('locations/fetchLocations', async (_, { rejectWithValue }) => {
-  try {
-    return await _getLocationsByUserId()
-  } catch (error) {
-    return rejectWithValue(error.response?.data || 'Error fetching locations')
+export const fetchLocations = createAsyncThunk(
+  'locations/fetchLocations',
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await _getLocationsByUserId()
+      return res.data
+    } catch (error) {
+      return rejectWithValue(error.response?.data || 'Error fetching locations')
+    }
   }
-})
+)
 
 const locationsSlice = createSlice({
   name: 'locations',
@@ -25,7 +27,7 @@ const locationsSlice = createSlice({
       state.isLoading = false
       state.error = null
       state.hasFetched = false
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -35,19 +37,16 @@ const locationsSlice = createSlice({
       })
       .addCase(fetchLocations.fulfilled, (state, action) => {
         state.isLoading = false
-        state.data = action.payload.data.data
+        state.data = action.payload.data
         state.hasFetched = true
       })
       .addCase(fetchLocations.rejected, (state, action) => {
         state.isLoading = false
-        state.error = action.payload.data
+        state.error = action.payload?.message || action.payload
         state.hasFetched = true
       })
   },
 })
 
-
-export const {
-  resetApi,
-} = locationsSlice.actions
+export const { resetApi } = locationsSlice.actions
 export default locationsSlice.reducer

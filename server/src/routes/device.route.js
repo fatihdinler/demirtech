@@ -5,6 +5,7 @@ const deviceValidator = require('../validations/device.validation')
 const verifyToken = require('../middlewares/auth.middleware')
 
 router.get('/get-devices-by-user-id', verifyToken, deviceValidator.getDevicesByUserId, deviceController.getDevicesByUserId)
+router.post('/reports', verifyToken, deviceController.getReportsForDevices, deviceController.getReportsForDevices)
 
 router.post('/', verifyToken, deviceValidator.createDevice, deviceController.createDevice)
 router.get('/', verifyToken, deviceValidator.getDevices, deviceController.getDevices)

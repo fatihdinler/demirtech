@@ -18,6 +18,7 @@ const DevicesList = () => {
     setSelectedDevices,
     handleTimeApply,
     handleGetReport,
+    isReportLoading,
   } = useDevicesList()
 
   return (
@@ -58,7 +59,7 @@ const DevicesList = () => {
 
             {selectedDevices.length > 0 && (
               <Col xs='auto'>
-                <GetReportButton onClick={handleGetReport} numberOfItems={selectedDevices.length} isLoading={false}/>
+                <GetReportButton onClick={handleGetReport} numberOfItems={selectedDevices.length} isLoading={isReportLoading} />
               </Col>
             )}
           </Row>
