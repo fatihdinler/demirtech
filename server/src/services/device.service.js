@@ -51,30 +51,30 @@ async function getDevicesByUserId(userId) {
 }
 
 async function getReportsForDevices(deviceIds, startTime, endTime) {
-  const schema = DeviceData.schema;
+  const schema = DeviceData.schema
   const output = {}
 
   for (const id of deviceIds) {
     // model cache kontrolü
-    const modelName = `Data_${id}`;
-    const collectionName = `data-${id}`;
+    const modelName = `Data_${id}`
+    const collectionName = `data-${id}`
     const Model = mongoose.models[modelName]
-      || mongoose.model(modelName, schema, collectionName);
+      || mongoose.model(modelName, schema, collectionName)
 
     // istenen tarihler arasındaki dokümanları al, zaman sırasına göre sırala
     const docs = await Model
       .find({ occurredTime: { $gte: startTime, $lte: endTime } })
       .sort({ occurredTime: 1 })
-      .lean();
+      .lean()
 
     // sadece ihtiyacımız olan alanları alıp array’e çevir
     output[id] = docs.map(({ occurredTime, value }) => ({
       occurredTime,
       value
-    }));
+    }))
   }
 
-  return output;
+  return output
 }
 
 module.exports = {

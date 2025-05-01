@@ -80,6 +80,16 @@ const getLocationsByUserId = asyncHandler(async (req, res) => {
   })
 })
 
+const getLocationReports = asyncHandler(async (req, res) => {
+  const { locationIds, startTime, endTime } = req.body
+  if (!locationIds?.length || !startTime || !endTime) {
+    return res.status(400).json({ message: 'locationIds, startTime and endTime are required' })
+  }
+
+  const report = await LocationService.generateLocationReport({ locationIds, startTime, endTime })
+  res.json({ data: report })
+})
+
 module.exports = {
   createLocation,
   getLocation,
@@ -87,4 +97,5 @@ module.exports = {
   updateLocation,
   deleteLocation,
   getLocationsByUserId,
+  getLocationReports,
 }

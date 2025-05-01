@@ -5,6 +5,7 @@ const locationValidator = require('../validations/location.validation')
 const verifyToken = require('../middlewares/auth.middleware')
 
 router.get('/get-locations-by-user-id', verifyToken, locationValidator.getLocations, locationController.getLocationsByUserId)
+router.post('/reports', verifyToken, locationController.getLocationReports)
 
 router.post('/', verifyToken, locationValidator.createLocation, locationController.createLocation)
 router.get('/', verifyToken, locationValidator.getLocations, locationController.getLocations)
