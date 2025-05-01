@@ -1,117 +1,44 @@
-import { useEffect, useCallback } from 'react'
+// src/pages/customer-dashboard/customer-dashboard.hook.jsx
+import { useEffect, useMemo } from 'react'
 import { useDispatch, useSelector, shallowEqual } from 'react-redux'
-// import { fetchCustomers } from '../../features/customers/customers.api'
-// import { fetchBranches } from '../../features/branches/branches.api'
-// import { fetchDevices } from '../../features/devices/devices.api'
-// import { fetchLocations } from '../../features/locations/locations.api'
-import { setStep, setSelectedBranch, setSelectedCustomer, setSelectedLocation, } from '../../features/dashboard/dashboard.state'
+import { fetchDevices } from '../../features/devices/devices.api'
 
+/**
+ * Müşteri paneli için cihaz listesini ve metrikleri hazırlar.
+ */
 const useDashboard = () => {
-  // const dispatch = useDispatch()
+  const dispatch = useDispatch()
+  const { data: devices, isLoading, error, hasFetched } = useSelector(
+    state => state.devices.api,
+    shallowEqual
+  )
 
-  // const { step, selectedCustomer, selectedBranch, selectedLocation } = useSelector(state => state.dashboard.dashboard)
+  useEffect(() => {
+    if (!hasFetched && !isLoading) dispatch(fetchDevices())
+  }, [dispatch, hasFetched, isLoading])
 
-  // const { data: customers, isLoading: isCustomersLoading, error: errorCustomers, hasFetched: doesCustomersLoaded } = useSelector(
-  //   (state) => state.customers.api,
-  //   shallowEqual
-  // )
+  // durum metrikleri
+  const metrics = useMemo(() => {
+    const counts = { total: 0, normal: 0, warning: 0, critical: 0 }
+    devices.forEach(dev => {
+      counts.total++
+      const live = dev._live
+      if (!live) return counts
+      const v = Number(live.value)
+      const t = live.type.toLowerCase()
+      let status = 'normal'
+      if (t.includes('temperature') || t.includes('sicaklik')) {
+        status = v < 17 || v > 28 ? (v < 15 || v > 30 ? 'critical' : 'warning') : 'normal'
+      }
+      if (t.includes('humidity') || t.includes('nem')) {
+        status = v < 30 || v > 70 ? (v < 20 || v > 80 ? 'critical' : 'warning') : 'normal'
+      }
+      counts[status]++
+    })
+    return counts
+  }, [devices])
 
-  // const { data: devices, isLoading: isDevicesLoading, error: errorDevices, hasFetched: doesDevicesLoaded } = useSelector(
-  //   (state) => state.devices.api,
-  //   shallowEqual
-  // )
-
-  // const { data: locations, isLoading: isLocationsLoading, error: errorLocations, hasFetched: doesLocationsLoaded } = useSelector(
-  //   (state) => state.locations.api,
-  //   shallowEqual
-  // )
-
-  // const { data: branches, isLoading: isBranchesLoading, error: errorBranches, hasFetched: doesBranchesLoaded } = useSelector(
-  //   (state) => state.branches.api,
-  //   shallowEqual
-  // )
-
-  // useEffect(() => {
-  //   if (!doesCustomersLoaded && !isCustomersLoading) {
-  //     dispatch(fetchCustomers())
-  //   }
-  // }, [doesCustomersLoaded, isCustomersLoading, dispatch])
-
-  // useEffect(() => {
-  //   if (!doesBranchesLoaded && !isBranchesLoading) {
-  //     dispatch(fetchBranches())
-  //   }
-  // }, [doesBranchesLoaded, isBranchesLoading, dispatch])
-
-  // useEffect(() => {
-  //   if (!doesLocationsLoaded && !isLocationsLoading) {
-  //     dispatch(fetchLocations())
-  //   }
-  // }, [doesLocationsLoaded, isLocationsLoading, dispatch])
-
-  // useEffect(() => {
-  //   if (!doesDevicesLoaded && !isDevicesLoading) {
-  //     dispatch(fetchDevices())
-  //   }
-  // }, [doesDevicesLoaded, isDevicesLoading, dispatch])
-
-  // const handleCustomerSelect = (customer) => {
-  //   dispatch(setSelectedCustomer(customer))
-  //   dispatch(setStep(2))
-  // }
-
-  // const handleBranchSelect = (branch) => {
-  //   dispatch(setSelectedBranch(branch))
-  //   dispatch(setStep(3))
-  // }
-
-  // const handleLocationSelect = (location) => {
-  //   dispatch(setSelectedLocation(location))
-  //   dispatch(setStep(4))
-  // }
-
-  // const handleBackToCustomer = () => {
-  //   dispatch(setSelectedCustomer(null))
-  //   dispatch(setSelectedBranch(null))
-  //   dispatch(setSelectedLocation(null))
-  //   dispatch(setStep(1))
-  // }
-
-  // const handleBackToBranch = () => {
-  //   dispatch(setSelectedBranch(null))
-  //   dispatch(setSelectedLocation(null))
-  //   dispatch(setStep(2))
-  // }
-
-  // const handleBackToLocation = () => {
-  //   dispatch(setSelectedLocation(null))
-  //   dispatch(setStep(3))
-  // }
-
-  return {
-    // customers,
-    // isCustomersLoading,
-    // errorCustomers,
-    // branches,
-    // isBranchesLoading,
-    // errorBranches,
-    // locations,
-    // isLocationsLoading,
-    // errorLocations,
-    // devices,
-    // isDevicesLoading,
-    // errorDevices,
-    // step,
-    // selectedCustomer,
-    // selectedBranch,
-    // selectedLocation,
-    // handleCustomerSelect,
-    // handleBranchSelect,
-    // handleLocationSelect,
-    // handleBackToCustomer,
-    // handleBackToBranch,
-    // handleBackToLocation,
-  }
+  return { devices, isLoading, error, metrics }
 }
 
 export default useDashboard

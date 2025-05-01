@@ -1,17 +1,17 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 const initialState = {
-  selectedLocations: [],
+  selectedDevices: [],
   startTime: null,
   endTime: null,
 }
 
-export const locationsList = createSlice({
-  name: 'locationsList',
+export const devicesList = createSlice({
+  name: 'devicesList',
   initialState,
   reducers: {
-    setSelectedLocations: (state, action) => {
-      state.selectedLocations = action.payload
+    setSelectedDevices: (state, action) => {
+      state.selectedDevices = action.payload
     },
     setStartTime: (state, action) => {
       state.startTime = action.payload
@@ -20,7 +20,7 @@ export const locationsList = createSlice({
       state.endTime = action.payload
     },
     clearState: (state) => {
-      state.selectedLocations = []
+      state.selectedDevices = []
       state.startTime = null
       state.endTime = null
     },
@@ -28,10 +28,10 @@ export const locationsList = createSlice({
 })
 
 export const {
-  setSelectedLocations,
+  setSelectedDevices,
   setStartTime,
   setEndTime,
   clearState,
-} = locationsList.actions
+} = devicesList.actions
 
-export default locationsList.reducer
+export default devicesList.reducer

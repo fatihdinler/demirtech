@@ -1,13 +1,14 @@
+const mongoose = require('mongoose')
 const Device = require('../models/device.model')
 const User = require('../models/user.model')
 const Location = require('../models/location.model')
+const DeviceData = require('../models/device-data.model')
 const { createDeviceDataCollection, deleteDeviceDataCollection } = require('../helpers/device-data.helper')
 
 const createDevice = async (data) => {
   const device = new Device(data)
   device.mqttTopic = `demirtech/${data.chipId}/${data.measurementType.toLowerCase()}`
   const savedDevice = await device.save()
-  // Yeni device oluşturulduktan sonra ilgili data collection'ı oluşturuyoruz.
   await createDeviceDataCollection(savedDevice.id)
   return savedDevice
 }
@@ -24,7 +25,6 @@ const updateDevice = async (id, data) => {
   data.mqttTopic = `demirtech/${data.chipId}/${data.measurementType.toLowerCase()}`
   const updatedDevice = await Device.findOneAndUpdate({ id }, data, { new: true })
   if (updatedDevice) {
-    // Güncelleme sonrası ilgili collection'ın varlığını garanti ediyoruz.
     await createDeviceDataCollection(updatedDevice.id)
   }
   return updatedDevice
@@ -33,7 +33,6 @@ const updateDevice = async (id, data) => {
 const deleteDevice = async (id) => {
   const result = await Device.deleteOne({ id })
   if (result.deletedCount > 0) {
-    // Device silindiğinde ilgili data collection'ı da siliyoruz.
     await deleteDeviceDataCollection(id)
     return true
   }
@@ -51,6 +50,33 @@ async function getDevicesByUserId(userId) {
   return await Device.find({ locationId: { $in: locationIds } })
 }
 
+async function getReportsForDevices(deviceIds, startTime, endTime) {
+  const schema = DeviceData.schema
+  const output = {}
+
+  for (const id of deviceIds) {
+    // model cache kontrolü
+    const modelName = `Data_${id}`
+    const collectionName = `data-${id}`
+    const Model = mongoose.models[modelName]
+      || mongoose.model(modelName, schema, collectionName)
+
+    // istenen tarihler arasındaki dokümanları al, zaman sırasına göre sırala
+    const docs = await Model
+      .find({ occurredTime: { $gte: startTime, $lte: endTime } })
+      .sort({ occurredTime: 1 })
+      .lean()
+
+    // sadece ihtiyacımız olan alanları alıp array’e çevir
+    output[id] = docs.map(({ occurredTime, value }) => ({
+      occurredTime,
+      value
+    }))
+  }
+
+  return output
+}
+
 module.exports = {
   createDevice,
   getDevices,
@@ -58,4 +84,5 @@ module.exports = {
   updateDevice,
   deleteDevice,
   getDevicesByUserId,
+  getReportsForDevices,
 }

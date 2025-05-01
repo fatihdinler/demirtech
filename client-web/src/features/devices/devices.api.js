@@ -1,15 +1,29 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import {
-  _getDevicesByUserId
+  _getDevicesByUserId,
+  _getReportsForDevices,
 } from '../../services/devices.service'
 
 export const fetchDevices = createAsyncThunk(
   'devices/fetchDevice',
-  async (id, { rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
-      return await _getDevicesByUserId()
+      const res = await _getDevicesByUserId()
+      return res.data
     } catch (error) {
       return rejectWithValue(error.response?.data || 'Error fetching device')
+    }
+  }
+)
+
+export const fetchDeviceReports = createAsyncThunk(
+  'devices/fetchDeviceReports',
+  async ({ deviceIds, startTime, endTime }, { rejectWithValue }) => {
+    try {
+      const response = await _getReportsForDevices({ deviceIds, startTime, endTime })
+      return response.data
+    } catch (error) {
+      return rejectWithValue(error.response?.data || 'Error fetching device reports')
     }
   }
 )
@@ -21,6 +35,8 @@ const devicesSlice = createSlice({
     isLoading: false,
     error: null,
     hasFetched: false,
+    reportValues: [],
+    isReportLoading: false,
   },
   reducers: {
     resetApi: (state) => {
@@ -28,7 +44,9 @@ const devicesSlice = createSlice({
       state.isLoading = false
       state.error = null
       state.hasFetched = false
-    }
+      state.reportValues = []
+      state.isReportLoading = false
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -38,18 +56,31 @@ const devicesSlice = createSlice({
       })
       .addCase(fetchDevices.fulfilled, (state, action) => {
         state.isLoading = false
-        state.data = action.payload.data.data
+        state.data = action.payload.data
         state.hasFetched = true
       })
       .addCase(fetchDevices.rejected, (state, action) => {
         state.isLoading = false
-        state.error = action.payload.data
+        state.error = action.payload?.message || action.payload
+        state.hasFetched = true
+      })
+
+      .addCase(fetchDeviceReports.pending, (state) => {
+        state.isReportLoading = true
+        state.error = null
+      })
+      .addCase(fetchDeviceReports.fulfilled, (state, action) => {
+        state.isReportLoading = false
+        state.reportValues = action.payload
+        state.hasFetched = true
+      })
+      .addCase(fetchDeviceReports.rejected, (state, action) => {
+        state.isReportLoading = false
+        state.error = action.payload?.message || action.payload
         state.hasFetched = true
       })
   },
 })
 
-export const {
-  resetApi,
-} = devicesSlice.actions
+export const { resetApi } = devicesSlice.actions
 export default devicesSlice.reducer
