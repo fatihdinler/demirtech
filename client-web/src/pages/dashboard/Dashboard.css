@@ -1,0 +1,316 @@
+.dashboard-container {
+  min-height: 90vh;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif;
+}
+
+.dashboard-date {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+/* ---- Metrik Kartları ---- */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.metric-card {
+  background: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.metric-value {
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 0.5rem;
+  color: #0f172a;
+}
+
+.metric-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.metric-card.normal {
+  border-left: 4px solid #10b981;
+}
+
+.metric-card.warning {
+  border-left: 4px solid #f59e0b;
+}
+
+.metric-card.critical {
+  border-left: 4px solid #ef4444;
+}
+
+/* ---- Grafik Kartları ---- */
+.chart-card {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: none;
+  overflow: hidden;
+}
+
+.chart-container {
+  margin-top: 1rem;
+}
+
+.chart-tabs .nav-link {
+  border: none;
+  color: #64748b;
+  padding: 0.75rem 1rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+.chart-tabs .nav-link.active {
+  color: #2563eb;
+  background-color: transparent;
+  border-bottom: 2px solid #2563eb;
+}
+
+.gauge-card {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: none;
+}
+
+.gauge-title {
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 1.125rem;
+  margin-bottom: 1rem;
+}
+
+.gauge-container {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.gauge-info {
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.gauge-status {
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.section-title {
+  font-weight: 600;
+  color: #1e293b;
+  margin-top: 0.5rem;
+}
+
+/* ---- Cihaz Kartları ---- */
+.device-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.device-card {
+  background: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: transform 0.3s, box-shadow 0.3s;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.device-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.device-card.normal {
+  border-left: 4px solid #10b981;
+}
+
+.device-card.warning {
+  border-left: 4px solid #f59e0b;
+}
+
+.device-card.critical {
+  border-left: 4px solid #ef4444;
+}
+
+.device-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.device-name {
+  font-weight: 600;
+  font-size: 1.125rem;
+  color: #1e293b;
+}
+
+.device-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background-color: #f1f5f9;
+  color: #64748b;
+}
+
+.device-card.normal .device-icon {
+  color: #10b981;
+}
+
+.device-card.warning .device-icon {
+  color: #f59e0b;
+}
+
+.device-card.critical .device-icon {
+  color: #ef4444;
+}
+
+.device-reading {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 1.25rem;
+}
+
+.reading-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1;
+}
+
+.reading-unit {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #64748b;
+  margin-left: 0.25rem;
+}
+
+.device-meta {
+  margin-bottom: 1rem;
+}
+
+.device-location {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #475569;
+  margin-bottom: 0.25rem;
+}
+
+.device-id {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.device-status-indicator {
+  display: flex;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+}
+
+.status-dot.normal {
+  background-color: #10b981;
+}
+
+.status-dot.warning {
+  background-color: #f59e0b;
+}
+
+.status-dot.critical {
+  background-color: #ef4444;
+}
+
+/* ---- Yükleme / Hata / Boş Durum ---- */
+.loading-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  color: #64748b;
+  font-size: 1rem;
+  gap: 1rem;
+}
+
+.error-message {
+  color: #ef4444;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  background-color: #fef2f2;
+  border: 1px solid #fee2e2;
+  margin: 2rem 0;
+  font-weight: 500;
+}
+
+/* Responsiveness */
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 1rem;
+  }
+
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .device-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+}
+
+@media (max-width: 576px) {
+  .dashboard-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .metric-value {
+    font-size: 1.75rem;
+  }
+
+  .device-grid {
+    grid-template-columns: 1fr;
+  }
+}
