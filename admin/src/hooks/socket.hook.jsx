@@ -1,17 +1,19 @@
-import { useState, useEffect } from 'react';
-import { io } from 'socket.io-client';
+import { useState, useEffect } from "react";
+import { io } from "socket.io-client";
 
-const SOCKET_SERVER_URL = 'http://localhost:3000'; // Gerekirse URL'i güncelleyin
+const SOCKET_SERVER_URL = process.env.REACT_APP_API_URL
+  ? process.env.REACT_APP_API_URL.replace("/api", "")
+  : "http://localhost:3000";
 
 function useRealtimeDeviceData() {
   const [realtimeDataMap, setRealtimeDataMap] = useState({}); // { [deviceId]: { ...data } }
 
   useEffect(() => {
-    const socket = io(SOCKET_SERVER_URL, { transports: ['websocket'] });
+    const socket = io(SOCKET_SERVER_URL, { transports: ["websocket"] });
 
-    socket.on('device-data', (data) => {
+    socket.on("device-data", (data) => {
       // data: { deviceId, chipId, value, type, occurredTime }
-      setRealtimeDataMap(prev => ({
+      setRealtimeDataMap((prev) => ({
         ...prev,
         [data.deviceId]: data,
       }));
