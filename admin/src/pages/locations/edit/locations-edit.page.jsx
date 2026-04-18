@@ -7,7 +7,6 @@ const LocationsEdit = () => {
   const {
     name,
     description,
-    model,
     branchId,
     onChange,
     branchesOptions,

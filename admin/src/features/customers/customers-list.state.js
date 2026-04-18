@@ -10,7 +10,5 @@ export const customersList = createSlice({
   },
 })
 
-export const {
-} = customersList.actions
 
 export default customersList.reducer

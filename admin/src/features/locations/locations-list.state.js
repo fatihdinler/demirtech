@@ -10,7 +10,5 @@ export const locationsList = createSlice({
   },
 })
 
-export const {
-} = locationsList.actions
 
 export default locationsList.reducer

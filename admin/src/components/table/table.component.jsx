@@ -3,7 +3,6 @@ import {
   Card,
   Form,
   Pagination,
-  Dropdown,
   OverlayTrigger,
   Tooltip,
   Table as BootstrapTable,

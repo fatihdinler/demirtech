@@ -10,7 +10,5 @@ export const devicesList = createSlice({
   },
 })
 
-export const {
-} = devicesList.actions
 
 export default devicesList.reducer

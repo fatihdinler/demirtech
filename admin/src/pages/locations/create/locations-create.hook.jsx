@@ -13,8 +13,8 @@ const useLocationsCreate = () => {
   const navigate = useNavigate()
   const { name, description, branchId, customerId, } = useSelector(state => state.locations.create)
 
-  const { data: branches, isLoading: isBranchesLoading, error: errorBranches, hasFetched: doesBranchesLoaded } = useSelector(state => state.branches.api)
-  const { data: customers, isLoading: isCustomersLoading, error: errorCustomers, hasFetched: doesCustomersLoaded } = useSelector(state => state.customers.api)
+  const { data: branches, isLoading: isBranchesLoading, hasFetched: doesBranchesLoaded } = useSelector(state => state.branches.api)
+  const { data: customers, isLoading: isCustomersLoading, hasFetched: doesCustomersLoaded } = useSelector(state => state.customers.api)
 
   const { refetch: refetchLocationsAfterCreation } = useLocationsList()
 

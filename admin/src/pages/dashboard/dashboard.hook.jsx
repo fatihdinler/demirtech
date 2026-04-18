@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react'
+import { useEffect } from 'react'
 import { useDispatch, useSelector, shallowEqual } from 'react-redux'
 import { fetchCustomers } from '../../features/customers/customers.api'
 import { fetchBranches } from '../../features/branches/branches.api'

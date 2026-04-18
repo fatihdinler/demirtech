@@ -11,8 +11,8 @@ const useBranchesList = () => {
     (state) => state.branches.api,
     shallowEqual
   )
-  const { data: customers, isLoading: isCustomersLoading, error: errorCustomers, hasFetched: doesCustomersLoaded } = useSelector(state => state.customers.api)
-  const { data: users, isLoading: isUsersLoading, error: errorUsers, hasFetched: doesUsersLoaded } = useSelector(state => state.users.api)
+  const { data: customers, isLoading: isCustomersLoading, hasFetched: doesCustomersLoaded } = useSelector(state => state.customers.api)
+  const { data: users, isLoading: isUsersLoading, hasFetched: doesUsersLoaded } = useSelector(state => state.users.api)
 
   const loadBranches = useCallback(() => {
     dispatch(fetchBranches())

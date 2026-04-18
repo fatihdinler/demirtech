@@ -10,7 +10,5 @@ export const usersList = createSlice({
   },
 })
 
-export const {
-} = usersList.actions
 
 export default usersList.reducer

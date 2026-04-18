@@ -10,7 +10,7 @@ const useUsersList = () => {
     (state) => state.users.api,
     shallowEqual
   )
-  const { data: branches, isLoading: isBranchesLoading, error: errorBranches, hasFetched: doesBranchesLoaded } = useSelector(state => state.branches.api)
+  const { data: branches, isLoading: isBranchesLoading, hasFetched: doesBranchesLoaded } = useSelector(state => state.branches.api)
 
   const loadUsers = useCallback(() => {
     dispatch(fetchUsers())

@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { editLocationValidator, retrieveSuccessMessage } from './locations-edit.messager'
-import { setName, setDescription, setModel, setBranchId, setCustomerId, clearPage } from '../../../features/locations/locations-edit.state'
+import { setName, setDescription, setBranchId, setCustomerId, clearPage } from '../../../features/locations/locations-edit.state'
 import { fetchLocation, updateLocation } from '../../../features/locations/locations.api'
 import { fetchBranches } from '../../../features/branches/branches.api'
 import { fetchCustomers } from '../../../features/customers/customers.api'
@@ -16,7 +16,7 @@ const useLocationsEdit = () => {
   const { name, description, model, branchId, customerId } = useSelector(state => state.locations.edit)
 
   const { data: branches, isLoading: isBranchesLoading, hasFetched: doesBranchesLoaded } = useSelector(state => state.branches.api)
-  const { data: customers, isLoading: isCustomersLoading, error: errorCustomers, hasFetched: doesCustomersLoaded } = useSelector(state => state.customers.api)
+  const { data: customers } = useSelector(state => state.customers.api)
 
   const { refetch: refetchLocationsAfterEditing } = useLocationsList()
 

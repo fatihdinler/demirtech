@@ -1,4 +1,4 @@
-import { FaHome, FaStoreAlt, FaUserCog } from 'react-icons/fa'
+import { FaHome, FaStoreAlt } from 'react-icons/fa'
 import { FaPeopleRoof } from 'react-icons/fa6'
 import { MdAcUnit, MdDevices, MdAssessment } from 'react-icons/md'
 import { TbUsers } from 'react-icons/tb'

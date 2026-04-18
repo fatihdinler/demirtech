@@ -31,7 +31,7 @@ const RedirectAuthenticatedUser = ({ children }) => {
 
 const App = () => {
   const dispatch = useDispatch()
-  const { error } = useSelector(state => state.auth.api)
+  useSelector(state => state.auth.api)
 
   useEffect(() => {
     dispatch(checkAuth())

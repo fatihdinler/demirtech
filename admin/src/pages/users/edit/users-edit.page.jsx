@@ -17,7 +17,6 @@ const UsersEdit = () => {
     handleRolesChange,
     name,
     onChange,
-    password,
     role,
     roleOptions,
     surname,

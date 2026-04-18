@@ -16,8 +16,8 @@ const useDevicesCreate = () => {
   const { name, description, chipId, locationId, deviceType, measurementType, branchId, customerId, isActive } = useSelector(state => state.devices.create)
 
   const { data: locations, isLoading: isLocationsLoading, hasFetched: doesLocationsLoaded } = useSelector(state => state.locations.api)
-  const { data: customers, isLoading: isCustomersLoading, error: errorCustomers, hasFetched: doesCustomersLoaded } = useSelector(state => state.customers.api)
-  const { data: branches, isLoading: isBranchesLoading, error: errorBranches, hasFetched: doesBranchesLoaded } = useSelector(state => state.branches.api)
+  const { data: customers, isLoading: isCustomersLoading, hasFetched: doesCustomersLoaded } = useSelector(state => state.customers.api)
+  const { data: branches, isLoading: isBranchesLoading, hasFetched: doesBranchesLoaded } = useSelector(state => state.branches.api)
 
   const { refetch: refetchDevicesAfterCreation } = useDevicesList()
 

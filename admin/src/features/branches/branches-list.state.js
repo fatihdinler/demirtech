@@ -10,7 +10,5 @@ export const branchesList = createSlice({
   },
 })
 
-export const {
-} = branchesList.actions
 
 export default branchesList.reducer
