@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { FaThermometerHalf, FaTint, FaExclamationTriangle, FaChevronLeft, FaChartLine } from 'react-icons/fa'
 import useDashboard from './dashboard.hook'
 import useRealtimeDeviceData from '../../hooks/socket.hook'

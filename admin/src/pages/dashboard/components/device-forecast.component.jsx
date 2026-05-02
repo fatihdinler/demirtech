@@ -9,7 +9,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ReferenceLine,
 } from 'recharts'
 import { FaArrowUp, FaArrowDown, FaMinus, FaChevronLeft, FaSync } from 'react-icons/fa'
