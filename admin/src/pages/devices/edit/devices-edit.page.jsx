@@ -1,183 +1,74 @@
-import { Form, Container, Row, Col } from 'react-bootstrap'
-import { Breadcrumb, PageFooter } from '../../../components'
 import Select from 'react-select'
+import { Breadcrumb, PageFooter } from '../../../components'
 import useDevicesEdit from './devices-edit.hook'
+
+const inputCls = "w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all disabled:bg-slate-50 disabled:text-slate-400"
+const labelCls = "block text-sm font-medium text-slate-700 mb-1.5"
 
 const DevicesEdit = () => {
   const {
-    name,
-    description,
-    chipId,
-    locationId,
-    deviceType,
-    measurementType,
-    mqttTopic,
-    onChange,
-    locationsOptions,
-    handleLocationsChange,
-    clearPageHandler,
-    editDevice,
-    deviceTypesOptions,
-    handleDeviceTypesChange,
-    deviceMeasurementTypesOptions,
-    handleDeviceMeasurementTypesChange,
-    customersOptions,
-    handleCustomersChange,
-    branchesOptions,
-    handleBranchesChange,
-    customerId,
-    branchId,
-    isActive,
+    name, description, chipId, locationId, deviceType, measurementType, mqttTopic, onChange,
+    locationsOptions, handleLocationsChange, clearPageHandler, editDevice,
+    deviceTypesOptions, handleDeviceTypesChange, deviceMeasurementTypesOptions, handleDeviceMeasurementTypesChange,
+    customersOptions, handleCustomersChange, branchesOptions, handleBranchesChange,
+    customerId, branchId, isActive,
   } = useDevicesEdit()
 
   return (
-    <Container fluid>
-      <Breadcrumb
-        paths={[
-          { label: 'Cihazlar', link: '/devices' },
-          { label: 'Düzenle' }
-        ]}
-      />
-      <div className='page-background'>
-        <Row className='mt-3'>
-          <Col md={6}>
-            <Form.Group controlId='deviceName'>
-              <Form.Label>Ad</Form.Label>
-              <Form.Control
-                type='text'
-                placeholder='Cihaz adını girin'
-                value={name}
-                onChange={(e) => onChange(e, 'name')}
-              />
-            </Form.Group>
-          </Col>
-          <Col md={6}>
-            <Form.Group controlId='deviceChipId'>
-              <Form.Label>Chip ID</Form.Label>
-              <Form.Control
-                type='text'
-                placeholder='Chip ID girin'
-                value={chipId}
-                onChange={(e) => onChange(e, 'chipId')}
-              />
-            </Form.Group>
-          </Col>
-        </Row>
-
-        {/* Customer ve Branch seçimi */}
-        <Row className='mt-3'>
-          <Col md={6}>
-            <Form.Group controlId='deviceCustomer'>
-              <Form.Label>Müşteri</Form.Label>
-              <Select
-                options={customersOptions}
-                value={customersOptions ? customersOptions.find(option => option.value === customerId) : null}
-                onChange={handleCustomersChange}
-                placeholder='Müşteri seçin'
-              />
-            </Form.Group>
-          </Col>
-          <Col md={6}>
-            <Form.Group controlId='deviceBranch'>
-              <Form.Label>Şube</Form.Label>
-              <Select
-                options={branchesOptions}
-                value={branchesOptions ? branchesOptions.find(option => option.value === branchId) : null}
-                onChange={handleBranchesChange}
-                placeholder={!customerId ? 'Lütfen önce müşteri seçin' : 'Şube seçin'}
-              />
-            </Form.Group>
-          </Col>
-        </Row>
-
-        <Row className='mt-3'>
-          <Col md={6}>
-            <Form.Group controlId='deviceClimate'>
-              <Form.Label>Klima</Form.Label>
-              <Select
-                options={locationsOptions}
-                value={locationsOptions ? locationsOptions.find(option => option.value === locationId) : null}
-                onChange={handleLocationsChange}
-                placeholder={(!customerId || !branchId) ? 'Lütfen önce müşteri ve şube seçin' : 'Klima seçin'}
-              />
-            </Form.Group>
-          </Col>
-          <Col md={6}>
-            <Form.Group controlId='deviceType'>
-              <Form.Label>Cihaz Tipi</Form.Label>
-              <Select
-                options={deviceTypesOptions}
-                value={deviceTypesOptions ? deviceTypesOptions.find(option => option.value === deviceType) : null}
-                onChange={handleDeviceTypesChange}
-                placeholder='Cihaz tipi seçin'
-              />
-            </Form.Group>
-          </Col>
-        </Row>
-
-        <Row className='mt-3'>
-          <Col md={12}>
-            <Form.Group controlId='deviceMeasurementType'>
-              <Form.Label>Ölçüm Tipi</Form.Label>
-              <Select
-                options={deviceMeasurementTypesOptions}
-                value={deviceMeasurementTypesOptions ? deviceMeasurementTypesOptions.find(option => option.value === measurementType) : null}
-                onChange={handleDeviceMeasurementTypesChange}
-                placeholder='Ölçüm tipi seçin'
-              />
-            </Form.Group>
-          </Col>
-        </Row>
-
-        <Row className='mt-3'>
-          <Col>
-            <Form.Group controlId='deviceDescription'>
-              <Form.Label>Cihaz Aktifliği</Form.Label>
-              <Form.Check
-                type='switch'
-                id='custom-switch'
-                label='Active'
-                checked={isActive}  // isActive'in boolean değer olması gerekiyor
-                onChange={(e) => onChange(e, 'isActive')}
-              />
-            </Form.Group>
-          </Col>
-        </Row>
-
-        <Row className='mt-3'>
-          <Col>
-            <Form.Group controlId='deviceDescription'>
-              <Form.Label>Açıklama</Form.Label>
-              <Form.Control
-                as='textarea'
-                rows={3}
-                placeholder='Cihaz açıklamasını girin'
-                value={description}
-                onChange={(e) => onChange(e, 'description')}
-              />
-            </Form.Group>
-          </Col>
-        </Row>
-
-        <Row className='mt-3'>
-          <Col>
-            <Form.Group controlId='deviceMqttTopic'>
-              <Form.Label>MQTT Topic</Form.Label>
-              <Form.Control
-                type='text'
-                value={mqttTopic}
-                disabled
-              />
-            </Form.Group>
-          </Col>
-        </Row>
-
-        <PageFooter
-          createOrEditHandler={editDevice}
-          cancelHander={clearPageHandler}
-        />
+    <div>
+      <Breadcrumb paths={[{ label: 'Cihazlar', link: '/devices' }, { label: 'Düzenle' }]} />
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div>
+            <label className={labelCls}>Ad</label>
+            <input type="text" placeholder="Cihaz adını girin" value={name} onChange={(e) => onChange(e, 'name')} className={inputCls} />
+          </div>
+          <div>
+            <label className={labelCls}>Chip ID</label>
+            <input type="text" placeholder="Chip ID girin" value={chipId} onChange={(e) => onChange(e, 'chipId')} className={inputCls} />
+          </div>
+          <div>
+            <label className={labelCls}>Müşteri</label>
+            <Select options={customersOptions} value={customersOptions?.find(o => o.value === customerId)} onChange={handleCustomersChange} placeholder="Müşteri seçin" classNamePrefix="rs" />
+          </div>
+          <div>
+            <label className={labelCls}>Şube</label>
+            <Select options={branchesOptions} value={branchesOptions?.find(o => o.value === branchId)} onChange={handleBranchesChange} placeholder={!customerId ? 'Lütfen önce müşteri seçin' : 'Şube seçin'} classNamePrefix="rs" />
+          </div>
+          <div>
+            <label className={labelCls}>Lokasyon</label>
+            <Select options={locationsOptions} value={locationsOptions?.find(o => o.value === locationId)} onChange={handleLocationsChange} placeholder={(!customerId || !branchId) ? 'Lütfen müşteri ve şube seçin' : 'Lokasyon seçin'} classNamePrefix="rs" />
+          </div>
+          <div>
+            <label className={labelCls}>Cihaz Tipi</label>
+            <Select options={deviceTypesOptions} value={deviceTypesOptions?.find(o => o.value === deviceType)} onChange={handleDeviceTypesChange} placeholder="Cihaz tipi seçin" classNamePrefix="rs" />
+          </div>
+          <div className="md:col-span-2">
+            <label className={labelCls}>Ölçüm Tipi</label>
+            <Select options={deviceMeasurementTypesOptions} value={deviceMeasurementTypesOptions?.find(o => o.value === measurementType)} onChange={handleDeviceMeasurementTypesChange} placeholder="Ölçüm tipi seçin" classNamePrefix="rs" />
+          </div>
+          <div className="md:col-span-2">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <div className="relative">
+                <input type="checkbox" className="sr-only" checked={!!isActive} onChange={(e) => onChange(e, 'isActive')} />
+                <div className={`w-10 h-5 rounded-full transition-colors duration-200 ${isActive ? 'bg-indigo-600' : 'bg-slate-300'}`} />
+                <div className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200 ${isActive ? 'translate-x-5' : 'translate-x-0'}`} />
+              </div>
+              <span className="text-sm font-medium text-slate-700">Cihaz Aktif</span>
+            </label>
+          </div>
+          <div className="md:col-span-2">
+            <label className={labelCls}>Açıklama</label>
+            <textarea rows={3} placeholder="Cihaz açıklamasını girin" value={description} onChange={(e) => onChange(e, 'description')} className={`${inputCls} resize-none`} />
+          </div>
+          <div className="md:col-span-2">
+            <label className={labelCls}>MQTT Topic</label>
+            <input type="text" value={mqttTopic} disabled className={inputCls} />
+          </div>
+        </div>
+        <PageFooter createOrEditHandler={editDevice} cancelHander={clearPageHandler} />
       </div>
-    </Container>
+    </div>
   )
 }
 

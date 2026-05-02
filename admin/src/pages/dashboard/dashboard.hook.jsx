@@ -4,12 +4,18 @@ import { fetchCustomers } from '../../features/customers/customers.api'
 import { fetchBranches } from '../../features/branches/branches.api'
 import { fetchDevices } from '../../features/devices/devices.api'
 import { fetchLocations } from '../../features/locations/locations.api'
-import { setStep, setSelectedBranch, setSelectedCustomer, setSelectedLocation, } from '../../features/dashboard/dashboard.state'
+import {
+  setStep,
+  setSelectedCustomer,
+  setSelectedDevice,
+} from '../../features/dashboard/dashboard.state'
 
 const useDashboard = () => {
   const dispatch = useDispatch()
 
-  const { step, selectedCustomer, selectedBranch, selectedLocation } = useSelector(state => state.dashboard.dashboard)
+  const { step, selectedCustomer, selectedDevice } = useSelector(
+    (state) => state.dashboard.dashboard
+  )
 
   const { data: customers, isLoading: isCustomersLoading, error: errorCustomers, hasFetched: doesCustomersLoaded } = useSelector(
     (state) => state.customers.api,
@@ -32,27 +38,19 @@ const useDashboard = () => {
   )
 
   useEffect(() => {
-    if (!doesCustomersLoaded && !isCustomersLoading) {
-      dispatch(fetchCustomers())
-    }
+    if (!doesCustomersLoaded && !isCustomersLoading) dispatch(fetchCustomers())
   }, [doesCustomersLoaded, isCustomersLoading, dispatch])
 
   useEffect(() => {
-    if (!doesBranchesLoaded && !isBranchesLoading) {
-      dispatch(fetchBranches())
-    }
+    if (!doesBranchesLoaded && !isBranchesLoading) dispatch(fetchBranches())
   }, [doesBranchesLoaded, isBranchesLoading, dispatch])
 
   useEffect(() => {
-    if (!doesLocationsLoaded && !isLocationsLoading) {
-      dispatch(fetchLocations())
-    }
+    if (!doesLocationsLoaded && !isLocationsLoading) dispatch(fetchLocations())
   }, [doesLocationsLoaded, isLocationsLoading, dispatch])
 
   useEffect(() => {
-    if (!doesDevicesLoaded && !isDevicesLoading) {
-      dispatch(fetchDevices())
-    }
+    if (!doesDevicesLoaded && !isDevicesLoading) dispatch(fetchDevices())
   }, [doesDevicesLoaded, isDevicesLoading, dispatch])
 
   const handleCustomerSelect = (customer) => {
@@ -60,57 +58,34 @@ const useDashboard = () => {
     dispatch(setStep(2))
   }
 
-  const handleBranchSelect = (branch) => {
-    dispatch(setSelectedBranch(branch))
-    dispatch(setStep(3))
-  }
-
-  const handleLocationSelect = (location) => {
-    dispatch(setSelectedLocation(location))
-    dispatch(setStep(4))
-  }
-
   const handleBackToCustomer = () => {
     dispatch(setSelectedCustomer(null))
-    dispatch(setSelectedBranch(null))
-    dispatch(setSelectedLocation(null))
+    dispatch(setSelectedDevice(null))
     dispatch(setStep(1))
   }
 
-  const handleBackToBranch = () => {
-    dispatch(setSelectedBranch(null))
-    dispatch(setSelectedLocation(null))
-    dispatch(setStep(2))
-  }
-
-  const handleBackToLocation = () => {
-    dispatch(setSelectedLocation(null))
+  const handleDeviceSelect = (device) => {
+    dispatch(setSelectedDevice(device))
     dispatch(setStep(3))
   }
 
+  const handleBackToDevices = () => {
+    dispatch(setSelectedDevice(null))
+    dispatch(setStep(2))
+  }
+
   return {
-    customers,
-    isCustomersLoading,
-    errorCustomers,
-    branches,
-    isBranchesLoading,
-    errorBranches,
-    locations,
-    isLocationsLoading,
-    errorLocations,
-    devices,
-    isDevicesLoading,
-    errorDevices,
+    customers, isCustomersLoading, errorCustomers,
+    branches, isBranchesLoading, errorBranches,
+    locations, isLocationsLoading, errorLocations,
+    devices, isDevicesLoading, errorDevices,
     step,
     selectedCustomer,
-    selectedBranch,
-    selectedLocation,
+    selectedDevice,
     handleCustomerSelect,
-    handleBranchSelect,
-    handleLocationSelect,
     handleBackToCustomer,
-    handleBackToBranch,
-    handleBackToLocation,
+    handleDeviceSelect,
+    handleBackToDevices,
   }
 }
 

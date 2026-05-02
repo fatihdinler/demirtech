@@ -1,13 +1,12 @@
 import useDevicesList from './devices-list.hook'
 import DevicesListTable from './devices-list.table'
 import { ListPagesHeader, Loading } from '../../../components'
-import { Container } from 'react-bootstrap'
 
 const DevicesList = () => {
   const { devices, isLoading, error, locations } = useDevicesList()
 
   return (
-    <Container fluid>
+    <div>
       {isLoading && error === null ? (
         <Loading />
       ) : (
@@ -19,7 +18,7 @@ const DevicesList = () => {
           <DevicesListTable devices={devices} locations={locations} />
         </>
       )}
-    </Container>
+    </div>
   )
 }
 

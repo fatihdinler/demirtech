@@ -3,8 +3,7 @@ import { createSlice } from '@reduxjs/toolkit'
 const initialState = {
   step: 1,
   selectedCustomer: null,
-  selectedBranch: null,
-  selectedLocation: null,
+  selectedDevice: null,
 }
 
 export const dashboard = createSlice({
@@ -17,11 +16,8 @@ export const dashboard = createSlice({
     setSelectedCustomer: (state, action) => {
       state.selectedCustomer = action.payload
     },
-    setSelectedBranch: (state, action) => {
-      state.selectedBranch = action.payload
-    },
-    setSelectedLocation: (state, action) => {
-      state.selectedLocation = action.payload
+    setSelectedDevice: (state, action) => {
+      state.selectedDevice = action.payload
     },
   },
 })
@@ -29,8 +25,7 @@ export const dashboard = createSlice({
 export const {
   setStep,
   setSelectedCustomer,
-  setSelectedBranch,
-  setSelectedLocation,
+  setSelectedDevice,
 } = dashboard.actions
 
 export default dashboard.reducer

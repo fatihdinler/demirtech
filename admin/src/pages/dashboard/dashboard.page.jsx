@@ -1,50 +1,35 @@
 import useDashboard from './dashboard.hook'
 import DashboardCustomerSelection from './dashboard-customer.page'
-import DashboardBranchSelection from './dashboard-branch.page'
-import DashboardLocationSelection from './dashboard-location.page'
 import DashboardDeviceSelection from './dashboard-device.page'
+import DeviceForecast from './components/device-forecast.component'
 
 const Dashboard = () => {
   const {
     step,
     selectedCustomer,
-    selectedBranch,
-    selectedLocation,
+    selectedDevice,
     handleCustomerSelect,
-    handleBranchSelect,
-    handleLocationSelect,
     handleBackToCustomer,
-    handleBackToBranch,
-    handleBackToLocation,
+    handleDeviceSelect,
+    handleBackToDevices,
   } = useDashboard()
 
   return (
-    <div style={{height: 'calc(100vh - 80px)', // 80px örnek header yüksekliği, ihtiyaca göre ayarlayın
-      overflowY: 'auto'}}>
+    <div className="h-full overflow-y-auto scrollbar-thin">
       {step === 1 && (
         <DashboardCustomerSelection onCustomerSelect={handleCustomerSelect} />
       )}
       {step === 2 && selectedCustomer && (
-        <DashboardBranchSelection
-          selectedCustomer={selectedCustomer}
-          onBranchSelect={handleBranchSelect}
-          onBackToCustomer={handleBackToCustomer}
-        />
-      )}
-      {step === 3 && selectedCustomer && selectedBranch && (
-        <DashboardLocationSelection
-          selectedCustomer={selectedCustomer}
-          selectedBranch={selectedBranch}
-          onLocationSelect={handleLocationSelect}
-          onBackToBranch={handleBackToBranch}
-        />
-      )}
-      {step === 4 && selectedCustomer && selectedBranch && selectedLocation && (
         <DashboardDeviceSelection
           selectedCustomer={selectedCustomer}
-          selectedBranch={selectedBranch}
-          selectedLocation={selectedLocation}
-          onBackToLocation={handleBackToLocation}
+          onBackToCustomer={handleBackToCustomer}
+          onDeviceSelect={handleDeviceSelect}
+        />
+      )}
+      {step === 3 && selectedDevice && (
+        <DeviceForecast
+          device={selectedDevice}
+          onBack={handleBackToDevices}
         />
       )}
     </div>

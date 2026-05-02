@@ -4,7 +4,6 @@ import { Provider } from 'react-redux'
 import axios from 'axios'
 import App from './App'
 import store from './features/store'
-import 'bootstrap/dist/css/bootstrap.min.css'
 import './styles/index.css'
 import 'react-toastify/dist/ReactToastify.css'
 

@@ -1,74 +1,77 @@
-import React from 'react'
-import { Nav } from 'react-bootstrap'
 import { Link, useLocation } from 'react-router-dom'
 import { routes } from '../../routes'
 
 const Sidebar = ({ isSidebarOpen }) => {
   const location = useLocation()
-  const sidebarWidth = isSidebarOpen ? 250 : 80
 
   return (
     <div
-      style={{
-        width: sidebarWidth,
-        minHeight: '100vh',
-        backgroundColor: '#ffffff',
-        color: '#343a40',
-        padding: '1rem',
-        transition: 'width 0.3s ease',
-        borderRight: '1px solid #dee2e6'
-      }}
+      className="h-full flex flex-col bg-gradient-to-b from-slate-950 to-indigo-950 overflow-hidden transition-all duration-300"
+      style={{ width: '100%' }}
     >
-      <Nav className='flex-column'>
+      <div className="flex-1 py-4 px-3 space-y-1 overflow-y-auto scrollbar-thin">
         {routes.map((route) => {
           if (!route.isSidebarPage) return null
           const active = location.pathname === route.to
+
           return (
-            <Nav.Link
-              as={Link}
+            <Link
               to={route.to}
               key={route.to}
-              active={active}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                padding: '0.75rem 1rem',
-                borderRadius: '0.375rem',
-                marginBottom: '0.5rem',
-                textDecoration: 'none',
-                color: active ? '#007bff' : '#495057',
-                backgroundColor: active ? '#e9ecef' : 'transparent',
-                boxShadow: active ? '0 4px 6px rgba(0,0,0,0.05)' : 'none',
-                transition: 'background-color 0.2s ease, box-shadow 0.2s ease'
-              }}
+              className={`
+                flex items-center rounded-xl transition-all duration-200 group relative
+                ${isSidebarOpen ? 'px-3 py-2.5' : 'px-0 py-2.5 justify-center'}
+                ${
+                  active
+                    ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-lg shadow-indigo-900/40'
+                    : 'text-slate-400 hover:bg-slate-800/60 hover:text-white'
+                }
+              `}
             >
-              <span style={{ fontSize: '1.25rem' }}>{route.icon}</span>
+              <span
+                className={`text-xl shrink-0 transition-all duration-200 ${
+                  active ? 'text-white' : 'text-slate-400 group-hover:text-indigo-400'
+                }`}
+              >
+                {route.icon}
+              </span>
+
               {isSidebarOpen && (
-                <span
-                  style={{
-                    marginLeft: '0.75rem',
-                    fontSize: '1rem',
-                    fontWeight: 500
-                  }}
-                >
+                <span className="ml-3 text-sm font-medium truncate">{route.label}</span>
+              )}
+
+              {active && isSidebarOpen && (
+                <span className="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-300 shrink-0" />
+              )}
+
+              {!isSidebarOpen && (
+                <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-slate-900 text-white text-xs font-medium rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-150 whitespace-nowrap z-50">
                   {route.label}
-                </span>
+                  <div className="absolute top-1/2 -left-1 -translate-y-1/2 border-4 border-transparent border-r-slate-900" />
+                </div>
               )}
-              {active && (
-                <div
-                  style={{
-                    marginLeft: 'auto',
-                    width: '6px',
-                    height: '6px',
-                    borderRadius: '50%',
-                    backgroundColor: '#007bff'
-                  }}
-                ></div>
-              )}
-            </Nav.Link>
+            </Link>
           )
         })}
-      </Nav>
+      </div>
+
+      <div className="px-3 py-4 border-t border-white/5">
+        <div
+          className={`flex items-center rounded-lg p-2 ${
+            isSidebarOpen ? '' : 'justify-center'
+          }`}
+        >
+          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-400 to-violet-500 flex items-center justify-center shrink-0">
+            <span className="text-white text-xs font-bold">D</span>
+          </div>
+          {isSidebarOpen && (
+            <div className="ml-2.5 min-w-0">
+              <p className="text-xs font-semibold text-white/90 truncate">Demirtek</p>
+              <p className="text-xs text-slate-500 truncate">Admin Panel</p>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
