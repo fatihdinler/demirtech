@@ -9,6 +9,7 @@
     "start": "nodemon app.js"
   },
   "dependencies": {
+    "arima": "^0.2.8",
     "bcryptjs": "^3.0.2",
     "bull": "^4.16.5",
     "cookie-parser": "^1.4.7",

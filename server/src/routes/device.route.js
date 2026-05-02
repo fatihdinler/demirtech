@@ -3,9 +3,12 @@ const router = express.Router()
 const deviceController = require('../controllers/device.controller')
 const deviceValidator = require('../validations/device.validation')
 const verifyToken = require('../middlewares/auth.middleware')
+const { getForecast } = require('../controllers/prediction.controller')
 
 router.get('/get-devices-by-user-id', verifyToken, deviceValidator.getDevicesByUserId, deviceController.getDevicesByUserId)
 router.post('/reports', verifyToken, deviceController.getReportsForDevices, deviceController.getReportsForDevices)
+
+router.get('/:id/forecast', verifyToken, getForecast)
 
 router.post('/', verifyToken, deviceValidator.createDevice, deviceController.createDevice)
 router.get('/', verifyToken, deviceValidator.getDevices, deviceController.getDevices)
