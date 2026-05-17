@@ -1,6 +1,7 @@
 const ARIMA = require('arima')
 const Device = require('../models/device.model')
 const { getDeviceDataModel } = require('../helpers/device-data.helper')
+const { analyzeCauses } = require('./cause-analysis.service')
 
 /**
  * ARIMA (AutoRegressive Integrated Moving Average) tabanlı zaman serisi tahmini.
@@ -99,15 +100,22 @@ async function getDeviceForecast(deviceId) {
 
   const lastTime = new Date(docs[docs.length - 1].occurredTime)
 
+  // Ölçüm tipine göre fiziksel sınırlar (ARIMA bu sınırları bilmez)
+  const bounds = device.measurementType === 'HUMIDITY'
+    ? { min: 0, max: 100 }
+    : { min: -50, max: 80 }
+
+  const clamp = (v) => Math.max(bounds.min, Math.min(bounds.max, v))
+
   // Tahmin serisi — %95 güven aralığı ile (z = 1.96)
   const forecast = predictions.map((value, i) => {
     const sigma = Math.sqrt(Math.abs(variances[i] || 0))
-    const v = parseFloat(value.toFixed(2))
+    const v = parseFloat(clamp(value).toFixed(2))
     return {
       time: new Date(lastTime.getTime() + avgIntervalMs * (i + 1)).toISOString(),
       value: v,
-      upper: parseFloat((v + 1.96 * sigma).toFixed(2)),
-      lower: parseFloat((v - 1.96 * sigma).toFixed(2)),
+      upper: parseFloat(clamp(v + 1.96 * sigma).toFixed(2)),
+      lower: parseFloat(clamp(v - 1.96 * sigma).toFixed(2)),
     }
   })
 
@@ -133,6 +141,23 @@ async function getDeviceForecast(deviceId) {
     allValues.reduce((s, v) => s + Math.pow(v - mean, 2), 0) / allValues.length
   )
 
+  const computedStats = {
+    lastValue: parseFloat(timeSeries[timeSeries.length - 1].toFixed(2)),
+    mean: parseFloat(mean.toFixed(2)),
+    stdDev: parseFloat(stdDev.toFixed(2)),
+    nextPredicted: forecast[0]?.value ?? null,
+  }
+
+  const timestamps = docs.slice(-HISTORY_CHART).map(d => d.occurredTime)
+  const causes = analyzeCauses(
+    allValues,
+    timestamps,
+    forecast,
+    computedStats,
+    trend,
+    device.measurementType
+  )
+
   return {
     deviceId,
     deviceName: device.name,
@@ -149,12 +174,8 @@ async function getDeviceForecast(deviceId) {
       confidenceLevel: 0.95,
     },
     trend,
-    stats: {
-      lastValue: parseFloat(timeSeries[timeSeries.length - 1].toFixed(2)),
-      mean: parseFloat(mean.toFixed(2)),
-      stdDev: parseFloat(stdDev.toFixed(2)),
-      nextPredicted: forecast[0]?.value ?? null,
-    },
+    stats: computedStats,
+    causes,
     generatedAt: new Date().toISOString(),
   }
 }

@@ -15,6 +15,7 @@ import { FaArrowUp, FaArrowDown, FaMinus, FaChevronLeft, FaSync } from 'react-ic
 import { format, parseISO } from 'date-fns'
 import { tr } from 'date-fns/locale'
 import { fetchDeviceForecast } from '../../../features/predictions/predictions.api'
+import DeviceCauses from './device-causes.component'
 
 const trendConfig = {
   increasing: { icon: FaArrowUp, color: 'text-red-500', bg: 'bg-red-50', border: 'border-red-200', label: 'Artış Trendi' },
@@ -84,12 +85,14 @@ const DeviceForecast = ({ device, onBack }) => {
   let trendKey = 'stable'
   let stats = null
   let nowIndex = -1
+  let causes = []
 
   if (forecastState?.data) {
-    const { historical, forecast, model, trend, stats: s } = forecastState.data
+    const { historical, forecast, model, trend, stats: s, causes: c } = forecastState.data
     modelInfo = model
     trendKey = trend
     stats = s
+    causes = c || []
 
     chartData = [
       ...historical.map(h => ({
@@ -318,6 +321,9 @@ const DeviceForecast = ({ device, onBack }) => {
               </ResponsiveContainer>
             </div>
           </div>
+
+          {/* Cause Analysis */}
+          <DeviceCauses causes={causes} />
 
           {/* Model Info */}
           <div className="bg-slate-950 rounded-2xl p-5 text-white">

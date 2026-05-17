@@ -1,6 +1,7 @@
 const Device = require('../models/device.model')
 const { insertDeviceData } = require('./device-data.helper')
 const { emitDeviceData } = require('./socket.helper')
+const { checkAndAlert } = require('../services/alert.service')
 
 async function subscribeToWildcardTopic(mqttClient) {
   mqttClient.subscribe('demirtech/#', (err) => {
@@ -83,6 +84,14 @@ async function listenDevicesMqtt(mqttClient) {
         .catch(err => {
           console.error(`Error inserting data for device ${device.id}:`, err)
         })
+
+      checkAndAlert({
+        deviceId: device.id,
+        deviceName: device.name,
+        chipId: payload.chipId,
+        measurementType: device.measurementType,
+        value: Number(payload.value),
+      })
     }
   })
 }

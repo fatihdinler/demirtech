@@ -10,6 +10,7 @@ const { connectDb } = require('./src/helpers/database.helper')
 const config = require('./src/config')
 const { listenDevicesMqtt } = require('./src/helpers/mqtt.listener')
 const { initSocket } = require('./src/helpers/socket.helper.js')
+const { startSimulation } = require('./src/simulation')
 
 const customerRoutes = require('./src/routes/customer.route')
 const branchRoutes = require('./src/routes/branch.route')
@@ -58,6 +59,7 @@ server.listen(port, async () => {
     global.db = db
     await require('./src/helpers/db-scripts/index.js')()
     listenDevicesMqtt(global.mqttClient)
+    await startSimulation()
   } catch (error) {
     console.error(`Error in app.js: ${error.message}`)
   }
