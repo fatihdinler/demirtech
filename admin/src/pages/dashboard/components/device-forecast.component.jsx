@@ -11,7 +11,7 @@ import {
   Tooltip,
   ReferenceLine,
 } from 'recharts'
-import { FaArrowUp, FaArrowDown, FaMinus, FaChevronLeft, FaSync } from 'react-icons/fa'
+import { FaArrowUp, FaArrowDown, FaMinus, FaChevronLeft, FaSync, FaBrain } from 'react-icons/fa'
 import { format, parseISO } from 'date-fns'
 import { tr } from 'date-fns/locale'
 import { fetchDeviceForecast } from '../../../features/predictions/predictions.api'
@@ -38,7 +38,7 @@ const formatFullTime = (iso) => {
   try { return format(parseISO(iso), 'dd MMM HH:mm', { locale: tr }) } catch { return iso }
 }
 
-const CustomTooltip = ({ active, payload, label, unit, nowLabel }) => {
+const CustomTooltip = ({ active, payload, label, unit }) => {
   if (!active || !payload?.length) return null
   const isForecast = payload.some(p => p.dataKey === 'forecastValue')
 
@@ -65,6 +65,13 @@ const CustomTooltip = ({ active, payload, label, unit, nowLabel }) => {
   )
 }
 
+const MetricBadge = ({ label, value, good }) => (
+  <div className={`px-3 py-2 rounded-lg border ${good ? 'bg-emerald-50 border-emerald-200' : 'bg-slate-50 border-slate-200'}`}>
+    <p className="text-[10px] font-medium text-slate-500">{label}</p>
+    <p className={`text-sm font-black ${good ? 'text-emerald-700' : 'text-slate-800'}`}>{value}</p>
+  </div>
+)
+
 const DeviceForecast = ({ device, onBack }) => {
   const dispatch = useDispatch()
   const forecastState = useSelector(s => s.predictions.byDevice[device.id])
@@ -79,7 +86,6 @@ const DeviceForecast = ({ device, onBack }) => {
 
   const meta = measurementMeta[device.measurementType?.toLowerCase()] || { unit: '', label: 'Değer', color: '#6366f1' }
 
-  // --- Grafik verisi oluştur ---
   let chartData = []
   let modelInfo = null
   let trendKey = 'stable'
@@ -115,6 +121,7 @@ const DeviceForecast = ({ device, onBack }) => {
 
   const trendCfg = trendConfig[trendKey]
   const TrendIcon = trendCfg.icon
+  const metrics = modelInfo?.metrics
 
   return (
     <div className="animate-fadeSlideIn">
@@ -152,7 +159,7 @@ const DeviceForecast = ({ device, onBack }) => {
             <div className="w-3 h-3 rounded-full bg-violet-500 animate-bounce2" />
             <div className="w-3 h-3 rounded-full bg-violet-500 animate-bounce3" />
           </div>
-          <p className="text-sm text-slate-400">ARIMA modeli eğitiliyor ve tahmin üretiliyor...</p>
+          <p className="text-sm text-slate-400">LSTM modeli eğitiliyor ve tahmin üretiliyor...</p>
         </div>
       )}
 
@@ -176,7 +183,6 @@ const DeviceForecast = ({ device, onBack }) => {
 
           {/* KPI Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {/* Son ölçüm */}
             <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
               <p className="text-xs font-medium text-slate-400 mb-1">Son Ölçüm</p>
               <p className="text-2xl font-black text-slate-900">
@@ -184,7 +190,6 @@ const DeviceForecast = ({ device, onBack }) => {
               </p>
             </div>
 
-            {/* Sonraki tahmin */}
             <div className="bg-gradient-to-br from-violet-50 to-indigo-50 border border-violet-200 rounded-2xl p-4 shadow-sm">
               <p className="text-xs font-medium text-violet-500 mb-1">Sonraki Tahmin</p>
               <p className="text-2xl font-black text-violet-700">
@@ -192,7 +197,6 @@ const DeviceForecast = ({ device, onBack }) => {
               </p>
             </div>
 
-            {/* Ortalama */}
             <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
               <p className="text-xs font-medium text-slate-400 mb-1">Ortalama</p>
               <p className="text-2xl font-black text-slate-700">
@@ -201,7 +205,6 @@ const DeviceForecast = ({ device, onBack }) => {
               <p className="text-xs text-slate-400 mt-0.5">σ = {stats?.stdDev}</p>
             </div>
 
-            {/* Trend */}
             <div className={`${trendCfg.bg} border ${trendCfg.border} rounded-2xl p-4 shadow-sm`}>
               <p className="text-xs font-medium text-slate-400 mb-1">Trend</p>
               <div className={`flex items-center gap-2 ${trendCfg.color}`}>
@@ -215,7 +218,7 @@ const DeviceForecast = ({ device, onBack }) => {
           <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
             <div className="px-5 pt-5 pb-3 flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-bold text-slate-800">Zaman Serisi & ARIMA Tahmini</h3>
+                <h3 className="text-sm font-bold text-slate-800">Zaman Serisi & LSTM Tahmini</h3>
                 <p className="text-xs text-slate-400 mt-0.5">
                   {modelInfo?.description} · %{(modelInfo?.confidenceLevel || 0.95) * 100} güven aralığı
                 </p>
@@ -266,7 +269,6 @@ const DeviceForecast = ({ device, onBack }) => {
 
                   <Tooltip content={<CustomTooltip unit={meta.unit} />} />
 
-                  {/* Confidence interval area */}
                   <Area
                     dataKey="upper"
                     fill="url(#ciGradient)"
@@ -282,7 +284,6 @@ const DeviceForecast = ({ device, onBack }) => {
                     legendType="none"
                   />
 
-                  {/* "Now" boundary */}
                   {nowIndex >= 0 && chartData[nowIndex] && (
                     <ReferenceLine
                       x={chartData[nowIndex].time}
@@ -293,7 +294,6 @@ const DeviceForecast = ({ device, onBack }) => {
                     />
                   )}
 
-                  {/* Historical line */}
                   <Line
                     type="monotone"
                     dataKey="historicalValue"
@@ -305,7 +305,6 @@ const DeviceForecast = ({ device, onBack }) => {
                     activeDot={{ r: 4, fill: '#6366f1', stroke: 'white', strokeWidth: 2 }}
                   />
 
-                  {/* Forecast line */}
                   <Line
                     type="monotone"
                     dataKey="forecastValue"
@@ -314,7 +313,7 @@ const DeviceForecast = ({ device, onBack }) => {
                     strokeDasharray="6 3"
                     dot={false}
                     connectNulls={false}
-                    name="ARIMA Tahmini"
+                    name="LSTM Tahmini"
                     activeDot={{ r: 4, fill: '#8b5cf6', stroke: 'white', strokeWidth: 2 }}
                   />
                 </ComposedChart>
@@ -325,13 +324,56 @@ const DeviceForecast = ({ device, onBack }) => {
           {/* Cause Analysis */}
           <DeviceCauses causes={causes} />
 
-          {/* Model Info */}
+          {/* Model Performance Metrics */}
+          {metrics && (
+            <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
+              <div className="px-5 py-3.5 flex items-center gap-2 border-b border-slate-100">
+                <FaBrain size={14} className="text-violet-500" />
+                <h4 className="text-sm font-bold text-slate-800">Model Performans Metrikleri</h4>
+              </div>
+              <div className="p-5 grid grid-cols-2 md:grid-cols-4 gap-3">
+                <MetricBadge
+                  label="MAE (Ortalama Mutlak Hata)"
+                  value={metrics.mae}
+                  good={metrics.mae < 2}
+                />
+                <MetricBadge
+                  label="RMSE (Kök Ortalama Kare Hata)"
+                  value={metrics.rmse}
+                  good={metrics.rmse < 3}
+                />
+                <MetricBadge
+                  label="MAPE (Ortalama Yüzde Hata)"
+                  value={`%${metrics.mape}`}
+                  good={metrics.mape < 10}
+                />
+                <MetricBadge
+                  label="R² (Belirlilik Katsayısı)"
+                  value={metrics.r2}
+                  good={metrics.r2 > 0.85}
+                />
+              </div>
+              <div className="px-5 pb-4">
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Bu metrikler modelin validasyon verisi üzerindeki performansını gösterir.
+                  R² değeri 1'e ne kadar yakınsa model o kadar iyi; MAE ve RMSE ne kadar düşükse tahmin hatası o kadar azdır.
+                  MAPE %10'un altındaysa model yüksek doğrulukta kabul edilir.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* LSTM Model Architecture */}
           <div className="bg-slate-950 rounded-2xl p-5 text-white">
-            <h4 className="text-sm font-bold mb-4 text-slate-200">Model Bilgisi</h4>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="flex items-center gap-2 mb-4">
+              <FaBrain size={14} className="text-violet-400" />
+              <h4 className="text-sm font-bold text-slate-200">LSTM Model Bilgisi</h4>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
               {[
-                { label: 'Algoritma', value: modelInfo?.algorithm || 'ARIMA' },
-                { label: 'Model', value: modelInfo?.description || '-' },
+                { label: 'Algoritma', value: modelInfo?.algorithm || 'LSTM' },
+                { label: 'Mimari', value: modelInfo?.description || '-' },
                 { label: 'Eğitim Verisi', value: `${modelInfo?.trainingPoints || '-'} nokta` },
                 { label: 'Güven Aralığı', value: `%${(modelInfo?.confidenceLevel || 0.95) * 100}` },
               ].map(item => (
@@ -341,18 +383,46 @@ const DeviceForecast = ({ device, onBack }) => {
                 </div>
               ))}
             </div>
-            <div className="mt-4 pt-4 border-t border-slate-800 grid grid-cols-3 gap-4">
-              {[
-                { label: 'AR(p) — Otoregresyon derecesi', value: `p = ${modelInfo?.p ?? '-'}` },
-                { label: 'I(d) — Fark alma derecesi', value: `d = ${modelInfo?.d ?? '-'}` },
-                { label: 'MA(q) — Hareketli ortalama derecesi', value: `q = ${modelInfo?.q ?? '-'}` },
-              ].map(item => (
-                <div key={item.label}>
-                  <p className="text-xs text-slate-500 mb-1">{item.label}</p>
-                  <p className="text-base font-black text-violet-400 font-mono">{item.value}</p>
+
+            {modelInfo?.hyperparameters && (
+              <div className="pt-4 border-t border-slate-800 grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
+                {[
+                  { label: 'Window Size (Pencere)', value: modelInfo.hyperparameters.windowSize },
+                  { label: 'Epochs (Dönem)', value: modelInfo.hyperparameters.epochs },
+                  { label: 'Batch Size', value: modelInfo.hyperparameters.batchSize },
+                  { label: 'Learning Rate', value: modelInfo.hyperparameters.learningRate },
+                  { label: 'Validation Split', value: `%${modelInfo.hyperparameters.validationSplit * 100}` },
+                ].map(item => (
+                  <div key={item.label}>
+                    <p className="text-[10px] text-slate-500 mb-1">{item.label}</p>
+                    <p className="text-sm font-black text-violet-400 font-mono">{item.value}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {modelInfo?.architecture && (
+              <div className="pt-4 border-t border-slate-800">
+                <p className="text-[10px] text-slate-500 mb-3">Katman Mimarisi</p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {[
+                    { name: 'Input', detail: `[${modelInfo.architecture.windowSize}, 1]`, color: 'bg-blue-600' },
+                    { name: 'LSTM', detail: `${modelInfo.architecture.lstmUnits} birim`, color: 'bg-violet-600' },
+                    { name: 'Dropout', detail: `${modelInfo.architecture.dropoutRate * 100}%`, color: 'bg-amber-600' },
+                    { name: 'Dense', detail: `${modelInfo.architecture.denseUnits} birim, ReLU`, color: 'bg-emerald-600' },
+                    { name: 'Output', detail: '1 birim, Linear', color: 'bg-rose-600' },
+                  ].map((layer, i) => (
+                    <div key={layer.name} className="flex items-center gap-2">
+                      <div className={`${layer.color} px-3 py-1.5 rounded-lg`}>
+                        <p className="text-[10px] font-bold text-white">{layer.name}</p>
+                        <p className="text-[9px] text-white/70">{layer.detail}</p>
+                      </div>
+                      {i < 4 && <span className="text-slate-600 text-xs">→</span>}
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </div>
+            )}
           </div>
 
         </div>

@@ -13,6 +13,8 @@ import {
   setCustomerId,
   clearPage,
   setIsActive,
+  setMinValue,
+  setMaxValue,
 } from '../../../features/devices/devices-edit.state'
 import { fetchDevice, updateDevice } from '../../../features/devices/devices.api'
 import { fetchLocations } from '../../../features/locations/locations.api'
@@ -38,6 +40,8 @@ const useDevicesEdit = () => {
     customerId,
     branchId,
     isActive,
+    minValue,
+    maxValue,
   } = useSelector(state => state.devices.edit)
 
   const { data: locations, isLoading: isLocationsLoading, hasFetched: doesLocationsLoaded } = useSelector(state => state.locations.api)
@@ -95,6 +99,8 @@ const useDevicesEdit = () => {
           if (response.data.mqttTopic) dispatch(setMqttTopic(response.data.mqttTopic))
           if (response.data.locationId) dispatch(setLocationId(response.data.locationId))
           if (response.data.isActive) dispatch(setIsActive(response.data.isActive))
+          if (response.data.minValue != null) dispatch(setMinValue(response.data.minValue))
+          if (response.data.maxValue != null) dispatch(setMaxValue(response.data.maxValue))
         }
       } catch (error) {
         console.error('Error fetching device:', error)
@@ -116,6 +122,12 @@ const useDevicesEdit = () => {
         break
       case 'isActive':
         dispatch(setIsActive(event.target.checked))
+        break
+      case 'minValue':
+        dispatch(setMinValue(event.target.value))
+        break
+      case 'maxValue':
+        dispatch(setMaxValue(event.target.value))
         break
       default:
         break
@@ -166,6 +178,8 @@ const useDevicesEdit = () => {
       measurementType,
       mqttTopic,
       isActive,
+      minValue: minValue !== '' ? Number(minValue) : null,
+      maxValue: maxValue !== '' ? Number(maxValue) : null,
     }
 
     const isValid = editDeviceValidator(postData)
@@ -202,6 +216,8 @@ const useDevicesEdit = () => {
     customerId,
     branchId,
     isActive,
+    minValue,
+    maxValue,
   }
 }
 

@@ -11,6 +11,8 @@ const initialState = {
   customerId: null,
   branchId: null,
   isActive: false,
+  minValue: '',
+  maxValue: '',
 }
 
 export const devicesEdit = createSlice({
@@ -47,6 +49,12 @@ export const devicesEdit = createSlice({
     setIsActive: (state, action) => {
       state.isActive = action.payload
     },
+    setMinValue: (state, action) => {
+      state.minValue = action.payload
+    },
+    setMaxValue: (state, action) => {
+      state.maxValue = action.payload
+    },
     clearPage: (state) => {
       state.name = initialState.name
       state.description = initialState.description
@@ -59,6 +67,8 @@ export const devicesEdit = createSlice({
       state.customerId = initialState.customerId
       state.branchId = initialState.branchId
       state.isActive = initialState.isActive
+      state.minValue = initialState.minValue
+      state.maxValue = initialState.maxValue
     },
   },
 })
@@ -75,6 +85,8 @@ export const {
   setCustomerId,
   setBranchId,
   setIsActive,
+  setMinValue,
+  setMaxValue,
 } = devicesEdit.actions
 
 export default devicesEdit.reducer

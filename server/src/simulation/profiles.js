@@ -1,259 +1,256 @@
 /**
- * 15 sanal cihaz profili.
+ * 10 sanal cihaz profili — Soğuk Hava Deposu Senaryosu
  *
- * Her profil farklı bir veri deseni üretir, böylece cause-analysis
- * motorundaki tüm neden türleri en az bir cihazda tetiklenir.
+ * Tasarım ilkeleri:
+ *   1. Tutarlılık: Ardışık değerler arasında fiziksel olarak imkânsız
+ *      sıçramalar olmaz. Tüm geçişler pürüzsüzdür.
+ *   2. Determinizm: Aynı step her zaman aynı değeri üretir (sin/cos
+ *      tabanlı pseudo-noise, Math.random kullanılmaz).
+ *   3. Fiziksel sınırlar: Her profil kendi fiziksel aralığında kalır.
+ *   4. Feature kapsamı: Profiller toplu olarak şu feature'ları tetikler:
+ *      - Anlık eşik aşımı bildirimi (threshold_exceeded)
+ *      - Tahmin bazlı uyarı (prediction_alert)
+ *      - Trend analizi (yükseliş / düşüş / stabil)
+ *      - Dalgalanma analizi (düşük / normal / yüksek)
+ *      - Ani değişim tespiti (anomaly)
+ *      - Zaman & mevsim bağlamı
+ *      - Cihaz eşik analizi
  *
- * generate(step) → Number : verilen adım numarası için ölçüm değeri döner.
- *   step, sunucu ilk başladığında 0'dan başlar ve her tick'te 1 artar.
- *   Döngüsel profillerde `step % cycleLength` kullanılır; böylece
- *   script sonsuza kadar tutarlı veri üretir.
+ * Her profil bir minValue ve maxValue içerir. Bu değerler Device
+ * oluşturulurken veritabanına yazılır ve bildirim sistemi tarafından
+ * kullanılır.
  */
-
-function noise(amplitude) {
-  return (Math.random() - 0.5) * 2 * amplitude
-}
 
 function round(v, d = 2) {
   const f = Math.pow(10, d)
   return Math.round(v * f) / f
 }
 
-const PROFILES = [
-  // ──────────────── SICAKLIK CİHAZLARI ────────────────
+/**
+ * Deterministic smooth pseudo-noise.
+ * Sin/cos kombinasyonu ile adım bazlı, pürüzsüz varyasyon üretir.
+ * Aynı step → aynı değer. Ardışık step'ler arasında fark küçüktür.
+ */
+function smoothNoise(step, amplitude, seed = 0) {
+  const s = step + seed
+  return amplitude * (
+    0.5 * Math.sin(s * 0.37 + 1.23) +
+    0.3 * Math.sin(s * 0.71 + 4.56) +
+    0.2 * Math.cos(s * 1.13 + 2.78)
+  )
+}
 
-  // 1 ▸ Kararlı soğuk oda — mükemmel çalışan sistem
-  //   Tetikler: Stability Duration, Optimal Threshold, Low Volatility
+/**
+ * Pürüzsüz rampa: 0'dan 1'e yavaşça yükselir, sonra 1'den 0'a düşer.
+ * phase [0, cycleLen) aralığında döner.
+ * riseRatio: döngünün ne kadarı yükseliş, geri kalanı düşüş.
+ */
+function smoothRamp(step, cycleLen, riseRatio = 0.7) {
+  const phase = step % cycleLen
+  const riseDuration = Math.floor(cycleLen * riseRatio)
+  if (phase < riseDuration) {
+    const t = phase / riseDuration
+    return 0.5 - 0.5 * Math.cos(Math.PI * t)
+  }
+  const fallDuration = cycleLen - riseDuration
+  const t = (phase - riseDuration) / fallDuration
+  return 0.5 + 0.5 * Math.cos(Math.PI * t)
+}
+
+/**
+ * Pürüzsüz spike: belirli periyotlarda yumuşak bir çıkıntı üretir.
+ * Spike genişliği spikeWidth adım, geçiş cos ile pürüzsüz.
+ */
+function smoothSpike(step, period, spikeWidth, amplitude) {
+  const phase = step % period
+  if (phase >= period - spikeWidth) {
+    const t = (phase - (period - spikeWidth)) / spikeWidth
+    const envelope = 0.5 - 0.5 * Math.cos(2 * Math.PI * t)
+    return amplitude * envelope
+  }
+  return 0
+}
+
+const PROFILES = [
+  // ══════════════════ SICAKLIK CİHAZLARI (6 adet) ══════════════════
+
+  // ─── 1. Kararlı soğuk oda — mükemmel çalışan sistem ───
+  // Tetikler: Düşük dalgalanma, optimal aralık, stabil tahmin
+  // Eşik aşımı: HAYIR (her zaman aralıkta kalır)
   {
-    name: 'Soğuk Oda 1 - Sıcaklık',
+    name: 'Soğuk Oda A - Sıcaklık',
     chipId: '30100001',
     measurementType: 'TEMPERATURE',
     deviceType: 'DT-100',
+    minValue: 2,
+    maxValue: 8,
     generate(step) {
-      return round(4.0 + noise(0.15))
+      return round(4.5 + smoothNoise(step, 0.3, 10))
     },
   },
 
-  // 2 ▸ Yükselen sıcaklık — kompresör verimsizleşiyor
-  //   Tetikler: Trend Momentum (rising), Threshold Warning/Critical
+  // ─── 2. Kompresör problemi — yavaş yükseliş trendi ───
+  // Tetikler: Yükseliş trendi, MAX eşik aşımı bildirimi,
+  //           tahmin bazlı uyarı (tahmin eşiği aşacak)
+  // Döngü: 300 adımda 4°C → 10°C yükselir, sonra bakım
+  //        yapılmış gibi 4°C'ye yumuşak geçiş
   {
-    name: 'Soğuk Oda 2 - Sıcaklık',
+    name: 'Soğuk Oda B - Sıcaklık',
     chipId: '30100002',
     measurementType: 'TEMPERATURE',
     deviceType: 'DT-100',
+    minValue: 2,
+    maxValue: 8,
     generate(step) {
-      const phase = step % 200
-      if (phase < 140) {
-        return round(4.0 + phase * 0.1 + noise(0.2))
-      }
-      const t = (phase - 140) / 60
-      return round(4.0 + 14.0 * Math.max(0, 1 - t) + noise(0.3))
+      const ramp = smoothRamp(step, 300, 0.75)
+      const base = 4.0 + ramp * 6.5
+      return round(base + smoothNoise(step, 0.25, 20))
     },
   },
 
-  // 3 ▸ Düşen sıcaklık — soğutma sistemi fazla çalışıyor
-  //   Tetikler: Trend Momentum (falling), Critical Low Threshold
+  // ─── 3. Derin dondurucu — stabil düşük sıcaklık ───
+  // Tetikler: Stabil tahmin, optimal aralık, düşük dalgalanma
+  // Eşik aşımı: HAYIR
   {
     name: 'Derin Dondurucu - Sıcaklık',
     chipId: '30100003',
     measurementType: 'TEMPERATURE',
     deviceType: 'DT-100',
+    minValue: -22,
+    maxValue: -15,
     generate(step) {
-      const phase = step % 200
-      if (phase < 140) {
-        return round(8.0 - phase * 0.06 + noise(0.2))
-      }
-      const t = (phase - 140) / 60
-      return round(8.0 - 8.4 * Math.max(0, 1 - t) + noise(0.3))
+      return round(-18.0 + smoothNoise(step, 0.5, 30))
     },
   },
 
-  // 4 ▸ Ani spike'lar — kapak periyodik olarak açılıyor
-  //   Tetikler: Sudden Change Detection (anomaly)
+  // ─── 4. Meyve & sebze reyonu — periyodik kapak açılması ───
+  // Tetikler: Ani değişim tespiti (anomaly), spike sonrası
+  //           ortalamaya dönüş, forecast değişkenliği
+  // Her 40 adımda bir kapak açılır → sıcaklık 8°C'den
+  // yumuşak şekilde 12°C'ye çıkar ve geri döner
   {
     name: 'Meyve & Sebze Reyonu - Sıcaklık',
     chipId: '30100004',
     measurementType: 'TEMPERATURE',
     deviceType: 'DT-100',
+    minValue: 5,
+    maxValue: 12,
     generate(step) {
-      const base = 8.0 + noise(0.3)
-      const cyclePos = step % 25
-      if (cyclePos >= 22) {
-        return round(base + 5.5 + noise(1.2))
-      }
-      return round(base)
+      const base = 8.0 + smoothNoise(step, 0.3, 40)
+      const spike = smoothSpike(step, 40, 8, 4.0)
+      return round(base + spike)
     },
   },
 
-  // 5 ▸ Yüksek dalgalanma — yükleme rampası, dış etki
-  //   Tetikler: Volatility (high), Forecast Uncertainty
+  // ─── 5. Yükleme rampası — gün/gece döngüsü ───
+  // Tetikler: Döngüsel pattern, zaman bağlamı analizi,
+  //           mevsimsel bağlam, zaman zaman eşik aşımı
+  // Sinüsoidal: 12–22°C arası, periyot 48 adım (~24 saat)
   {
     name: 'Yükleme Rampası - Sıcaklık',
     chipId: '30100005',
     measurementType: 'TEMPERATURE',
     deviceType: 'DT-100',
+    minValue: 10,
+    maxValue: 20,
     generate(step) {
-      return round(15.0 + noise(4.0))
+      const dayNight = 5.0 * Math.sin(2 * Math.PI * step / 48)
+      return round(17.0 + dayNight + smoothNoise(step, 0.4, 50))
     },
   },
 
-  // 6 ▸ Döngüsel — gün/gece siklüsü simülasyonu
-  //   Tetikler: Cyclic Pattern Detection
+  // ─── 6. Et deposu — defrost döngüsü ───
+  // Tetikler: Mean reversion, ani değişim, forecast uyarısı
+  // Her 80 adımda defrost: 1°C → 5°C yükselir, sonra
+  // soğutma devreye girer ve yumuşakça 1°C'ye döner
   {
-    name: 'Ana Salon - Sıcaklık',
+    name: 'Et Deposu - Sıcaklık',
     chipId: '30100006',
     measurementType: 'TEMPERATURE',
     deviceType: 'DT-100',
+    minValue: -1,
+    maxValue: 4,
     generate(step) {
-      const period = 80
-      return round(22.0 + 3.5 * Math.sin(2 * Math.PI * step / period) + noise(0.25))
-    },
-  },
-
-  // 7 ▸ Ortalamaya dönüş — ani yükselme sonrası doğal düşüş
-  //   Tetikler: Mean Reversion, Sudden Change (spike anında)
-  {
-    name: 'Et Deposu - Sıcaklık',
-    chipId: '30100007',
-    measurementType: 'TEMPERATURE',
-    deviceType: 'DT-100',
-    generate(step) {
-      const phase = step % 120
-      if (phase < 8) {
-        return round(2.0 + phase * 1.2 + noise(0.3))
+      const phase = step % 80
+      let base
+      if (phase < 10) {
+        const t = phase / 10
+        base = 1.0 + 4.5 * (0.5 - 0.5 * Math.cos(Math.PI * t))
+      } else {
+        const t = (phase - 10) / 70
+        base = 5.5 - 4.5 * (0.5 - 0.5 * Math.cos(Math.PI * t))
       }
-      const decay = Math.exp(-(phase - 8) * 0.04)
-      return round(2.0 + 9.6 * decay + noise(0.2))
+      return round(base + smoothNoise(step, 0.15, 60))
     },
   },
 
-  // 8 ▸ Hızlanan yükselme — sistem kapasitesi aşılıyor
-  //   Tetikler: Rate of Change Acceleration, Trend Momentum
-  {
-    name: 'Kompresör Odası - Sıcaklık',
-    chipId: '30100008',
-    measurementType: 'TEMPERATURE',
-    deviceType: 'DT-100',
-    generate(step) {
-      const phase = step % 160
-      if (phase < 110) {
-        const t = phase / 110
-        return round(25.0 + 12.0 * Math.pow(t, 1.8) + noise(0.3))
-      }
-      const t = (phase - 110) / 50
-      return round(25.0 + 12.0 * Math.max(0, 1 - t) + noise(0.4))
-    },
-  },
+  // ══════════════════ NEM CİHAZLARI (4 adet) ══════════════════
 
-  // 9 ▸ Yavaşlayan toparlanma — sistem dengeye yaklaşıyor
-  //   Tetikler: Rate of Change Deceleration
-  {
-    name: 'Süt Ürünleri Dolabı - Sıcaklık',
-    chipId: '30100009',
-    measurementType: 'TEMPERATURE',
-    deviceType: 'DT-100',
-    generate(step) {
-      const phase = step % 140
-      if (phase < 100) {
-        const t = phase / 100
-        return round(10.0 - 6.0 * (Math.log(1 + t * 9) / Math.log(10)) + noise(0.2))
-      }
-      const t = (phase - 100) / 40
-      return round(4.0 + 6.0 * t + noise(0.3))
-    },
-  },
-
-  // 10 ▸ Uyarı bölgesine yaklaşan — yavaş sürünen tehlike
-  //   Tetikler: Forecast Divergence, Threshold Proximity Forecast
-  {
-    name: 'Dondurucu Tezgah - Sıcaklık',
-    chipId: '30100010',
-    measurementType: 'TEMPERATURE',
-    deviceType: 'DT-100',
-    generate(step) {
-      const phase = step % 200
-      if (phase < 160) {
-        return round(24.0 + phase * 0.03 + noise(0.15))
-      }
-      const t = (phase - 160) / 40
-      return round(24.0 + 4.8 * Math.max(0, 1 - t) + noise(0.2))
-    },
-  },
-
-  // ──────────────── NEM CİHAZLARI ────────────────
-
-  // 11 ▸ Kararlı nem — ilaç deposu, kontrollü ortam
-  //   Tetikler: Stability Duration (humidity), Optimal Threshold
+  // ─── 7. İlaç deposu — kontrollü ortam, stabil nem ───
+  // Tetikler: Düşük dalgalanma, optimal aralık
+  // Eşik aşımı: HAYIR
   {
     name: 'İlaç Deposu - Nem',
-    chipId: '30100011',
+    chipId: '30100007',
     measurementType: 'HUMIDITY',
     deviceType: 'DT-100',
+    minValue: 35,
+    maxValue: 55,
     generate(step) {
-      return round(45.0 + noise(1.5))
+      return round(45.0 + smoothNoise(step, 1.2, 70))
     },
   },
 
-  // 12 ▸ Yükselen nem — havalandırma yetersizliği
-  //   Tetikler: Trend Momentum (rising, humidity), Threshold Warning
+  // ─── 8. Soğuk oda nem — yavaş yükseliş (havalandırma yetersiz) ───
+  // Tetikler: Yükseliş trendi, MAX eşik aşımı bildirimi,
+  //           tahmin bazlı uyarı
+  // Döngü: 250 adımda %45 → %72 yükselir, sonra havalandırma
+  //        tamir edilmiş gibi %45'e yumuşak düşüş
   {
-    name: 'Soğuk Oda 1 - Nem',
-    chipId: '30100012',
+    name: 'Soğuk Oda A - Nem',
+    chipId: '30100008',
     measurementType: 'HUMIDITY',
     deviceType: 'DT-100',
+    minValue: 35,
+    maxValue: 65,
     generate(step) {
-      const phase = step % 180
-      if (phase < 130) {
-        return round(45.0 + phase * 0.25 + noise(1.0))
-      }
-      const t = (phase - 130) / 50
-      return round(45.0 + 32.5 * Math.max(0, 1 - t) + noise(1.5))
+      const ramp = smoothRamp(step, 250, 0.72)
+      const base = 45.0 + ramp * 27.0
+      return round(base + smoothNoise(step, 1.0, 80))
     },
   },
 
-  // 13 ▸ Dalgalı nem — kararsız ortam koşulları
-  //   Tetikler: Volatility (high, humidity)
-  {
-    name: 'Meyve & Sebze Reyonu - Nem',
-    chipId: '30100013',
-    measurementType: 'HUMIDITY',
-    deviceType: 'DT-100',
-    generate(step) {
-      return round(55.0 + noise(9.0))
-    },
-  },
-
-  // 14 ▸ Kritik yüksek nem — kontrol dışı ortam
-  //   Tetikler: Critical Threshold (humidity)
+  // ─── 9. Ana salon — gün/gece nem döngüsü ───
+  // Tetikler: Döngüsel pattern, zaman bağlamı
   {
     name: 'Ana Salon - Nem',
-    chipId: '30100014',
+    chipId: '30100009',
     measurementType: 'HUMIDITY',
     deviceType: 'DT-100',
+    minValue: 30,
+    maxValue: 65,
     generate(step) {
-      const phase = step % 200
-      if (phase < 150) {
-        return round(82.0 + phase * 0.08 + noise(0.8))
-      }
-      const t = (phase - 150) / 50
-      return round(82.0 + 12.0 * Math.max(0, 1 - t) + noise(1.0))
+      const cycle = 8.0 * Math.sin(2 * Math.PI * step / 48)
+      return round(48.0 + cycle + smoothNoise(step, 0.8, 90))
     },
   },
 
-  // 15 ▸ Nem toparlanması — yüksekten düşüşe geçiş
-  //   Tetikler: Mean Reversion (humidity), Deceleration
+  // ─── 10. Yükleme rampası nem — yüksek volatilite ───
+  // Tetikler: Yüksek dalgalanma, zaman zaman eşik aşımı,
+  //           geniş güven aralığı
+  // Birden fazla sinüs dalgasının bileşimi → karmaşık ama pürüzsüz
   {
     name: 'Yükleme Rampası - Nem',
-    chipId: '30100015',
+    chipId: '30100010',
     measurementType: 'HUMIDITY',
     deviceType: 'DT-100',
+    minValue: 35,
+    maxValue: 70,
     generate(step) {
-      const phase = step % 150
-      if (phase < 10) {
-        return round(42.0 + phase * 4.0 + noise(1.0))
-      }
-      const decay = Math.exp(-(phase - 10) * 0.025)
-      return round(42.0 + 40.0 * decay + noise(1.5))
+      const wave1 = 8.0 * Math.sin(2 * Math.PI * step / 36)
+      const wave2 = 5.0 * Math.sin(2 * Math.PI * step / 17 + 1.0)
+      const wave3 = 3.0 * Math.cos(2 * Math.PI * step / 53 + 2.5)
+      return round(53.0 + wave1 + wave2 + wave3 + smoothNoise(step, 0.5, 100))
     },
   },
 ]

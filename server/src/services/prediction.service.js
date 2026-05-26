@@ -1,30 +1,256 @@
-const ARIMA = require('arima')
+const tf = require('@tensorflow/tfjs')
 const Device = require('../models/device.model')
 const { getDeviceDataModel } = require('../helpers/device-data.helper')
 const { analyzeCauses } = require('./cause-analysis.service')
 
 /**
- * ARIMA (AutoRegressive Integrated Moving Average) tabanlı zaman serisi tahmini.
+ * LSTM (Long Short-Term Memory) Tabanlı Zaman Serisi Tahmin Motoru
  *
- * Model: ARIMA(p, d, q)
- *   - AR(p): y_t = φ₁·y_{t-1} + ... + φ_p·y_{t-p} + ε_t
- *   - I(d) : d. dereceden fark alma → durağanlaştırma (stationarity)
- *   - MA(q): hata terimi modeli: θ₁·ε_{t-1} + ... + θ_q·ε_{t-q}
+ * LSTM Hücre Denklemleri:
+ *   Giriş kapısı  : iₜ = σ(Wᵢ · [hₜ₋₁, xₜ] + bᵢ)
+ *   Unutma kapısı  : fₜ = σ(W_f · [hₜ₋₁, xₜ] + b_f)
+ *   Aday hücre     : C̃ₜ = tanh(W_C · [hₜ₋₁, xₜ] + b_C)
+ *   Hücre durumu   : Cₜ = fₜ ⊙ Cₜ₋₁ + iₜ ⊙ C̃ₜ
+ *   Çıkış kapısı   : oₜ = σ(Wₒ · [hₜ₋₁, xₜ] + bₒ)
+ *   Gizli durum    : hₜ = oₜ ⊙ tanh(Cₜ)
  *
- * Parametre seçimi: AIC/BIC kriteri ile otomatik (auto-ARIMA / Box-Jenkins yöntemi)
- * Güven aralığı: %95 → pred ± 1.96 · σ  (σ = √variance)
+ * Neden ARIMA değil LSTM?
+ *   - ARIMA doğrusal (linear) bir modeldir; IoT verilerindeki non-linear
+ *     paternleri yakalayamaz.
+ *   - LSTM, kapı mekanizmaları ile uzun ve kısa vadeli bağımlılıkları
+ *     aynı anda öğrenebilir.
+ *   - Ani sıçramalar, döngüsel paternler ve trend kırılmalarına ARIMA'dan
+ *     çok daha iyi uyum sağlar.
+ *
+ * Mimari:
+ *   Input → LSTM(32) → Dropout(0.15) → Dense(16, ReLU) → Dense(1, Linear)
+ *
+ * Hiperparametreler:
+ *   - Window Size (lookback) : 10
+ *   - Epochs                 : 30
+ *   - Learning Rate          : 0.002 (Adam optimizer)
+ *   - Batch Size             : 32
+ *   - Validation Split       : 0.15
  */
 
-const TRAINING_LIMIT = 150   // Eğitim için kullanılacak maksimum veri noktası sayısı
-const HISTORY_CHART = 40     // Grafikte gösterilecek geçmiş veri noktası sayısı
-const FORECAST_STEPS = 12    // Tahmin edilecek ileri adım sayısı
-const MIN_DATA_POINTS = 15   // Minimum gerekli veri noktası sayısı
+const TRAINING_LIMIT = 150
+const HISTORY_CHART = 40
+const FORECAST_STEPS = 12
+const MIN_DATA_POINTS = 20
+const WINDOW_SIZE = 10
+const LSTM_UNITS = 32
+const DENSE_UNITS = 16
+const EPOCHS = 30
+const BATCH_SIZE = 32
+const LEARNING_RATE = 0.002
+const VALIDATION_SPLIT = 0.15
+const DROPOUT_RATE = 0.15
+
+const modelCache = new Map()
+
+function buildLSTMModel() {
+  const model = tf.sequential()
+
+  model.add(tf.layers.lstm({
+    units: LSTM_UNITS,
+    inputShape: [WINDOW_SIZE, 1],
+    returnSequences: false,
+    kernelInitializer: 'glorotNormal',
+    recurrentInitializer: 'glorotNormal',
+  }))
+
+  model.add(tf.layers.dropout({ rate: DROPOUT_RATE }))
+
+  model.add(tf.layers.dense({
+    units: DENSE_UNITS,
+    activation: 'relu',
+    kernelInitializer: 'glorotNormal',
+  }))
+
+  model.add(tf.layers.dense({
+    units: 1,
+    activation: 'linear',
+  }))
+
+  model.compile({
+    optimizer: tf.train.adam(LEARNING_RATE),
+    loss: 'meanSquaredError',
+    metrics: ['mse'],
+  })
+
+  return model
+}
 
 /**
- * Verilen cihaz ID'si için ARIMA tabanlı zaman serisi tahmini üretir.
- * @param {string} deviceId - Cihazın UUID formatındaki ID'si
- * @returns {Object} Tahmin sonuçları (geçmiş + gelecek + model bilgisi)
+ * Min-Max normalizasyonu: x' = (x - min) / (max - min)
+ * Ters dönüşüm        : x  = x' * (max - min) + min
  */
+function normalizeData(data) {
+  const min = Math.min(...data)
+  const max = Math.max(...data)
+  const range = max - min || 1
+  const normalized = data.map(v => (v - min) / range)
+  return { normalized, min, max, range }
+}
+
+function denormalize(value, min, range) {
+  return value * range + min
+}
+
+/**
+ * Sliding window ile eğitim verisi oluşturur.
+ * Her pencere [t-W, t-1] aralığını girdi, t anını hedef olarak kullanır.
+ */
+function createSequences(normalizedData) {
+  const X = []
+  const y = []
+  for (let i = WINDOW_SIZE; i < normalizedData.length; i++) {
+    X.push(normalizedData.slice(i - WINDOW_SIZE, i).map(v => [v]))
+    y.push(normalizedData[i])
+  }
+  return { X, y }
+}
+
+/**
+ * Değerlendirme metrikleri hesaplar:
+ *   MAE  = (1/n) Σ|yᵢ - ŷᵢ|
+ *   RMSE = √((1/n) Σ(yᵢ - ŷᵢ)²)
+ *   MAPE = (100/n) Σ|yᵢ - ŷᵢ| / |yᵢ|
+ *   R²   = 1 - Σ(yᵢ - ŷᵢ)² / Σ(yᵢ - ȳ)²
+ */
+function computeMetrics(actual, predicted) {
+  const n = actual.length
+  if (n === 0) return { mae: 0, rmse: 0, mape: 0, r2: 0 }
+
+  const meanActual = actual.reduce((s, v) => s + v, 0) / n
+  let sumAE = 0, sumSE = 0, sumAPE = 0, sumSS_tot = 0
+
+  for (let i = 0; i < n; i++) {
+    const error = actual[i] - predicted[i]
+    sumAE += Math.abs(error)
+    sumSE += error * error
+    if (Math.abs(actual[i]) > 0.01) {
+      sumAPE += Math.abs(error / actual[i])
+    }
+    sumSS_tot += (actual[i] - meanActual) ** 2
+  }
+
+  return {
+    mae: parseFloat((sumAE / n).toFixed(4)),
+    rmse: parseFloat(Math.sqrt(sumSE / n).toFixed(4)),
+    mape: parseFloat(((sumAPE / n) * 100).toFixed(2)),
+    r2: parseFloat((sumSS_tot > 0 ? 1 - sumSE / sumSS_tot : 0).toFixed(4)),
+  }
+}
+
+/**
+ * LSTM modelini eğitir veya cache'den yükler.
+ */
+async function trainOrLoadModel(deviceId, normalizedData, normParams) {
+  const cacheKey = deviceId
+  const cached = modelCache.get(cacheKey)
+  const dataHash = normalizedData.length
+
+  if (cached && Math.abs(cached.dataLength - dataHash) < 5) {
+    return cached
+  }
+
+  if (cached?.model) {
+    cached.model.dispose()
+  }
+
+  const model = buildLSTMModel()
+  const { X, y } = createSequences(normalizedData)
+
+  if (X.length < 5) {
+    model.dispose()
+    return null
+  }
+
+  const xs = tf.tensor3d(X)
+  const ys = tf.tensor2d(y, [y.length, 1])
+
+  let trainingHistory
+  try {
+    trainingHistory = await model.fit(xs, ys, {
+      epochs: EPOCHS,
+      batchSize: Math.min(BATCH_SIZE, X.length),
+      validationSplit: VALIDATION_SPLIT,
+      shuffle: true,
+      verbose: 0,
+    })
+  } finally {
+    xs.dispose()
+    ys.dispose()
+  }
+
+  const valLoss = trainingHistory.history.val_loss
+  const finalValLoss = valLoss ? valLoss[valLoss.length - 1] : null
+
+  const splitIdx = Math.floor(X.length * (1 - VALIDATION_SPLIT))
+  const valX = X.slice(splitIdx)
+  const valY = y.slice(splitIdx)
+
+  let metrics = { mae: 0, rmse: 0, mape: 0, r2: 0 }
+  let predStdDev = 1.0
+
+  if (valX.length > 0) {
+    const valInput = tf.tensor3d(valX)
+    const valPred = model.predict(valInput)
+    const predValues = valPred.dataSync()
+    valInput.dispose()
+    valPred.dispose()
+
+    const validationPredictions = Array.from(predValues).map(v => denormalize(v, normParams.min, normParams.range))
+    const validationActuals = valY.map(v => denormalize(v, normParams.min, normParams.range))
+
+    metrics = computeMetrics(validationActuals, validationPredictions)
+
+    const errors = validationActuals.map((a, i) => a - validationPredictions[i])
+    predStdDev = errors.length > 1
+      ? Math.sqrt(errors.reduce((s, e) => s + e * e, 0) / errors.length)
+      : 1.0
+  }
+
+  const entry = {
+    model,
+    dataLength: dataHash,
+    metrics,
+    predStdDev,
+    finalValLoss,
+    trainedAt: new Date().toISOString(),
+  }
+
+  modelCache.set(cacheKey, entry)
+  return entry
+}
+
+/**
+ * Çok adımlı tahmin: son pencereyi kullanarak iteratif olarak tahmin üretir.
+ * Her adımda bir önceki tahmin pencereye eklenerek sonraki adım hesaplanır.
+ */
+async function generateForecasts(model, lastWindow, steps, normParams, bounds) {
+  const predictions = []
+  const currentWindow = [...lastWindow]
+
+  for (let i = 0; i < steps; i++) {
+    const input = tf.tensor3d([currentWindow.map(v => [v])])
+    const pred = model.predict(input)
+    const normalizedPred = pred.dataSync()[0]
+    input.dispose()
+    pred.dispose()
+
+    const rawValue = denormalize(normalizedPred, normParams.min, normParams.range)
+    const clampedValue = Math.max(bounds.min, Math.min(bounds.max, rawValue))
+    predictions.push(clampedValue)
+
+    currentWindow.shift()
+    currentWindow.push(normalizedPred)
+  }
+
+  return predictions
+}
+
 async function getDeviceForecast(deviceId) {
   const device = await Device.findOne({ id: deviceId })
   if (!device) {
@@ -33,7 +259,6 @@ async function getDeviceForecast(deviceId) {
     throw err
   }
 
-  // Cihaza ait koleksiyondan son verileri çek (zaman sırasına göre artan)
   const Model = getDeviceDataModel(deviceId)
   const rawDocs = await Model
     .find()
@@ -49,45 +274,29 @@ async function getDeviceForecast(deviceId) {
     throw err
   }
 
-  // Kronolojik sıraya çevir
   const docs = rawDocs.reverse()
   const timeSeries = docs.map(d => Number(d.value))
 
-  // --- ARIMA Model Eğitimi ---
-  let arima
-  let modelParams = { p: 1, d: 1, q: 1 }
+  const normParams = normalizeData(timeSeries)
 
-  try {
-    // Önce auto-ARIMA dene (AIC kriterine göre en iyi parametreleri seçer)
-    arima = new ARIMA({ auto: true, verbose: false }).train(timeSeries)
-    modelParams = {
-      p: typeof arima.p === 'number' ? arima.p : 1,
-      d: typeof arima.d === 'number' ? arima.d : 1,
-      q: typeof arima.q === 'number' ? arima.q : 1,
-    }
-  } catch (_autoError) {
-    // Auto-ARIMA başarısız olursa ARIMA(1,1,1) ile devam et
-    try {
-      arima = new ARIMA({ p: 1, d: 1, q: 1, verbose: false }).train(timeSeries)
-    } catch (fallbackError) {
-      const err = new Error('ARIMA modeli eğitilemedi: ' + fallbackError.message)
-      err.statusCode = 500
-      throw err
-    }
-  }
+  const bounds = device.measurementType === 'HUMIDITY'
+    ? { min: 0, max: 100 }
+    : { min: -50, max: 80 }
 
-  // --- Tahmin Üretimi ---
-  let predictions, variances
-  try {
-    ;[predictions, variances] = arima.predict(FORECAST_STEPS)
-  } catch (predictError) {
-    const err = new Error('Tahmin üretilemedi: ' + predictError.message)
+  const cached = await trainOrLoadModel(deviceId, normParams.normalized, normParams)
+
+  if (!cached) {
+    const err = new Error('LSTM modeli eğitilemedi: yetersiz pencere verisi.')
     err.statusCode = 500
     throw err
   }
 
-  // Ortalama ölçüm aralığını hesapla (ms cinsinden)
-  let avgIntervalMs = 60_000 // Varsayılan: 1 dakika
+  const { model, metrics, predStdDev } = cached
+
+  const lastWindow = normParams.normalized.slice(-WINDOW_SIZE)
+  const predictions = await generateForecasts(model, lastWindow, FORECAST_STEPS, normParams, bounds)
+
+  let avgIntervalMs = 60_000
   if (docs.length > 1) {
     const sample = docs.slice(-Math.min(docs.length, 20))
     let sum = 0
@@ -99,27 +308,19 @@ async function getDeviceForecast(deviceId) {
   }
 
   const lastTime = new Date(docs[docs.length - 1].occurredTime)
-
-  // Ölçüm tipine göre fiziksel sınırlar (ARIMA bu sınırları bilmez)
-  const bounds = device.measurementType === 'HUMIDITY'
-    ? { min: 0, max: 100 }
-    : { min: -50, max: 80 }
-
   const clamp = (v) => Math.max(bounds.min, Math.min(bounds.max, v))
 
-  // Tahmin serisi — %95 güven aralığı ile (z = 1.96)
   const forecast = predictions.map((value, i) => {
-    const sigma = Math.sqrt(Math.abs(variances[i] || 0))
-    const v = parseFloat(clamp(value).toFixed(2))
+    const v = parseFloat(value.toFixed(2))
+    const uncertainty = predStdDev * Math.sqrt(i + 1)
     return {
       time: new Date(lastTime.getTime() + avgIntervalMs * (i + 1)).toISOString(),
       value: v,
-      upper: parseFloat(clamp(v + 1.96 * sigma).toFixed(2)),
-      lower: parseFloat(clamp(v - 1.96 * sigma).toFixed(2)),
+      upper: parseFloat(clamp(v + 1.96 * uncertainty).toFixed(2)),
+      lower: parseFloat(clamp(v - 1.96 * uncertainty).toFixed(2)),
     }
   })
 
-  // Trend analizi
   const firstPred = predictions[0]
   const lastPred = predictions[predictions.length - 1]
   const slope = (lastPred - firstPred) / FORECAST_STEPS
@@ -128,13 +329,11 @@ async function getDeviceForecast(deviceId) {
     : slope > 0 ? 'increasing'
     : 'decreasing'
 
-  // Grafik için geçmiş veri (son HISTORY_CHART nokta)
   const historical = docs.slice(-HISTORY_CHART).map(d => ({
     time: new Date(d.occurredTime).toISOString(),
     value: parseFloat(Number(d.value).toFixed(2)),
   }))
 
-  // Özet istatistikler
   const allValues = timeSeries.slice(-HISTORY_CHART)
   const mean = allValues.reduce((s, v) => s + v, 0) / allValues.length
   const stdDev = Math.sqrt(
@@ -155,7 +354,8 @@ async function getDeviceForecast(deviceId) {
     forecast,
     computedStats,
     trend,
-    device.measurementType
+    device.measurementType,
+    device
   )
 
   return {
@@ -166,12 +366,30 @@ async function getDeviceForecast(deviceId) {
     historical,
     forecast,
     model: {
-      ...modelParams,
-      algorithm: 'ARIMA',
-      description: `ARIMA(${modelParams.p}, ${modelParams.d}, ${modelParams.q})`,
+      algorithm: 'LSTM',
+      description: `LSTM(${LSTM_UNITS}) → Dropout(${DROPOUT_RATE}) → Dense(${DENSE_UNITS}) → Dense(1)`,
+      architecture: {
+        lstmUnits: LSTM_UNITS,
+        denseUnits: DENSE_UNITS,
+        dropoutRate: DROPOUT_RATE,
+        windowSize: WINDOW_SIZE,
+        activationHidden: 'relu',
+        activationOutput: 'linear',
+        optimizer: `Adam(lr=${LEARNING_RATE})`,
+        lossFunction: 'MSE (Mean Squared Error)',
+      },
+      hyperparameters: {
+        epochs: EPOCHS,
+        batchSize: BATCH_SIZE,
+        learningRate: LEARNING_RATE,
+        validationSplit: VALIDATION_SPLIT,
+        windowSize: WINDOW_SIZE,
+      },
+      metrics,
       trainingPoints: docs.length,
       forecastSteps: FORECAST_STEPS,
       confidenceLevel: 0.95,
+      trainedAt: cached.trainedAt,
     },
     trend,
     stats: computedStats,

@@ -4,7 +4,6 @@ import { MdAcUnit, MdDevices, MdAssessment } from 'react-icons/md'
 import { TbUsers } from 'react-icons/tb'
 import {
   Dashboard,
-  ReportsList,
   BranchesCreate,
   BranchesEdit,
   BranchesList,
@@ -135,13 +134,6 @@ export const routes = [
     label: null,
     isSidebarPage: false,
     element: <DevicesEdit />,
-  },
-  {
-    to: '/reports',
-    icon: <MdAssessment />,
-    label: 'Raporlar',
-    isSidebarPage: true,
-    element: <ReportsList />,
   },
   {
     to: '/login',

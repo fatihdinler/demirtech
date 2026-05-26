@@ -18,6 +18,7 @@ const locationRoutes = require('./src/routes/location.route')
 const deviceRoutes = require('./src/routes/device.route')
 const authRoutes = require('./src/routes/auth.route.js')
 const userRoutes = require('./src/routes/user.route.js')
+const notificationRoutes = require('./src/routes/notification.route')
 
 const app = express()
 app.use(express.json())
@@ -71,6 +72,7 @@ app.use('/api/locations', locationRoutes)
 app.use('/api/devices', deviceRoutes)
 app.use('/api/auth', authRoutes)
 app.use('/api/users', userRoutes)
+app.use('/api/notifications', notificationRoutes)
 
 app.use((err, req, res, next) => {
   const statusCode = res.statusCode !== 200 ? res.statusCode : 500

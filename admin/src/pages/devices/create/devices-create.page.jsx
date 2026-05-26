@@ -11,7 +11,7 @@ const DevicesCreate = () => {
     locationsOptions, handleLocationsChange, clearPageHandler, createDevice,
     deviceTypesOptions, handleDeviceTypesChange, deviceMeasurementTypesOptions, handleDeviceMeasurementTypesChange,
     customersOptions, handleCustomersChange, branchesOptions, handleBranchesChange,
-    customerId, branchId, isActive,
+    customerId, branchId, isActive, minValue, maxValue,
   } = useDevicesCreate()
 
   return (
@@ -46,6 +46,16 @@ const DevicesCreate = () => {
           <div className="md:col-span-2">
             <label className={labelCls}>Ölçüm Tipi</label>
             <Select options={deviceMeasurementTypesOptions} value={deviceMeasurementTypesOptions?.find(o => o.value === measurementType)} onChange={handleDeviceMeasurementTypesChange} placeholder="Ölçüm tipi seçin" classNamePrefix="rs" />
+          </div>
+          <div>
+            <label className={labelCls}>Minimum Eşik Değeri</label>
+            <input type="number" step="0.1" placeholder="Ör: 2" value={minValue} onChange={(e) => onChange(e, 'minValue')} className={inputCls} />
+            <p className="text-[11px] text-slate-400 mt-1">Bu değerin altına düşülürse bildirim gönderilir</p>
+          </div>
+          <div>
+            <label className={labelCls}>Maksimum Eşik Değeri</label>
+            <input type="number" step="0.1" placeholder="Ör: 35" value={maxValue} onChange={(e) => onChange(e, 'maxValue')} className={inputCls} />
+            <p className="text-[11px] text-slate-400 mt-1">Bu değerin üstüne çıkılırsa bildirim gönderilir</p>
           </div>
           <div className="md:col-span-2">
             <label className="flex items-center gap-3 cursor-pointer">

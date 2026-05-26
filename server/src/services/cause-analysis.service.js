@@ -1,14 +1,17 @@
 /**
- * Tahmin Neden Analizi — 5 Perspektif
+ * Gelişmiş Tahmin Neden Analizi — 8 Perspektif
  *
  * Her perspektif TAM OLARAK 1 neden üretir.
- * Her cihaz için her zaman 5 neden döner.
+ * Her cihaz için her zaman 8 neden döner.
  *
- *   1. Trend       → Değer yükseliyor mu, düşüyor mu, sabit mi?
- *   2. Anlık Durum  → Değer şu an hangi bölgede? (optimal / uyarı / kritik)
- *   3. Dalgalanma   → Ölçümler ne kadar stabil veya kararsız?
- *   4. Ani Değişim  → Son ölçümlerde ani bir sıçrama var mı?
- *   5. Tahmin Yönü  → ARIMA modeli ne öngörüyor?
+ *   1. Trend           → Değer yükseliyor mu, düşüyor mu, sabit mi?
+ *   2. Anlık Durum      → Değer şu an hangi bölgede? (optimal / uyarı / kritik)
+ *   3. Dalgalanma       → Ölçümler ne kadar stabil veya kararsız?
+ *   4. Ani Değişim      → Son ölçümlerde ani bir sıçrama var mı?
+ *   5. Tahmin Yönü      → LSTM modeli ne öngörüyor?
+ *   6. Zaman Bağlamı    → Günün saati ölçümleri nasıl etkiliyor?
+ *   7. Mevsimsel Bağlam → Mevsim ve hava koşulları ölçümleri nasıl etkiliyor?
+ *   8. Cihaz Eşik       → Cihaza tanımlı min/max eşiklerine göre durum
  */
 
 const THRESHOLDS = {
@@ -24,7 +27,21 @@ const THRESHOLDS = {
   },
 }
 
-function analyzeCauses(timeSeries, timestamps, forecast, stats, trend, measurementType) {
+const SEASONS = {
+  winter: { months: [12, 1, 2], name: 'Kış', tempEffect: 'düşük', humidityEffect: 'yüksek' },
+  spring: { months: [3, 4, 5], name: 'İlkbahar', tempEffect: 'değişken', humidityEffect: 'orta' },
+  summer: { months: [6, 7, 8], name: 'Yaz', tempEffect: 'yüksek', humidityEffect: 'düşük' },
+  autumn: { months: [9, 10, 11], name: 'Sonbahar', tempEffect: 'düşen', humidityEffect: 'artan' },
+}
+
+const TIME_PERIODS = {
+  night:    { hours: [0, 1, 2, 3, 4, 5], name: 'Gece', tempDesc: 'Gece saatlerinde radyasyonel soğuma nedeniyle sıcaklık düşüş eğilimindedir.', humDesc: 'Gece saatlerinde bağıl nem genellikle yükselir.' },
+  morning:  { hours: [6, 7, 8, 9, 10, 11], name: 'Sabah', tempDesc: 'Sabah saatlerinde güneş ışınımıyla sıcaklık artış eğilimindedir.', humDesc: 'Sabah çiğ oluşumu nedeniyle nem yüksek olabilir.' },
+  afternoon:{ hours: [12, 13, 14, 15, 16, 17], name: 'Öğleden Sonra', tempDesc: 'Öğleden sonra güneş ışınımı maksimuma ulaşır; sıcaklık en yüksek seviyededir.', humDesc: 'Öğleden sonra artan sıcaklıkla bağıl nem düşme eğilimindedir.' },
+  evening:  { hours: [18, 19, 20, 21, 22, 23], name: 'Akşam', tempDesc: 'Akşam saatlerinde güneş batışıyla birlikte sıcaklık düşmeye başlar.', humDesc: 'Akşam saatlerinde soğumayla birlikte nem artmaya başlar.' },
+}
+
+function analyzeCauses(timeSeries, timestamps, forecast, stats, trend, measurementType, device) {
   const mt = (measurementType || 'TEMPERATURE').toUpperCase()
   const thresholds = THRESHOLDS[mt] || THRESHOLDS.TEMPERATURE
   const isTemp = mt === 'TEMPERATURE'
@@ -42,6 +59,9 @@ function analyzeCauses(timeSeries, timestamps, forecast, stats, trend, measureme
     analyzeVolatility(timeSeries, unit, label, isTemp),
     analyzeAnomaly(timeSeries, stats.stdDev, unit, label, isTemp),
     analyzeForecastDirection(lastValue, forecastFirst, forecastLast, forecast, unit, label),
+    analyzeTimeContext(timestamps, timeSeries, unit, label, isTemp),
+    analyzeSeasonalContext(timestamps, lastValue, unit, label, isTemp),
+    analyzeDeviceThreshold(lastValue, forecast, device, unit, label),
   ]
 }
 
@@ -68,7 +88,7 @@ function analyzeTrend(timeSeries, unit, label) {
 
   return cause('trend', severity, `${label} ${direction} Trendi`,
     `${label} son ölçümlerde ${Math.abs(diff).toFixed(1)}${unit} ${diff > 0 ? 'artış' : 'düşüş'} göstermiştir.`,
-    `Eski ölçüm ortalaması ${oldMean.toFixed(1)}${unit}, son ölçüm ortalaması ${newMean.toFixed(1)}${unit}. ARIMA modeli bu trendi tahmine yansıtmaktadır.`,
+    `Eski ölçüm ortalaması ${oldMean.toFixed(1)}${unit}, son ölçüm ortalaması ${newMean.toFixed(1)}${unit}. LSTM modeli bu trendi tahmine yansıtmaktadır.`,
     `${diff > 0 ? '+' : ''}${diff.toFixed(1)}${unit}`)
 }
 
@@ -198,8 +218,197 @@ function analyzeForecastDirection(lastValue, forecastFirst, forecastLast, foreca
 
   return cause('forecast', severity, `${label} ${direction} Öngörüsü`,
     `Model, ${Math.abs(totalChange).toFixed(1)}${unit} ${totalChange > 0 ? 'artış' : 'düşüş'} öngörmektedir (${lastValue.toFixed(1)}${unit} → ${forecastLast.toFixed(1)}${unit}).`,
-    'Bu öngörü mevcut veri trendinin devam edeceği varsayımına dayanmaktadır.',
+    'Bu öngörü LSTM modelinin zaman serisi paternlerini öğrenmesiyle elde edilmiştir.',
     `→ ${forecastLast.toFixed(1)}${unit}`)
+}
+
+// ─── 6. ZAMAN BAĞLAMI ──────────────────────────────────────
+
+function analyzeTimeContext(timestamps, timeSeries, unit, label, isTemp) {
+  if (!timestamps.length) {
+    return cause('time_context', 'info', 'Zaman Bağlamı', 'Zaman bilgisi mevcut değil.', '', '—')
+  }
+
+  const now = new Date()
+  const currentHour = now.getHours()
+  let currentPeriod = null
+
+  for (const [key, period] of Object.entries(TIME_PERIODS)) {
+    if (period.hours.includes(currentHour)) {
+      currentPeriod = { key, ...period }
+      break
+    }
+  }
+
+  if (!currentPeriod) {
+    return cause('time_context', 'info', 'Zaman Bağlamı', 'Zaman dilimi belirlenemedi.', '', '—')
+  }
+
+  const desc = isTemp ? currentPeriod.tempDesc : currentPeriod.humDesc
+
+  const periodIndices = []
+  for (let i = 0; i < timestamps.length; i++) {
+    const ts = new Date(timestamps[i])
+    if (currentPeriod.hours.includes(ts.getHours())) {
+      periodIndices.push(i)
+    }
+  }
+
+  let periodAvg = null
+  if (periodIndices.length > 2) {
+    const periodValues = periodIndices.map(i => timeSeries[i])
+    periodAvg = avg(periodValues)
+  }
+
+  const lastValue = timeSeries[timeSeries.length - 1]
+  let comparison = ''
+  if (periodAvg !== null) {
+    const diff = lastValue - periodAvg
+    if (Math.abs(diff) > 1) {
+      comparison = ` Aynı zaman dilimindeki ortalamaya göre ${Math.abs(diff).toFixed(1)}${unit} ${diff > 0 ? 'daha yüksek' : 'daha düşük'}.`
+    } else {
+      comparison = ` Aynı zaman dilimindeki ortalamayla uyumlu.`
+    }
+  }
+
+  return cause('time_context', 'info', `${currentPeriod.name} Saatleri Etkisi`,
+    `Şu an ${currentPeriod.name.toLowerCase()} saatlerindeyiz (${String(currentHour).padStart(2, '0')}:00).`,
+    `${desc}${comparison}`,
+    `${currentPeriod.name}`)
+}
+
+// ─── 7. MEVSİMSEL BAĞLAM ───────────────────────────────────
+
+function analyzeSeasonalContext(timestamps, lastValue, unit, label, isTemp) {
+  const now = new Date()
+  const currentMonth = now.getMonth() + 1
+  let currentSeason = null
+
+  for (const [key, season] of Object.entries(SEASONS)) {
+    if (season.months.includes(currentMonth)) {
+      currentSeason = { key, ...season }
+      break
+    }
+  }
+
+  if (!currentSeason) {
+    return cause('seasonal', 'info', 'Mevsimsel Bağlam', 'Mevsim belirlenemedi.', '', '—')
+  }
+
+  const monthNames = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+    'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık']
+  const monthName = monthNames[currentMonth - 1]
+
+  const effect = isTemp ? currentSeason.tempEffect : currentSeason.humidityEffect
+
+  let explanation = ''
+  if (isTemp) {
+    switch (currentSeason.key) {
+      case 'winter':
+        explanation = `Kış aylarında dış ortam sıcaklığı düşük olduğundan iç ortam sıcaklığı da etkilenebilir. Soğutma sistemleri daha az enerji harcar ancak izolasyon kayıpları artabilir. İstanbul ve çevresi için ortalama dış sıcaklık 3–10°C aralığındadır.`
+        break
+      case 'spring':
+        explanation = `İlkbahar aylarında dış sıcaklıklar hızla değişir. Gece-gündüz sıcaklık farkı artır ve bu durum iç ortam sıcaklığında dalgalanmalara neden olabilir.`
+        break
+      case 'summer':
+        explanation = `Yaz aylarında dış ortam sıcaklığı 25–35°C aralığına çıkar. Soğutma sistemleri yoğun çalışır ve enerji tüketimi artar. Soğuk oda sıcaklıklarında artış riski yükselir.`
+        break
+      case 'autumn':
+        explanation = `Sonbahar aylarında sıcaklıklar düşüş eğilimindedir. Gece-gündüz farkları artmaya başlar ve ortam koşulları değişkenlik gösterir.`
+        break
+    }
+  } else {
+    switch (currentSeason.key) {
+      case 'winter':
+        explanation = `Kış aylarında kapalı ortamlarda ısıtma sistemleri havayı kurutur, nem düşebilir. Dış ortamda ise yağış nedeniyle nem genellikle yüksektir.`
+        break
+      case 'spring':
+        explanation = `İlkbahar aylarında yağışlar ve sıcaklık değişimleri nem oranını doğrudan etkiler. Nem dalgalanmaları normaldir.`
+        break
+      case 'summer':
+        explanation = `Yaz aylarında yüksek sıcaklıklar nedeniyle bağıl nem düşer. Ancak klima sistemleri havayı nemlendirebilir veya kurutabilir.`
+        break
+      case 'autumn':
+        explanation = `Sonbahar aylarında sıcaklık düşüşüyle birlikte yoğuşma artar ve bağıl nem yükselme eğilimindedir.`
+        break
+    }
+  }
+
+  return cause('seasonal', 'info', `${currentSeason.name} Mevsimi Etkisi`,
+    `${monthName} ayı ${currentSeason.name.toLowerCase()} mevsimine denk gelmektedir. ${isTemp ? 'Sıcaklık' : 'Nem'} etkisi: ${effect}.`,
+    explanation,
+    `${currentSeason.name}`)
+}
+
+// ─── 8. CİHAZ EŞİK ANALİZİ ─────────────────────────────────
+
+function analyzeDeviceThreshold(lastValue, forecast, device, unit, label) {
+  const minVal = device?.minValue
+  const maxVal = device?.maxValue
+
+  if (minVal == null && maxVal == null) {
+    return cause('device_threshold', 'info', `${label} Eşik Tanımsız`,
+      'Bu cihaz için özel min/max eşik değeri tanımlanmamıştır.',
+      'Cihaz ayarlarından min ve max değerler tanımlanarak kişiselleştirilmiş uyarılar alabilirsiniz.',
+      '—')
+  }
+
+  const violations = []
+
+  if (minVal != null && lastValue < minVal) {
+    violations.push({
+      type: 'current_low',
+      severity: 'critical',
+      msg: `Anlık değer (${lastValue.toFixed(1)}${unit}) tanımlı minimum (${minVal}${unit}) altında.`,
+    })
+  }
+  if (maxVal != null && lastValue > maxVal) {
+    violations.push({
+      type: 'current_high',
+      severity: 'critical',
+      msg: `Anlık değer (${lastValue.toFixed(1)}${unit}) tanımlı maksimum (${maxVal}${unit}) üstünde.`,
+    })
+  }
+
+  for (const f of forecast) {
+    if (minVal != null && f.value < minVal) {
+      violations.push({
+        type: 'forecast_low',
+        severity: 'warning',
+        msg: `Tahmin edilen değer (${f.value}${unit}) minimum eşiğin (${minVal}${unit}) altına düşebilir.`,
+      })
+      break
+    }
+    if (maxVal != null && f.value > maxVal) {
+      violations.push({
+        type: 'forecast_high',
+        severity: 'warning',
+        msg: `Tahmin edilen değer (${f.value}${unit}) maksimum eşiğin (${maxVal}${unit}) üstüne çıkabilir.`,
+      })
+      break
+    }
+  }
+
+  if (violations.length === 0) {
+    const range = [minVal, maxVal].filter(v => v != null)
+    const rangeStr = range.length === 2
+      ? `${minVal}${unit} – ${maxVal}${unit}`
+      : (minVal != null ? `min: ${minVal}${unit}` : `max: ${maxVal}${unit}`)
+
+    return cause('device_threshold', 'info', `${label} Eşik Uyumlu`,
+      `Anlık ve tahmin edilen değerler tanımlı eşikler (${rangeStr}) içindedir.`,
+      'Herhangi bir eşik ihlali tespit edilmemiştir.',
+      `${lastValue.toFixed(1)}${unit}`)
+  }
+
+  const worstSeverity = violations.some(v => v.severity === 'critical') ? 'critical' : 'warning'
+  const title = worstSeverity === 'critical' ? `${label} Eşik İhlali` : `${label} Eşik Uyarısı`
+  const summary = violations[0].msg
+  const detail = violations.length > 1
+    ? violations.map(v => v.msg).join(' ')
+    : `Cihaz eşikleri: ${minVal != null ? `min=${minVal}${unit}` : ''} ${maxVal != null ? `max=${maxVal}${unit}` : ''}.`
+
+  return cause('device_threshold', worstSeverity, title, summary, detail, `${lastValue.toFixed(1)}${unit}`)
 }
 
 // ─── YARDIMCI ───────────────────────────────────────────────

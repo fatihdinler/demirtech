@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { createDeviceValidator, retrieveSuccessMessage } from './devices-create.messager'
-import { setName, setDescription, setChipId, setLocationId, setDeviceType, setMeasurementType, clearPage, setBranchId, setCustomerId, setIsActive, } from '../../../features/devices/devices-create.state'
+import { setName, setDescription, setChipId, setLocationId, setDeviceType, setMeasurementType, clearPage, setBranchId, setCustomerId, setIsActive, setMinValue, setMaxValue } from '../../../features/devices/devices-create.state'
 import { fetchLocations } from '../../../features/locations/locations.api'
 import { fetchBranches } from '../../../features/branches/branches.api'
 import { fetchCustomers } from '../../../features/customers/customers.api'
@@ -13,7 +13,7 @@ import useDevicesList from '../list/devices-list.hook'
 const useDevicesCreate = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const { name, description, chipId, locationId, deviceType, measurementType, branchId, customerId, isActive } = useSelector(state => state.devices.create)
+  const { name, description, chipId, locationId, deviceType, measurementType, branchId, customerId, isActive, minValue, maxValue } = useSelector(state => state.devices.create)
 
   const { data: locations, isLoading: isLocationsLoading, hasFetched: doesLocationsLoaded } = useSelector(state => state.locations.api)
   const { data: customers, isLoading: isCustomersLoading, hasFetched: doesCustomersLoaded } = useSelector(state => state.customers.api)
@@ -52,6 +52,12 @@ const useDevicesCreate = () => {
         break
       case 'isActive':
         dispatch(setIsActive(event.target.checked))
+        break
+      case 'minValue':
+        dispatch(setMinValue(event.target.value))
+        break
+      case 'maxValue':
+        dispatch(setMaxValue(event.target.value))
         break
       default:
         break
@@ -93,6 +99,8 @@ const useDevicesCreate = () => {
       deviceType,
       measurementType,
       isActive,
+      minValue: minValue !== '' ? Number(minValue) : null,
+      maxValue: maxValue !== '' ? Number(maxValue) : null,
     }
 
     const isValid = createDeviceValidator(postData)
@@ -128,6 +136,8 @@ const useDevicesCreate = () => {
     customerId,
     branchId,
     isActive,
+    minValue,
+    maxValue,
   }
 }
 

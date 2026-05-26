@@ -24,6 +24,14 @@ const LocationSchema = new Schema({
     ref: 'Branch',
     required: [true, 'Şube bilgisi gerekli']
   },
+  latitude: {
+    type: Number,
+    default: null,
+  },
+  longitude: {
+    type: Number,
+    default: null,
+  },
 }, { timestamps: true })
 
 module.exports = mongoose.model('Location', LocationSchema)

@@ -2,6 +2,7 @@ const Device = require('../models/device.model')
 const { insertDeviceData } = require('./device-data.helper')
 const { emitDeviceData } = require('./socket.helper')
 const { checkAndAlert } = require('../services/alert.service')
+const { checkDeviceThresholds } = require('../services/notification.service')
 
 async function subscribeToWildcardTopic(mqttClient) {
   mqttClient.subscribe('demirtech/#', (err) => {
@@ -91,6 +92,17 @@ async function listenDevicesMqtt(mqttClient) {
         chipId: payload.chipId,
         measurementType: device.measurementType,
         value: Number(payload.value),
+      })
+
+      checkDeviceThresholds({
+        deviceId: device.id,
+        deviceName: device.name,
+        measurementType: device.measurementType,
+        value: Number(payload.value),
+        minValue: device.minValue,
+        maxValue: device.maxValue,
+      }).catch(err => {
+        console.error(`[Notification] Threshold check error for ${device.id}:`, err.message)
       })
     }
   })

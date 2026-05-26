@@ -5,6 +5,7 @@ const Device = require('../models/device.model')
 const { getDeviceDataModel, createDeviceDataCollection } = require('../helpers/device-data.helper')
 const { emitDeviceData } = require('../helpers/socket.helper')
 const { checkAndAlert } = require('../services/alert.service')
+const { checkDeviceThresholds } = require('../services/notification.service')
 const PROFILES = require('./profiles')
 
 const TICK_INTERVAL_MS = 30_000
@@ -16,11 +17,6 @@ const LOCATION_NAME = 'Ana Depo - Blok A'
 
 const LOG_PREFIX = '[Simulator]'
 
-/**
- * Entity'leri (customer → branch → location → devices) oluşturur.
- * Zaten varsa atlar (idempotent).
- * @returns {{ locationId: string, devices: Array<{ id: string, profileIdx: number }> }}
- */
 async function seedEntities() {
   let customer = await Customer.findOne({ name: CUSTOMER_NAME })
   if (!customer) {
@@ -48,8 +44,15 @@ async function seedEntities() {
       name: LOCATION_NAME,
       description: 'Ana depo binası — Blok A, tüm soğuk oda ve reyon birimleri',
       branchId: branch.id,
+      latitude: 40.8165,
+      longitude: 29.3009,
     })
     console.log(`${LOG_PREFIX} Lokasyon oluşturuldu: ${LOCATION_NAME}`)
+  } else if (location.latitude == null) {
+    await Location.findOneAndUpdate(
+      { id: location.id },
+      { latitude: 40.8165, longitude: 29.3009 }
+    )
   }
 
   const devices = []
@@ -70,9 +73,17 @@ async function seedEntities() {
         locationId: location.id,
         isActive: true,
         description: '',
+        minValue: p.minValue ?? null,
+        maxValue: p.maxValue ?? null,
       })
       await createDeviceDataCollection(device.id)
-      console.log(`${LOG_PREFIX} Cihaz oluşturuldu: ${p.name} (chipId: ${p.chipId})`)
+      console.log(`${LOG_PREFIX} Cihaz oluşturuldu: ${p.name} (chipId: ${p.chipId}, min: ${p.minValue}, max: ${p.maxValue})`)
+    } else if (device.minValue == null && p.minValue != null) {
+      await Device.findOneAndUpdate(
+        { id: device.id },
+        { minValue: p.minValue, maxValue: p.maxValue }
+      )
+      console.log(`${LOG_PREFIX} Cihaz eşikleri güncellendi: ${p.name} (min: ${p.minValue}, max: ${p.maxValue})`)
     }
 
     devices.push({ id: device.id, profileIdx: i })
@@ -81,10 +92,6 @@ async function seedEntities() {
   return { locationId: location.id, devices }
 }
 
-/**
- * Her cihaz için geçmiş veriyi seed'ler (ilk çalıştırmada).
- * Zaten veri varsa atlar.
- */
 async function seedHistoricalData(devices) {
   const now = Date.now()
 
@@ -116,11 +123,7 @@ async function seedHistoricalData(devices) {
   }
 }
 
-/**
- * Her cihaz için anlık bir Socket.IO event'i gönderir.
- * Böylece dashboard açıkken bile ilk veri hemen görünür.
- */
-async function emitInitialValues(devices, currentStep) {
+async function emitInitialValues(devices) {
   for (const { id: deviceId, profileIdx } of devices) {
     const profile = PROFILES[profileIdx]
     const Model = getDeviceDataModel(deviceId)
@@ -139,9 +142,6 @@ async function emitInitialValues(devices, currentStep) {
   console.log(`${LOG_PREFIX} İlk değerler Socket.IO üzerinden gönderildi.`)
 }
 
-/**
- * Sürekli veri üretim döngüsünü başlatır.
- */
 function startContinuousGeneration(devices, startStep) {
   let tick = 0
 
@@ -178,6 +178,15 @@ function startContinuousGeneration(devices, startStep) {
           measurementType: profile.measurementType,
           value,
         })
+
+        checkDeviceThresholds({
+          deviceId,
+          deviceName: profile.name,
+          measurementType: profile.measurementType,
+          value,
+          minValue: profile.minValue,
+          maxValue: profile.maxValue,
+        }).catch(() => {})
       } catch (err) {
         console.error(`${LOG_PREFIX} Veri yazma hatası (${profile.name}):`, err.message)
       }
@@ -198,12 +207,6 @@ function startContinuousGeneration(devices, startStep) {
   return interval
 }
 
-/**
- * Ana giriş noktası — app.js'den çağrılır.
- * 1. Entity'leri oluşturur (idempotent)
- * 2. Geçmiş veriyi seed'ler (ilk çalıştırmada)
- * 3. Sürekli veri üretimini başlatır
- */
 async function startSimulation() {
   try {
     console.log(`${LOG_PREFIX} Başlatılıyor...`)
@@ -217,7 +220,7 @@ async function startSimulation() {
     const firstModel = getDeviceDataModel(devices[0].id)
     const existingCount = await firstModel.countDocuments()
 
-    await emitInitialValues(devices, existingCount)
+    await emitInitialValues(devices)
 
     startContinuousGeneration(devices, existingCount)
     console.log(

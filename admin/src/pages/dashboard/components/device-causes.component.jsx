@@ -7,14 +7,20 @@ import {
   FaBinoculars,
   FaChevronDown,
   FaChevronUp,
+  FaClock,
+  FaCloudSun,
+  FaSlidersH,
 } from 'react-icons/fa'
 
 const typeStyle = {
-  trend:      { icon: FaArrowUp,     color: 'text-violet-500' },
-  threshold:  { icon: FaCrosshairs,  color: 'text-orange-500' },
-  volatility: { icon: FaWaveSquare,  color: 'text-teal-500' },
-  anomaly:    { icon: FaBolt,        color: 'text-rose-500' },
-  forecast:   { icon: FaBinoculars,  color: 'text-indigo-500' },
+  trend:            { icon: FaArrowUp,     color: 'text-violet-500' },
+  threshold:        { icon: FaCrosshairs,  color: 'text-orange-500' },
+  volatility:       { icon: FaWaveSquare,  color: 'text-teal-500' },
+  anomaly:          { icon: FaBolt,        color: 'text-rose-500' },
+  forecast:         { icon: FaBinoculars,  color: 'text-indigo-500' },
+  time_context:     { icon: FaClock,       color: 'text-sky-500' },
+  seasonal:         { icon: FaCloudSun,    color: 'text-amber-500' },
+  device_threshold: { icon: FaSlidersH,    color: 'text-fuchsia-500' },
 }
 
 const sevBorder = {
@@ -69,7 +75,7 @@ const DeviceCauses = ({ causes }) => {
   return (
     <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
       <div className="flex items-center justify-between px-5 py-3.5">
-        <h3 className="text-sm font-bold text-slate-800">Tahmin Nedenleri</h3>
+        <h3 className="text-sm font-bold text-slate-800">Tahmin Nedenleri & Bağlam Analizi</h3>
         <div className="flex items-center gap-1.5">
           {hasCritical && <span className={`w-2 h-2 rounded-full ${sevDot.critical}`} />}
           {hasWarning && <span className={`w-2 h-2 rounded-full ${sevDot.warning}`} />}
@@ -79,7 +85,7 @@ const DeviceCauses = ({ causes }) => {
 
       <div className="px-4 pb-4 space-y-1">
         {causes.map((c, i) => (
-          <CauseRow key={c.type} cause={c} />
+          <CauseRow key={`${c.type}-${i}`} cause={c} />
         ))}
       </div>
     </div>

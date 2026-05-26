@@ -53,6 +53,14 @@ const DeviceSchema = new Schema({
     type: String,
     default: '',
   },
+  minValue: {
+    type: Number,
+    default: null,
+  },
+  maxValue: {
+    type: Number,
+    default: null,
+  },
 }, { timestamps: true })
 
 module.exports = mongoose.model('Device', DeviceSchema)

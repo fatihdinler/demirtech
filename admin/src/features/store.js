@@ -9,6 +9,7 @@ import usersReducer from './users/users.reducer'
 import authReducer from './auth/auth.reducer'
 import loginReducer from './login/login.state'
 import predictionsReducer from './predictions/predictions.slice'
+import notificationsReducer from './notifications/notifications.slice'
 
 const rootReducer = combineReducers({
   devices: devicesReducer,
@@ -21,6 +22,7 @@ const rootReducer = combineReducers({
   auth: authReducer,
   login: loginReducer,
   predictions: predictionsReducer,
+  notifications: notificationsReducer,
 })
 
 const store = configureStore({
