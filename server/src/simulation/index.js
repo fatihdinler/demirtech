@@ -9,7 +9,7 @@ const { checkDeviceThresholds } = require('../services/notification.service')
 const PROFILES = require('./profiles')
 
 const TICK_INTERVAL_MS = 30_000
-const SEED_COUNT = 150
+const SEED_COUNT = 3000
 
 const CUSTOMER_NAME = 'Yıldız Soğuk Hava Depoculuk A.Ş.'
 const BRANCH_NAME = 'Tuzla Merkez Depo'
@@ -99,7 +99,7 @@ async function seedHistoricalData(devices) {
     const Model = getDeviceDataModel(deviceId)
     const count = await Model.countDocuments()
 
-    if (count >= SEED_COUNT) continue
+    //if (count >= SEED_COUNT) continue
 
     const profile = PROFILES[profileIdx]
     const toInsert = SEED_COUNT - count

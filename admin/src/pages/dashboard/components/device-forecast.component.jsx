@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
   ResponsiveContainer,
@@ -73,18 +73,21 @@ const MetricBadge = ({ label, value, good }) => (
 )
 
 const DeviceForecast = ({ device, onBack }) => {
-  const dispatch = useDispatch()
-  const forecastState = useSelector(s => s.predictions.byDevice[device.id])
+    const dispatch = useDispatch()
+    const forecastState = useSelector(s => s.predictions.byDevice[device.id])
 
-  useEffect(() => {
-    if (!forecastState || forecastState.error) {
-      dispatch(fetchDeviceForecast(device.id))
-    }
-  }, [device.id, dispatch]) // eslint-disable-line
+    // YENİ EKLENEN: Hangi zaman aralığında olduğumuzu tutan state
+    const [timeRange, setTimeRange] = useState('hourly')
 
-  const refresh = () => dispatch(fetchDeviceForecast(device.id))
+    // GÜNCELLENEN: timeRange değiştiğinde veriyi yeniden çek
+    useEffect(() => {
+        dispatch(fetchDeviceForecast({ id: device.id, timeRange }))
+    }, [device.id, timeRange, dispatch])
 
-  const meta = measurementMeta[device.measurementType?.toLowerCase()] || { unit: '', label: 'Değer', color: '#6366f1' }
+    // GÜNCELLENEN: Yenile butonuna basıldığında mevcut timeRange ile çek
+    const refresh = () => dispatch(fetchDeviceForecast({ id: device.id, timeRange }))
+
+    const meta = measurementMeta[device.measurementType?.toLowerCase()] || { unit: '', label: 'Değer', color: '#6366f1' }
 
   let chartData = []
   let modelInfo = null
@@ -125,31 +128,52 @@ const DeviceForecast = ({ device, onBack }) => {
 
   return (
     <div className="animate-fadeSlideIn">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={onBack}
-            className="flex items-center gap-1.5 text-sm text-indigo-500 hover:text-indigo-700 font-medium transition-colors"
-          >
-            <FaChevronLeft size={11} />
-            Cihazlar
-          </button>
-          <span className="text-slate-300">/</span>
-          <span className="text-sm font-bold text-slate-800">{device.name}</span>
-          <span className="px-2 py-0.5 text-xs font-medium bg-slate-100 text-slate-500 rounded-full font-mono">
-            {device.chipId}
-          </span>
-        </div>
-        <button
-          onClick={refresh}
-          disabled={forecastState?.isLoading}
-          className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition-all disabled:opacity-50"
-        >
-          <FaSync size={10} className={forecastState?.isLoading ? 'animate-spin' : ''} />
-          Yenile
-        </button>
-      </div>
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+              <div className="flex items-center gap-3">
+                  <button
+                      onClick={onBack}
+                      className="flex items-center gap-1.5 text-sm text-indigo-500 hover:text-indigo-700 font-medium transition-colors"
+                  >
+                      <FaChevronLeft size={11} />
+                      Cihazlar
+                  </button>
+                  <span className="text-slate-300">/</span>
+                  <span className="text-sm font-bold text-slate-800">{device.name}</span>
+                  <span className="px-2 py-0.5 text-xs font-medium bg-slate-100 text-slate-500 rounded-full font-mono">
+                      {device.chipId}
+                  </span>
+              </div>
+
+              {/* YENİ EKLENEN: Filtre ve Yenile Butonları */}
+              <div className="flex items-center gap-2">
+                  <div className="flex bg-slate-100 p-1 rounded-lg">
+                      <button
+                          onClick={() => setTimeRange('hourly')}
+                          className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${timeRange === 'hourly' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                              }`}
+                      >
+                          Saatlik (Anlık)
+                      </button>
+                      <button
+                          onClick={() => setTimeRange('daily')}
+                          className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${timeRange === 'daily' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                              }`}
+                      >
+                          24 Saat (Trend)
+                      </button>
+                  </div>
+
+                  <button
+                      onClick={refresh}
+                      disabled={forecastState?.isLoading}
+                      className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition-all disabled:opacity-50"
+                  >
+                      <FaSync size={10} className={forecastState?.isLoading ? 'animate-spin' : ''} />
+                      Yenile
+                  </button>
+              </div>
+          </div>
 
       {/* Loading state */}
       {forecastState?.isLoading && (
