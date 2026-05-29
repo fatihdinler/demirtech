@@ -3,6 +3,22 @@
   "WorkspaceRootPath": "C:\\Users\\user\\Documents\\GitHub\\demirtech\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\user\\Documents\\GitHub\\demirtech\\admin\\src\\services\\predictions.service.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:admin\\src\\services\\predictions.service.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\user\\Documents\\GitHub\\demirtech\\admin\\src\\pages\\dashboard\\components\\device-forecast.component.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:admin\\src\\pages\\dashboard\\components\\device-forecast.component.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\user\\Documents\\GitHub\\demirtech\\server\\src\\controllers\\prediction.controller.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:server\\src\\controllers\\prediction.controller.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\user\\Documents\\GitHub\\demirtech\\server\\src\\services\\notification.service.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:server\\src\\services\\notification.service.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\user\\Documents\\GitHub\\demirtech\\server\\src\\services\\prediction.service.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:server\\src\\services\\prediction.service.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     },
@@ -15,20 +31,8 @@
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:admin\\src\\features\\predictions\\predictions.api.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\user\\Documents\\GitHub\\demirtech\\admin\\src\\services\\predictions.service.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:admin\\src\\services\\predictions.service.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\user\\Documents\\GitHub\\demirtech\\server\\src\\simulation\\index.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:server\\src\\simulation\\index.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\user\\Documents\\GitHub\\demirtech\\server\\src\\controllers\\prediction.controller.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:server\\src\\controllers\\prediction.controller.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\user\\Documents\\GitHub\\demirtech\\admin\\src\\pages\\dashboard\\components\\device-forecast.component.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:admin\\src\\pages\\dashboard\\components\\device-forecast.component.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     }
   ],
   "DocumentGroupContainers": [
@@ -38,69 +42,43 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "index.js",
-              "DocumentMoniker": "C:\\Users\\user\\Documents\\GitHub\\demirtech\\server\\src\\simulation\\index.js",
-              "RelativeDocumentMoniker": "server\\src\\simulation\\index.js",
-              "ToolTip": "C:\\Users\\user\\Documents\\GitHub\\demirtech\\server\\src\\simulation\\index.js",
-              "RelativeToolTip": "server\\src\\simulation\\index.js",
-              "ViewState": "AgIAAEkAAAAAAAAAAAApwGUAAAAGAAAAAAAAAA==",
+              "DocumentIndex": 3,
+              "Title": "notification.service.js",
+              "DocumentMoniker": "C:\\Users\\user\\Documents\\GitHub\\demirtech\\server\\src\\services\\notification.service.js",
+              "RelativeDocumentMoniker": "server\\src\\services\\notification.service.js",
+              "ToolTip": "C:\\Users\\user\\Documents\\GitHub\\demirtech\\server\\src\\services\\notification.service.js",
+              "RelativeToolTip": "server\\src\\services\\notification.service.js",
+              "ViewState": "AgIAAIcAAAAAAAAAAAAkwK8AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-05-27T22:30:52.901Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "predictions.slice.js",
-              "DocumentMoniker": "C:\\Users\\user\\Documents\\GitHub\\demirtech\\admin\\src\\features\\predictions\\predictions.slice.js",
-              "RelativeDocumentMoniker": "admin\\src\\features\\predictions\\predictions.slice.js",
-              "ToolTip": "C:\\Users\\user\\Documents\\GitHub\\demirtech\\admin\\src\\features\\predictions\\predictions.slice.js",
-              "RelativeToolTip": "admin\\src\\features\\predictions\\predictions.slice.js",
-              "ViewState": "AgIAABIAAAAAAAAAAADwvyUAAAAGAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-05-27T22:02:10.166Z",
+              "WhenOpened": "2026-05-29T12:51:54.464Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "predictions.api.js",
-              "DocumentMoniker": "C:\\Users\\user\\Documents\\GitHub\\demirtech\\admin\\src\\features\\predictions\\predictions.api.js",
-              "RelativeDocumentMoniker": "admin\\src\\features\\predictions\\predictions.api.js",
-              "ToolTip": "C:\\Users\\user\\Documents\\GitHub\\demirtech\\admin\\src\\features\\predictions\\predictions.api.js",
-              "RelativeToolTip": "admin\\src\\features\\predictions\\predictions.api.js",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAABAAAAAAAAAA==",
+              "Title": "prediction.controller.js",
+              "DocumentMoniker": "C:\\Users\\user\\Documents\\GitHub\\demirtech\\server\\src\\controllers\\prediction.controller.js",
+              "RelativeDocumentMoniker": "server\\src\\controllers\\prediction.controller.js",
+              "ToolTip": "C:\\Users\\user\\Documents\\GitHub\\demirtech\\server\\src\\controllers\\prediction.controller.js",
+              "RelativeToolTip": "server\\src\\controllers\\prediction.controller.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAzAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-05-27T21:59:46.505Z",
+              "WhenOpened": "2026-05-27T21:20:40.302Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "predictions.service.js",
-              "DocumentMoniker": "C:\\Users\\user\\Documents\\GitHub\\demirtech\\admin\\src\\services\\predictions.service.js",
-              "RelativeDocumentMoniker": "admin\\src\\services\\predictions.service.js",
-              "ToolTip": "C:\\Users\\user\\Documents\\GitHub\\demirtech\\admin\\src\\services\\predictions.service.js",
-              "RelativeToolTip": "admin\\src\\services\\predictions.service.js",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-05-27T22:00:02.719Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 1,
               "Title": "device-forecast.component.jsx",
               "DocumentMoniker": "C:\\Users\\user\\Documents\\GitHub\\demirtech\\admin\\src\\pages\\dashboard\\components\\device-forecast.component.jsx",
               "RelativeDocumentMoniker": "admin\\src\\pages\\dashboard\\components\\device-forecast.component.jsx",
               "ToolTip": "C:\\Users\\user\\Documents\\GitHub\\demirtech\\admin\\src\\pages\\dashboard\\components\\device-forecast.component.jsx",
               "RelativeToolTip": "admin\\src\\pages\\dashboard\\components\\device-forecast.component.jsx",
-              "ViewState": "AgIAAIsAAAAAAAAAAAAgwKEAAAAXAAAAAAAAAA==",
+              "ViewState": "AgIAAD0AAAAAAAAAAAApwF8AAAApAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
               "WhenOpened": "2026-05-27T21:35:24.705Z",
               "EditorCaption": ""
@@ -108,28 +86,64 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "predictions.service.js",
+              "DocumentMoniker": "C:\\Users\\user\\Documents\\GitHub\\demirtech\\admin\\src\\services\\predictions.service.js",
+              "RelativeDocumentMoniker": "admin\\src\\services\\predictions.service.js",
+              "ToolTip": "C:\\Users\\user\\Documents\\GitHub\\demirtech\\admin\\src\\services\\predictions.service.js",
+              "RelativeToolTip": "admin\\src\\services\\predictions.service.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-05-27T22:00:02.719Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "predictions.api.js",
+              "DocumentMoniker": "C:\\Users\\user\\Documents\\GitHub\\demirtech\\admin\\src\\features\\predictions\\predictions.api.js",
+              "RelativeDocumentMoniker": "admin\\src\\features\\predictions\\predictions.api.js",
+              "ToolTip": "C:\\Users\\user\\Documents\\GitHub\\demirtech\\admin\\src\\features\\predictions\\predictions.api.js",
+              "RelativeToolTip": "admin\\src\\features\\predictions\\predictions.api.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-05-27T21:59:46.505Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "predictions.slice.js",
+              "DocumentMoniker": "C:\\Users\\user\\Documents\\GitHub\\demirtech\\admin\\src\\features\\predictions\\predictions.slice.js",
+              "RelativeDocumentMoniker": "admin\\src\\features\\predictions\\predictions.slice.js",
+              "ToolTip": "C:\\Users\\user\\Documents\\GitHub\\demirtech\\admin\\src\\features\\predictions\\predictions.slice.js",
+              "RelativeToolTip": "admin\\src\\features\\predictions\\predictions.slice.js",
+              "ViewState": "AgIAABIAAAAAAAAAAADwvyUAAAAGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-05-27T22:02:10.166Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
               "Title": "prediction.service.js",
               "DocumentMoniker": "C:\\Users\\user\\Documents\\GitHub\\demirtech\\server\\src\\services\\prediction.service.js",
               "RelativeDocumentMoniker": "server\\src\\services\\prediction.service.js",
               "ToolTip": "C:\\Users\\user\\Documents\\GitHub\\demirtech\\server\\src\\services\\prediction.service.js",
               "RelativeToolTip": "server\\src\\services\\prediction.service.js",
-              "ViewState": "AgIAAFoBAAAAAAAAAAApwHUBAAAFAAAAAAAAAA==",
+              "ViewState": "AgIAAFoBAAAAAAAAAAApwHYBAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
               "WhenOpened": "2026-05-27T21:25:25.6Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "prediction.controller.js",
-              "DocumentMoniker": "C:\\Users\\user\\Documents\\GitHub\\demirtech\\server\\src\\controllers\\prediction.controller.js",
-              "RelativeDocumentMoniker": "server\\src\\controllers\\prediction.controller.js",
-              "ToolTip": "C:\\Users\\user\\Documents\\GitHub\\demirtech\\server\\src\\controllers\\prediction.controller.js",
-              "RelativeToolTip": "server\\src\\controllers\\prediction.controller.js",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB8AAAAgAAAAAAAAAA==",
+              "DocumentIndex": 7,
+              "Title": "index.js",
+              "DocumentMoniker": "C:\\Users\\user\\Documents\\GitHub\\demirtech\\server\\src\\simulation\\index.js",
+              "RelativeDocumentMoniker": "server\\src\\simulation\\index.js",
+              "ToolTip": "C:\\Users\\user\\Documents\\GitHub\\demirtech\\server\\src\\simulation\\index.js",
+              "RelativeToolTip": "server\\src\\simulation\\index.js",
+              "ViewState": "AgIAAEkAAAAAAAAAAAApwGUAAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-05-27T21:20:40.302Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-05-27T22:30:52.901Z"
             }
           ]
         }

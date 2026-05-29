@@ -3,13 +3,10 @@
     "",
     "\\admin",
     "\\admin\\src",
+    "\\admin\\src\\pages",
     "\\admin\\src\\pages\\dashboard",
     "\\admin\\src\\pages\\dashboard\\components",
-    "\\server",
-    "\\server\\src",
-    "\\server\\src\\services",
-    "\\server\\src\\simulation"
+    "\\server"
   ],
-  "SelectedNode": "\\server\\src\\simulation\\index.js",
   "PreviewInSolutionExplorer": false
 }

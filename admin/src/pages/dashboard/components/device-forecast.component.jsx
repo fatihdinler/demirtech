@@ -80,9 +80,20 @@ const DeviceForecast = ({ device, onBack }) => {
     const [timeRange, setTimeRange] = useState('hourly')
 
     // GÜNCELLENEN: timeRange değiştiğinde veriyi yeniden çek
+    // OTOMATİK YENİLEME VE İLK ÇEKİM
     useEffect(() => {
-        dispatch(fetchDeviceForecast({ id: device.id, timeRange }))
-    }, [device.id, timeRange, dispatch])
+        // 1. Component yüklendiğinde veya timeRange değiştiğinde hemen veriyi çek
+        dispatch(fetchDeviceForecast({ id: device.id, timeRange }));
+
+        // 2. Her 20 saniyede bir veriyi tekrar çekmek için sayacı (interval) başlat
+        const intervalId = setInterval(() => {
+            dispatch(fetchDeviceForecast({ id: device.id, timeRange }));
+            // console.log(`Grafik güncellendi (${timeRange} modu)`); // İstersen test için açabilirsin
+        }, 20000); // 20000 ms = 20 saniye
+
+        // 3. Component'ten çıkıldığında veya timeRange değiştiğinde eski sayacı temizle
+        return () => clearInterval(intervalId);
+    }, [device.id, timeRange, dispatch]);
 
     // GÜNCELLENEN: Yenile butonuna basıldığında mevcut timeRange ile çek
     const refresh = () => dispatch(fetchDeviceForecast({ id: device.id, timeRange }))
