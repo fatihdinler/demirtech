@@ -61,6 +61,25 @@ const DeviceSchema = new Schema({
     type: Number,
     default: null,
   },
+  causeContext: {
+    environment: {
+      type: String,
+      enum: ['sealed', 'semi-open', 'controlled'],
+      default: 'sealed',
+    },
+    cooling: {
+      type: Boolean,
+      default: true,
+    },
+    defrostCycle: {
+      type: Boolean,
+      default: false,
+    },
+    frequentAccess: {
+      type: Boolean,
+      default: false,
+    },
+  },
 }, { timestamps: true })
 
 module.exports = mongoose.model('Device', DeviceSchema)

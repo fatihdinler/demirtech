@@ -1,17 +1,18 @@
 const Notification = require('../models/notification.model')
 const { emitNotification } = require('../helpers/socket.helper')
+const { analyzeRootCause } = require('./root-cause.service')
 
 const NOTIFICATION_COOLDOWN_MS = 10 * 60 * 1000 // 10 dakika
 const cooldownMap = new Map()
 
-async function createNotification({ deviceId, deviceName, type, severity, title, message, value, threshold, measurementType }) {
+async function createNotification({ deviceId, deviceName, type, severity, title, message, value, threshold, measurementType, cause }) {
   const cooldownKey = `${deviceId}-${type}-${severity}`
   const lastTime = cooldownMap.get(cooldownKey)
   if (lastTime && Date.now() - lastTime < NOTIFICATION_COOLDOWN_MS) return null
 
   cooldownMap.set(cooldownKey, Date.now())
 
-  const notification = await Notification.create({
+  const notificationData = {
     deviceId,
     deviceName,
     type,
@@ -21,7 +22,18 @@ async function createNotification({ deviceId, deviceName, type, severity, title,
     value,
     threshold,
     measurementType,
-  })
+  }
+
+  if (cause && cause.title) {
+    notificationData.cause = {
+      title: cause.title,
+      description: cause.description,
+      confidence: cause.confidence,
+      recommendations: cause.recommendations || [],
+    }
+  }
+
+  const notification = await Notification.create(notificationData)
 
   emitNotification({
     id: notification.id,
@@ -34,6 +46,7 @@ async function createNotification({ deviceId, deviceName, type, severity, title,
     value: notification.value,
     threshold: notification.threshold,
     measurementType: notification.measurementType,
+    cause: notification.cause || null,
     isRead: notification.isRead,
     createdAt: notification.createdAt,
   })
@@ -84,11 +97,31 @@ async function getUnreadCount() {
  * Cihaza ait min/max eşik kontrolü yapar.
  * MQTT üzerinden gelen her ölçümde çağrılır.
  */
-async function checkDeviceThresholds({ deviceId, deviceName, measurementType, value, minValue, maxValue }) {
+async function checkDeviceThresholds({ deviceId, deviceName, measurementType, value, minValue, maxValue, causeContext }) {
   const numValue = Number(value)
   const isTemp = (measurementType || '').toUpperCase() === 'TEMPERATURE'
   const unit = isTemp ? '°C' : '%'
   const label = isTemp ? 'Sıcaklık' : 'Nem'
+
+  const needsAlert =
+    (minValue != null && numValue < minValue) ||
+    (maxValue != null && numValue > maxValue)
+
+  if (!needsAlert) return
+
+  let cause = null
+  try {
+    cause = await analyzeRootCause({
+      deviceId,
+      measurementType,
+      value: numValue,
+      minValue,
+      maxValue,
+      causeContext,
+    })
+  } catch (err) {
+    console.error('[RootCause] Analiz sırasında hata:', err.message)
+  }
 
   if (minValue != null && numValue < minValue) {
     await createNotification({
@@ -101,6 +134,7 @@ async function checkDeviceThresholds({ deviceId, deviceName, measurementType, va
       value: numValue,
       threshold: { min: minValue, max: maxValue },
       measurementType,
+      cause,
     })
   }
 
@@ -115,6 +149,7 @@ async function checkDeviceThresholds({ deviceId, deviceName, measurementType, va
       value: numValue,
       threshold: { min: minValue, max: maxValue },
       measurementType,
+      cause,
     })
   }
 }

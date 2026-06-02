@@ -1,13 +1,17 @@
 /**
- * 10 sanal cihaz profili — Soğuk Hava Deposu Senaryosu
+ * 10 sanal cihaz profili — Soğuk Hava Deposu Senaryosu (Demo Optimized)
  *
  * Tasarım ilkeleri:
  *   1. Tutarlılık: Ardışık değerler arasında fiziksel olarak imkânsız
  *      sıçramalar olmaz. Tüm geçişler pürüzsüzdür.
  *   2. Determinizm: Aynı step her zaman aynı değeri üretir (sin/cos
  *      tabanlı pseudo-noise, Math.random kullanılmaz).
- *   3. Fiziksel sınırlar: Her profil kendi fiziksel aralığında kalır.
- *   4. Feature kapsamı: Profiller toplu olarak şu feature'ları tetikler:
+ *   3. Fiziksel sınırlar: Hiçbir profil negatif sıcaklık veya aşırı
+ *      uç değerler üretmez. Tüm değerler gerçekçi aralıklarda kalır.
+ *   4. Demo dostu: 10 cihazdan 8'i kısa döngülerde (10–40 dk)
+ *      eşik aşımı yaparak bildirim tetikler. 2 referans cihaz stabil
+ *      kalır. Demo esnasında birkaç dakika içinde bildirimler düşer.
+ *   5. Feature kapsamı: Profiller toplu olarak şu feature'ları tetikler:
  *      - Anlık eşik aşımı bildirimi (threshold_exceeded)
  *      - Tahmin bazlı uyarı (prediction_alert)
  *      - Trend analizi (yükseliş / düşüş / stabil)
@@ -19,6 +23,13 @@
  * Her profil bir minValue ve maxValue içerir. Bu değerler Device
  * oluşturulurken veritabanına yazılır ve bildirim sistemi tarafından
  * kullanılır.
+ *
+ * causeContext: Her profilin fiziksel ortam tanımı. Root-cause analiz
+ * motoru bu bilgiyi kullanarak eşik aşımının olası sebebini belirler.
+ *   - environment: 'sealed' (kapalı/yalıtımlı) | 'semi-open' (yarı açık) | 'controlled' (kontrollü)
+ *   - cooling: Aktif soğutma sistemi var mı
+ *   - defrostCycle: Periyodik defrost döngüsü var mı
+ *   - frequentAccess: Kapak/kapı sık açılıyor mu (reyon, yükleme alanı)
  */
 
 function round(v, d = 2) {
@@ -74,9 +85,10 @@ function smoothSpike(step, period, spikeWidth, amplitude) {
 const PROFILES = [
   // ══════════════════ SICAKLIK CİHAZLARI (6 adet) ══════════════════
 
-  // ─── 1. Kararlı soğuk oda — mükemmel çalışan sistem ───
-  // Tetikler: Düşük dalgalanma, optimal aralık, stabil tahmin
-  // Eşik aşımı: HAYIR (her zaman aralıkta kalır)
+  // ─── 1. Soğuk Oda A — Stabil referans (sağlıklı sistem) ───
+  // Mükemmel çalışan kompresör. Düşük dalgalanma, optimal aralık.
+  // Eşik aşımı: HAYIR — referans cihaz olarak stabil kalır.
+  // Değer aralığı: ~4.6–5.4°C
   {
     name: 'Soğuk Oda A - Sıcaklık',
     chipId: '30100001',
@@ -84,16 +96,17 @@ const PROFILES = [
     deviceType: 'DT-100',
     minValue: 2,
     maxValue: 8,
+    causeContext: { environment: 'sealed', cooling: true, defrostCycle: false, frequentAccess: false },
     generate(step) {
-      return round(4.5 + smoothNoise(step, 0.3, 10))
+      return round(5.0 + smoothNoise(step, 0.4, 10))
     },
   },
 
-  // ─── 2. Kompresör problemi — yavaş yükseliş trendi ───
-  // Tetikler: Yükseliş trendi, MAX eşik aşımı bildirimi,
-  //           tahmin bazlı uyarı (tahmin eşiği aşacak)
-  // Döngü: 300 adımda 4°C → 10°C yükselir, sonra bakım
-  //        yapılmış gibi 4°C'ye yumuşak geçiş
+  // ─── 2. Soğuk Oda B — Kompresör arızası, yavaş yükseliş ───
+  // 80 adımlık döngü (~40 dk): 4°C → 9.5°C yükselir, sonra
+  // bakım yapılmış gibi yumuşak geçişle 4°C'ye döner.
+  // Eşik aşımı: EVET — max:8°C aşılır → bildirim tetiklenir
+  // Değer aralığı: ~3.8–9.7°C
   {
     name: 'Soğuk Oda B - Sıcaklık',
     chipId: '30100002',
@@ -101,84 +114,95 @@ const PROFILES = [
     deviceType: 'DT-100',
     minValue: 2,
     maxValue: 8,
+    causeContext: { environment: 'sealed', cooling: true, defrostCycle: false, frequentAccess: false },
     generate(step) {
-      const ramp = smoothRamp(step, 300, 0.75)
-      const base = 4.0 + ramp * 6.5
-      return round(base + smoothNoise(step, 0.25, 20))
+      const ramp = smoothRamp(step, 80, 0.7)
+      const base = 4.0 + ramp * 5.5
+      return round(base + smoothNoise(step, 0.2, 20))
     },
   },
 
-  // ─── 3. Derin dondurucu — stabil düşük sıcaklık ───
-  // Tetikler: Stabil tahmin, optimal aralık, düşük dalgalanma
-  // Eşik aşımı: HAYIR
+  // ─── 3. Süt Ürünleri Reyonu — Hafif dalgalanma ───
+  // 50 adımlık sinüs döngüsü (~25 dk): soğutma kapasitesi
+  // yetersiz kaldığında max:6°C'yi aşar.
+  // Eşik aşımı: EVET — max:6°C aşılır → bildirim tetiklenir
+  // Değer aralığı: ~2.3–6.7°C
   {
-    name: 'Derin Dondurucu - Sıcaklık',
+    name: 'Süt Ürünleri Reyonu - Sıcaklık',
     chipId: '30100003',
     measurementType: 'TEMPERATURE',
     deviceType: 'DT-100',
-    minValue: -22,
-    maxValue: -15,
+    minValue: 2,
+    maxValue: 6,
+    causeContext: { environment: 'sealed', cooling: true, defrostCycle: false, frequentAccess: true },
     generate(step) {
-      return round(-18.0 + smoothNoise(step, 0.5, 30))
+      const base = 4.5 + smoothNoise(step, 0.4, 30)
+      const drift = 1.8 * Math.sin(2 * Math.PI * step / 50)
+      return round(base + drift)
     },
   },
 
-  // ─── 4. Meyve & sebze reyonu — periyodik kapak açılması ───
-  // Tetikler: Ani değişim tespiti (anomaly), spike sonrası
-  //           ortalamaya dönüş, forecast değişkenliği
-  // Her 40 adımda bir kapak açılır → sıcaklık 8°C'den
-  // yumuşak şekilde 12°C'ye çıkar ve geri döner
+  // ─── 4. Meyve & Sebze Reyonu — Kapak açılma spike'ları ───
+  // 20 adımda bir spike (~10 dk): personel kapağı açtığında
+  // sıcaklık 7.5°C'den ~11.5°C'ye çıkar ve geri döner.
+  // Eşik aşımı: EVET — max:10°C aşılır → bildirim tetiklenir
+  // Değer aralığı: ~7.2–11.8°C
   {
     name: 'Meyve & Sebze Reyonu - Sıcaklık',
     chipId: '30100004',
     measurementType: 'TEMPERATURE',
     deviceType: 'DT-100',
     minValue: 5,
-    maxValue: 12,
+    maxValue: 10,
+    causeContext: { environment: 'sealed', cooling: true, defrostCycle: false, frequentAccess: true },
     generate(step) {
-      const base = 8.0 + smoothNoise(step, 0.3, 40)
-      const spike = smoothSpike(step, 40, 8, 4.0)
+      const base = 7.5 + smoothNoise(step, 0.3, 40)
+      const spike = smoothSpike(step, 20, 6, 4.0)
       return round(base + spike)
     },
   },
 
-  // ─── 5. Yükleme rampası — gün/gece döngüsü ───
-  // Tetikler: Döngüsel pattern, zaman bağlamı analizi,
-  //           mevsimsel bağlam, zaman zaman eşik aşımı
-  // Sinüsoidal: 12–22°C arası, periyot 48 adım (~24 saat)
+  // ─── 5. Yükleme Rampası — Gün/gece sıcaklık döngüsü ───
+  // 36 adımlık sinüs (~18 dk): yarı açık alan, dış hava etkisi.
+  // Gündüz 22°C'yi, gece 12°C'yi aşar.
+  // Eşik aşımı: EVET — hem min:12 hem max:22 aşılır → bildirim
+  // Değer aralığı: ~11.1–22.9°C
   {
     name: 'Yükleme Rampası - Sıcaklık',
     chipId: '30100005',
     measurementType: 'TEMPERATURE',
     deviceType: 'DT-100',
-    minValue: 10,
-    maxValue: 20,
+    minValue: 12,
+    maxValue: 22,
+    causeContext: { environment: 'semi-open', cooling: false, defrostCycle: false, frequentAccess: true },
     generate(step) {
-      const dayNight = 5.0 * Math.sin(2 * Math.PI * step / 48)
+      const dayNight = 5.5 * Math.sin(2 * Math.PI * step / 36)
       return round(17.0 + dayNight + smoothNoise(step, 0.4, 50))
     },
   },
 
-  // ─── 6. Et deposu — defrost döngüsü ───
-  // Tetikler: Mean reversion, ani değişim, forecast uyarısı
-  // Her 80 adımda defrost: 1°C → 5°C yükselir, sonra
-  // soğutma devreye girer ve yumuşakça 1°C'ye döner
+  // ─── 6. Et Deposu — Defrost döngüsü ───
+  // 40 adımlık döngü (~20 dk): defrost sırasında 1.5°C'den
+  // 5.5°C'ye yükselir, soğutma devreye girince geri döner.
+  // Eşik aşımı: EVET — max:4°C aşılır → bildirim tetiklenir
+  // Değer aralığı: ~1.35–5.65°C (negatif değer üretmez)
   {
     name: 'Et Deposu - Sıcaklık',
     chipId: '30100006',
     measurementType: 'TEMPERATURE',
     deviceType: 'DT-100',
-    minValue: -1,
+    minValue: 0,
     maxValue: 4,
+    causeContext: { environment: 'sealed', cooling: true, defrostCycle: true, frequentAccess: false },
     generate(step) {
-      const phase = step % 80
+      const phase = step % 40
       let base
-      if (phase < 10) {
-        const t = phase / 10
-        base = 1.0 + 4.5 * (0.5 - 0.5 * Math.cos(Math.PI * t))
+      if (phase < 8) {
+        const t = phase / 8
+        base = 1.5 + 4.0 * (0.5 - 0.5 * Math.cos(Math.PI * t))
       } else {
-        const t = (phase - 10) / 70
-        base = 5.5 - 4.5 * (0.5 - 0.5 * Math.cos(Math.PI * t))
+        const t = (phase - 8) / 32
+        base = 5.5 - 4.0 * (0.5 - 0.5 * Math.cos(Math.PI * t))
       }
       return round(base + smoothNoise(step, 0.15, 60))
     },
@@ -186,71 +210,79 @@ const PROFILES = [
 
   // ══════════════════ NEM CİHAZLARI (4 adet) ══════════════════
 
-  // ─── 7. İlaç deposu — kontrollü ortam, stabil nem ───
-  // Tetikler: Düşük dalgalanma, optimal aralık
-  // Eşik aşımı: HAYIR
+  // ─── 7. İlaç Deposu — Stabil referans (kontrollü ortam) ───
+  // Hassas nem kontrolü. Düşük dalgalanma.
+  // Eşik aşımı: HAYIR — referans cihaz olarak stabil kalır.
+  // Değer aralığı: ~46–48%
   {
     name: 'İlaç Deposu - Nem',
     chipId: '30100007',
     measurementType: 'HUMIDITY',
     deviceType: 'DT-100',
-    minValue: 35,
+    minValue: 40,
     maxValue: 55,
+    causeContext: { environment: 'controlled', cooling: true, defrostCycle: false, frequentAccess: false },
     generate(step) {
-      return round(45.0 + smoothNoise(step, 1.2, 70))
+      return round(47.0 + smoothNoise(step, 1.0, 70))
     },
   },
 
-  // ─── 8. Soğuk oda nem — yavaş yükseliş (havalandırma yetersiz) ───
-  // Tetikler: Yükseliş trendi, MAX eşik aşımı bildirimi,
-  //           tahmin bazlı uyarı
-  // Döngü: 250 adımda %45 → %72 yükselir, sonra havalandırma
-  //        tamir edilmiş gibi %45'e yumuşak düşüş
+  // ─── 8. Soğuk Oda A Nem — Havalandırma yetersizliği ───
+  // 80 adımlık döngü (~40 dk): %42'den %64'e yükselir,
+  // havalandırma tamir edilince %42'ye yumuşak düşüş.
+  // Eşik aşımı: EVET — max:60% aşılır → bildirim tetiklenir
+  // Değer aralığı: ~41.2–64.8%
   {
     name: 'Soğuk Oda A - Nem',
     chipId: '30100008',
     measurementType: 'HUMIDITY',
     deviceType: 'DT-100',
     minValue: 35,
-    maxValue: 65,
+    maxValue: 60,
+    causeContext: { environment: 'sealed', cooling: true, defrostCycle: false, frequentAccess: false },
     generate(step) {
-      const ramp = smoothRamp(step, 250, 0.72)
-      const base = 45.0 + ramp * 27.0
-      return round(base + smoothNoise(step, 1.0, 80))
+      const ramp = smoothRamp(step, 80, 0.7)
+      const base = 42.0 + ramp * 22.0
+      return round(base + smoothNoise(step, 0.8, 80))
     },
   },
 
-  // ─── 9. Ana salon — gün/gece nem döngüsü ───
-  // Tetikler: Döngüsel pattern, zaman bağlamı
+  // ─── 9. Ana Salon — Gün/gece nem döngüsü ───
+  // 36 adımlık sinüs (~18 dk): gün içi nem değişimi.
+  // Eşik aşımı: EVET — max:58% aşılır → bildirim tetiklenir
+  // Değer aralığı: ~39.2–60.8%
   {
     name: 'Ana Salon - Nem',
     chipId: '30100009',
     measurementType: 'HUMIDITY',
     deviceType: 'DT-100',
-    minValue: 30,
-    maxValue: 65,
+    minValue: 35,
+    maxValue: 58,
+    causeContext: { environment: 'semi-open', cooling: false, defrostCycle: false, frequentAccess: false },
     generate(step) {
-      const cycle = 8.0 * Math.sin(2 * Math.PI * step / 48)
-      return round(48.0 + cycle + smoothNoise(step, 0.8, 90))
+      const cycle = 10.0 * Math.sin(2 * Math.PI * step / 36)
+      return round(50.0 + cycle + smoothNoise(step, 0.8, 90))
     },
   },
 
-  // ─── 10. Yükleme rampası nem — yüksek volatilite ───
-  // Tetikler: Yüksek dalgalanma, zaman zaman eşik aşımı,
-  //           geniş güven aralığı
-  // Birden fazla sinüs dalgasının bileşimi → karmaşık ama pürüzsüz
+  // ─── 10. Yükleme Rampası Nem — Yüksek volatilite ───
+  // Çoklu sinüs dalgası bileşimi: yarı açık alan, dış hava
+  // ve malzeme giriş/çıkışı kaynaklı nem dalgalanması.
+  // Eşik aşımı: EVET — max:62% sık aşılır → bildirim tetiklenir
+  // Değer aralığı: ~35.5–68.5%
   {
     name: 'Yükleme Rampası - Nem',
     chipId: '30100010',
     measurementType: 'HUMIDITY',
     deviceType: 'DT-100',
     minValue: 35,
-    maxValue: 70,
+    maxValue: 62,
+    causeContext: { environment: 'semi-open', cooling: false, defrostCycle: false, frequentAccess: true },
     generate(step) {
-      const wave1 = 8.0 * Math.sin(2 * Math.PI * step / 36)
-      const wave2 = 5.0 * Math.sin(2 * Math.PI * step / 17 + 1.0)
-      const wave3 = 3.0 * Math.cos(2 * Math.PI * step / 53 + 2.5)
-      return round(53.0 + wave1 + wave2 + wave3 + smoothNoise(step, 0.5, 100))
+      const wave1 = 8.0 * Math.sin(2 * Math.PI * step / 24)
+      const wave2 = 5.0 * Math.sin(2 * Math.PI * step / 13 + 1.0)
+      const wave3 = 3.0 * Math.cos(2 * Math.PI * step / 37 + 2.5)
+      return round(52.0 + wave1 + wave2 + wave3 + smoothNoise(step, 0.5, 100))
     },
   },
 ]

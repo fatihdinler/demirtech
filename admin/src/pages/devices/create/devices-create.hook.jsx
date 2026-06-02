@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { createDeviceValidator, retrieveSuccessMessage } from './devices-create.messager'
-import { setName, setDescription, setChipId, setLocationId, setDeviceType, setMeasurementType, clearPage, setBranchId, setCustomerId, setIsActive, setMinValue, setMaxValue } from '../../../features/devices/devices-create.state'
+import { setName, setDescription, setChipId, setLocationId, setDeviceType, setMeasurementType, clearPage, setBranchId, setCustomerId, setIsActive, setMinValue, setMaxValue, setEnvironment, setCooling, setDefrostCycle, setFrequentAccess } from '../../../features/devices/devices-create.state'
 import { fetchLocations } from '../../../features/locations/locations.api'
 import { fetchBranches } from '../../../features/branches/branches.api'
 import { fetchCustomers } from '../../../features/customers/customers.api'
@@ -13,7 +13,7 @@ import useDevicesList from '../list/devices-list.hook'
 const useDevicesCreate = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const { name, description, chipId, locationId, deviceType, measurementType, branchId, customerId, isActive, minValue, maxValue } = useSelector(state => state.devices.create)
+  const { name, description, chipId, locationId, deviceType, measurementType, branchId, customerId, isActive, minValue, maxValue, environment, cooling, defrostCycle, frequentAccess } = useSelector(state => state.devices.create)
 
   const { data: locations, isLoading: isLocationsLoading, hasFetched: doesLocationsLoaded } = useSelector(state => state.locations.api)
   const { data: customers, isLoading: isCustomersLoading, hasFetched: doesCustomersLoaded } = useSelector(state => state.customers.api)
@@ -59,10 +59,21 @@ const useDevicesCreate = () => {
       case 'maxValue':
         dispatch(setMaxValue(event.target.value))
         break
+      case 'cooling':
+        dispatch(setCooling(event.target.checked))
+        break
+      case 'defrostCycle':
+        dispatch(setDefrostCycle(event.target.checked))
+        break
+      case 'frequentAccess':
+        dispatch(setFrequentAccess(event.target.checked))
+        break
       default:
         break
     }
   }
+
+  const handleEnvironmentChange = (selectedOption) => dispatch(setEnvironment(selectedOption.value))
 
   const customersOptions = customers?.map(customer => ({ value: customer.id, label: customer.name }))
   const handleCustomersChange = (selectedOption) => dispatch(setCustomerId(selectedOption.value))
@@ -101,6 +112,12 @@ const useDevicesCreate = () => {
       isActive,
       minValue: minValue !== '' ? Number(minValue) : null,
       maxValue: maxValue !== '' ? Number(maxValue) : null,
+      causeContext: {
+        environment: environment || 'sealed',
+        cooling: !!cooling,
+        defrostCycle: !!defrostCycle,
+        frequentAccess: !!frequentAccess,
+      },
     }
 
     const isValid = createDeviceValidator(postData)
@@ -138,6 +155,11 @@ const useDevicesCreate = () => {
     isActive,
     minValue,
     maxValue,
+    environment,
+    cooling,
+    defrostCycle,
+    frequentAccess,
+    handleEnvironmentChange,
   }
 }
 

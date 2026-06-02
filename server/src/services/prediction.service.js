@@ -45,6 +45,12 @@ const BATCH_SIZE = 32
 const LEARNING_RATE = 0.002
 const VALIDATION_SPLIT = 0.15
 const DROPOUT_RATE = 0.15
+const CACHE_RETRAIN_THRESHOLD = 50
+
+const FORECAST_INTERVALS = {
+  hourly: 5 * 60 * 1000,       // 5 dk × 12 adım = 1 saat
+  daily: 2 * 60 * 60 * 1000,   // 2 saat × 12 adım = 24 saat
+}
 
 const modelCache = new Map()
 
@@ -84,10 +90,13 @@ function buildLSTMModel() {
 /**
  * Min-Max normalizasyonu: x' = (x - min) / (max - min)
  * Ters dönüşüm        : x  = x' * (max - min) + min
+ *
+ * stableBounds verilirse normalizasyon sabit kalır ve model
+ * cache'i güvenle yeniden kullanılabilir.
  */
-function normalizeData(data) {
-  const min = Math.min(...data)
-  const max = Math.max(...data)
+function normalizeData(data, stableBounds) {
+  const min = stableBounds ? stableBounds.min : Math.min(...data)
+  const max = stableBounds ? stableBounds.max : Math.max(...data)
   const range = max - min || 1
   const normalized = data.map(v => (v - min) / range)
   return { normalized, min, max, range }
@@ -151,7 +160,7 @@ async function trainOrLoadModel(cacheKey, normalizedData, normParams) {
     const cached = modelCache.get(cacheKey)
     const dataHash = normalizedData.length
 
-    if (cached && Math.abs(cached.dataLength - dataHash) < 5) {
+    if (cached && Math.abs(cached.dataLength - dataHash) < CACHE_RETRAIN_THRESHOLD) {
         return cached
     }
 
@@ -251,7 +260,50 @@ async function generateForecasts(model, lastWindow, steps, normParams, bounds) {
   return predictions
 }
 
-// timeRange parametresi eklendi ve gruplama yapıldı
+/**
+ * LSTM tahminlerini fiziksel sınırlar içinde tutar.
+ *   1. Mean reversion: İleri adımlarda tahmin kademeli olarak son ortalamanın
+ *      etkisini alır — sonsuz ıraksama önlenir.
+ *   2. Step-to-step limit: Ardışık adımlar arası fark recent stdDev × 1.5'i aşamaz.
+ *   3. Cihaz aralığı: Tahmin, cihazın minValue–maxValue ± %30 marjından çıkamaz.
+ */
+function smoothPredictions(rawPredictions, recentValues, deviceMin, deviceMax) {
+  const n = recentValues.length
+  const recentMean = recentValues.reduce((a, b) => a + b, 0) / n
+  const recentStd = Math.sqrt(
+    recentValues.reduce((s, v) => s + (v - recentMean) ** 2, 0) / n
+  ) || 0.5
+  const lastActual = recentValues[n - 1]
+
+  const hasDeviceBounds = deviceMin != null && deviceMax != null
+  const range = hasDeviceBounds ? deviceMax - deviceMin : recentStd * 6
+  const margin = range * 0.3
+  const hardMin = hasDeviceBounds ? deviceMin - margin : recentMean - recentStd * 4
+  const hardMax = hasDeviceBounds ? deviceMax + margin : recentMean + recentStd * 4
+
+  const maxStepChange = Math.max(recentStd * 1.5, 0.3)
+
+  const smoothed = []
+
+  for (let i = 0; i < rawPredictions.length; i++) {
+    let value = rawPredictions[i]
+
+    const revertFactor = Math.min(0.04 * (i + 1), 0.4)
+    value = value * (1 - revertFactor) + recentMean * revertFactor
+
+    const prevValue = i === 0 ? lastActual : smoothed[i - 1]
+    const delta = value - prevValue
+    if (Math.abs(delta) > maxStepChange) {
+      value = prevValue + Math.sign(delta) * maxStepChange
+    }
+
+    value = Math.max(hardMin, Math.min(hardMax, value))
+    smoothed.push(parseFloat(value.toFixed(2)))
+  }
+
+  return smoothed
+}
+
 async function getDeviceForecast(deviceId, timeRange = 'hourly') {
     const device = await Device.findOne({ id: deviceId })
     if (!device) {
@@ -301,11 +353,18 @@ async function getDeviceForecast(deviceId, timeRange = 'hourly') {
     const docs = rawDocs.reverse()
     const timeSeries = docs.map(d => Number(d.value))
 
-    const normParams = normalizeData(timeSeries)
+    const isHumidity = device.measurementType === 'HUMIDITY'
+    let stableBounds = null
+    if (device.minValue != null && device.maxValue != null) {
+      const padding = (device.maxValue - device.minValue) * 0.5
+      stableBounds = { min: device.minValue - padding, max: device.maxValue + padding }
+    } else {
+      stableBounds = isHumidity ? { min: 0, max: 100 } : { min: -10, max: 50 }
+    }
 
-    const bounds = device.measurementType === 'HUMIDITY'
-        ? { min: 0, max: 100 }
-        : { min: -50, max: 80 }
+    const normParams = normalizeData(timeSeries, stableBounds)
+
+    const bounds = isHumidity ? { min: 0, max: 100 } : { min: -50, max: 80 }
 
     // cacheKey, cihaz kimliği ve zaman aralığının birleşimi yapıldı
     const cached = await trainOrLoadModel(`${deviceId}_${timeRange}`, normParams.normalized, normParams)
@@ -319,30 +378,23 @@ async function getDeviceForecast(deviceId, timeRange = 'hourly') {
     const { model, metrics, predStdDev } = cached
 
     const lastWindow = normParams.normalized.slice(-WINDOW_SIZE)
-    const predictions = await generateForecasts(model, lastWindow, FORECAST_STEPS, normParams, bounds)
+    const rawPredictions = await generateForecasts(model, lastWindow, FORECAST_STEPS, normParams, bounds)
 
-    let avgIntervalMs = 60_000
-    if (docs.length > 1) {
-        const sample = docs.slice(-Math.min(docs.length, 20))
-        let sum = 0
-        for (let i = 1; i < sample.length; i++) {
-            sum += new Date(sample[i].occurredTime) - new Date(sample[i - 1].occurredTime)
-        }
-        const computed = sum / (sample.length - 1)
-        if (computed > 0) avgIntervalMs = computed
-    }
+    const recentSlice = timeSeries.slice(-Math.min(timeSeries.length, 20))
+    const predictions = smoothPredictions(rawPredictions, recentSlice, device.minValue, device.maxValue)
+
+    const forecastIntervalMs = FORECAST_INTERVALS[timeRange] || FORECAST_INTERVALS.hourly
 
     const lastTime = new Date(docs[docs.length - 1].occurredTime)
     const clamp = (v) => Math.max(bounds.min, Math.min(bounds.max, v))
 
     const forecast = predictions.map((value, i) => {
-        const v = parseFloat(value.toFixed(2))
         const uncertainty = predStdDev * Math.sqrt(i + 1)
         return {
-            time: new Date(lastTime.getTime() + avgIntervalMs * (i + 1)).toISOString(),
-            value: v,
-            upper: parseFloat(clamp(v + 1.96 * uncertainty).toFixed(2)),
-            lower: parseFloat(clamp(v - 1.96 * uncertainty).toFixed(2)),
+            time: new Date(lastTime.getTime() + forecastIntervalMs * (i + 1)).toISOString(),
+            value,
+            upper: parseFloat(clamp(value + 1.96 * uncertainty).toFixed(2)),
+            lower: parseFloat(clamp(value - 1.96 * uncertainty).toFixed(2)),
         }
     })
 

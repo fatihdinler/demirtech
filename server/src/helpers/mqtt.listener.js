@@ -101,6 +101,7 @@ async function listenDevicesMqtt(mqttClient) {
         value: Number(payload.value),
         minValue: device.minValue,
         maxValue: device.maxValue,
+        causeContext: device.causeContext || null,
       }).catch(err => {
         console.error(`[Notification] Threshold check error for ${device.id}:`, err.message)
       })

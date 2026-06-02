@@ -47,6 +47,12 @@ const NotificationSchema = new Schema({
     type: String,
     default: 'TEMPERATURE',
   },
+  cause: {
+    title: { type: String, default: null },
+    description: { type: String, default: null },
+    confidence: { type: String, enum: ['high', 'medium', 'low'], default: null },
+    recommendations: [{ type: String }],
+  },
   isRead: {
     type: Boolean,
     default: false,

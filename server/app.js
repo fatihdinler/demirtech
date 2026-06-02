@@ -22,7 +22,12 @@ const notificationRoutes = require('./src/routes/notification.route')
 
 const app = express()
 app.use(express.json())
-app.use(cors())
+app.use(cors({
+  origin: ['http://localhost:3438', 'http://localhost:3439'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}))
 app.use(cookieParser())
 
 const port = config.DEMIRTECH_APPLICATION_PORT || 3000

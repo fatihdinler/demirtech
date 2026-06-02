@@ -75,15 +75,23 @@ async function seedEntities() {
         description: '',
         minValue: p.minValue ?? null,
         maxValue: p.maxValue ?? null,
+        causeContext: p.causeContext || null,
       })
       await createDeviceDataCollection(device.id)
       console.log(`${LOG_PREFIX} Cihaz oluşturuldu: ${p.name} (chipId: ${p.chipId}, min: ${p.minValue}, max: ${p.maxValue})`)
-    } else if (device.minValue == null && p.minValue != null) {
-      await Device.findOneAndUpdate(
-        { id: device.id },
-        { minValue: p.minValue, maxValue: p.maxValue }
-      )
-      console.log(`${LOG_PREFIX} Cihaz eşikleri güncellendi: ${p.name} (min: ${p.minValue}, max: ${p.maxValue})`)
+    } else {
+      const needsUpdate =
+        device.name !== p.name ||
+        device.minValue !== p.minValue ||
+        device.maxValue !== p.maxValue
+
+      if (needsUpdate) {
+        await Device.findOneAndUpdate(
+          { id: device.id },
+          { name: p.name, minValue: p.minValue, maxValue: p.maxValue, causeContext: p.causeContext || null }
+        )
+        console.log(`${LOG_PREFIX} Cihaz güncellendi: ${p.name} (min: ${p.minValue}, max: ${p.maxValue})`)
+      }
     }
 
     devices.push({ id: device.id, profileIdx: i })
@@ -186,6 +194,7 @@ function startContinuousGeneration(devices, startStep) {
           value,
           minValue: profile.minValue,
           maxValue: profile.maxValue,
+          causeContext: profile.causeContext || null,
         }).catch(() => {})
       } catch (err) {
         console.error(`${LOG_PREFIX} Veri yazma hatası (${profile.name}):`, err.message)

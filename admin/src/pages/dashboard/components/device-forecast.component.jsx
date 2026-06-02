@@ -11,11 +11,10 @@ import {
   Tooltip,
   ReferenceLine,
 } from 'recharts'
-import { FaArrowUp, FaArrowDown, FaMinus, FaChevronLeft, FaSync, FaBrain } from 'react-icons/fa'
+import { FaArrowUp, FaArrowDown, FaMinus, FaChevronLeft, FaSync } from 'react-icons/fa'
 import { format, parseISO } from 'date-fns'
 import { tr } from 'date-fns/locale'
 import { fetchDeviceForecast } from '../../../features/predictions/predictions.api'
-import DeviceCauses from './device-causes.component'
 
 const trendConfig = {
   increasing: { icon: FaArrowUp, color: 'text-red-500', bg: 'bg-red-50', border: 'border-red-200', label: 'Artış Trendi' },
@@ -65,13 +64,6 @@ const CustomTooltip = ({ active, payload, label, unit }) => {
   )
 }
 
-const MetricBadge = ({ label, value, good }) => (
-  <div className={`px-3 py-2 rounded-lg border ${good ? 'bg-emerald-50 border-emerald-200' : 'bg-slate-50 border-slate-200'}`}>
-    <p className="text-[10px] font-medium text-slate-500">{label}</p>
-    <p className={`text-sm font-black ${good ? 'text-emerald-700' : 'text-slate-800'}`}>{value}</p>
-  </div>
-)
-
 const DeviceForecast = ({ device, onBack }) => {
     const dispatch = useDispatch()
     const forecastState = useSelector(s => s.predictions.byDevice[device.id])
@@ -101,18 +93,14 @@ const DeviceForecast = ({ device, onBack }) => {
     const meta = measurementMeta[device.measurementType?.toLowerCase()] || { unit: '', label: 'Değer', color: '#6366f1' }
 
   let chartData = []
-  let modelInfo = null
   let trendKey = 'stable'
   let stats = null
   let nowIndex = -1
-  let causes = []
 
   if (forecastState?.data) {
-    const { historical, forecast, model, trend, stats: s, causes: c } = forecastState.data
-    modelInfo = model
+    const { historical, forecast, trend, stats: s } = forecastState.data
     trendKey = trend
     stats = s
-    causes = c || []
 
     chartData = [
       ...historical.map(h => ({
@@ -135,7 +123,6 @@ const DeviceForecast = ({ device, onBack }) => {
 
   const trendCfg = trendConfig[trendKey]
   const TrendIcon = trendCfg.icon
-  const metrics = modelInfo?.metrics
 
   return (
     <div className="animate-fadeSlideIn">
@@ -237,7 +224,6 @@ const DeviceForecast = ({ device, onBack }) => {
               <p className="text-2xl font-black text-slate-700">
                 {stats?.mean}<span className="text-lg font-semibold text-slate-400 ml-0.5">{meta.unit}</span>
               </p>
-              <p className="text-xs text-slate-400 mt-0.5">σ = {stats?.stdDev}</p>
             </div>
 
             <div className={`${trendCfg.bg} border ${trendCfg.border} rounded-2xl p-4 shadow-sm`}>
@@ -253,9 +239,9 @@ const DeviceForecast = ({ device, onBack }) => {
           <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
             <div className="px-5 pt-5 pb-3 flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-bold text-slate-800">Zaman Serisi & LSTM Tahmini</h3>
+                <h3 className="text-sm font-bold text-slate-800">Zaman Serisi & Tahmin</h3>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  {modelInfo?.description} · %{(modelInfo?.confidenceLevel || 0.95) * 100} güven aralığı
+                  Geçmiş ölçümler ve yapay zeka destekli tahmin
                 </p>
               </div>
               <div className="flex items-center gap-3 text-xs text-slate-500">
@@ -266,10 +252,6 @@ const DeviceForecast = ({ device, onBack }) => {
                 <span className="flex items-center gap-1.5">
                   <span className="w-6 h-0.5 bg-violet-500 rounded-full border-dashed inline-block" style={{ borderBottom: '2px dashed #8b5cf6' }} />
                   Tahmin
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded bg-violet-100 border border-violet-300 inline-block" />
-                  %95 GA
                 </span>
               </div>
             </div>
@@ -354,110 +336,6 @@ const DeviceForecast = ({ device, onBack }) => {
                 </ComposedChart>
               </ResponsiveContainer>
             </div>
-          </div>
-
-          {/* Cause Analysis */}
-          <DeviceCauses causes={causes} />
-
-          {/* Model Performance Metrics */}
-          {metrics && (
-            <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
-              <div className="px-5 py-3.5 flex items-center gap-2 border-b border-slate-100">
-                <FaBrain size={14} className="text-violet-500" />
-                <h4 className="text-sm font-bold text-slate-800">Model Performans Metrikleri</h4>
-              </div>
-              <div className="p-5 grid grid-cols-2 md:grid-cols-4 gap-3">
-                <MetricBadge
-                  label="MAE (Ortalama Mutlak Hata)"
-                  value={metrics.mae}
-                  good={metrics.mae < 2}
-                />
-                <MetricBadge
-                  label="RMSE (Kök Ortalama Kare Hata)"
-                  value={metrics.rmse}
-                  good={metrics.rmse < 3}
-                />
-                <MetricBadge
-                  label="MAPE (Ortalama Yüzde Hata)"
-                  value={`%${metrics.mape}`}
-                  good={metrics.mape < 10}
-                />
-                <MetricBadge
-                  label="R² (Belirlilik Katsayısı)"
-                  value={metrics.r2}
-                  good={metrics.r2 > 0.85}
-                />
-              </div>
-              <div className="px-5 pb-4">
-                <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Bu metrikler modelin validasyon verisi üzerindeki performansını gösterir.
-                  R² değeri 1'e ne kadar yakınsa model o kadar iyi; MAE ve RMSE ne kadar düşükse tahmin hatası o kadar azdır.
-                  MAPE %10'un altındaysa model yüksek doğrulukta kabul edilir.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* LSTM Model Architecture */}
-          <div className="bg-slate-950 rounded-2xl p-5 text-white">
-            <div className="flex items-center gap-2 mb-4">
-              <FaBrain size={14} className="text-violet-400" />
-              <h4 className="text-sm font-bold text-slate-200">LSTM Model Bilgisi</h4>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-              {[
-                { label: 'Algoritma', value: modelInfo?.algorithm || 'LSTM' },
-                { label: 'Mimari', value: modelInfo?.description || '-' },
-                { label: 'Eğitim Verisi', value: `${modelInfo?.trainingPoints || '-'} nokta` },
-                { label: 'Güven Aralığı', value: `%${(modelInfo?.confidenceLevel || 0.95) * 100}` },
-              ].map(item => (
-                <div key={item.label}>
-                  <p className="text-xs text-slate-500 mb-1">{item.label}</p>
-                  <p className="text-sm font-bold text-slate-100">{item.value}</p>
-                </div>
-              ))}
-            </div>
-
-            {modelInfo?.hyperparameters && (
-              <div className="pt-4 border-t border-slate-800 grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
-                {[
-                  { label: 'Window Size (Pencere)', value: modelInfo.hyperparameters.windowSize },
-                  { label: 'Epochs (Dönem)', value: modelInfo.hyperparameters.epochs },
-                  { label: 'Batch Size', value: modelInfo.hyperparameters.batchSize },
-                  { label: 'Learning Rate', value: modelInfo.hyperparameters.learningRate },
-                  { label: 'Validation Split', value: `%${modelInfo.hyperparameters.validationSplit * 100}` },
-                ].map(item => (
-                  <div key={item.label}>
-                    <p className="text-[10px] text-slate-500 mb-1">{item.label}</p>
-                    <p className="text-sm font-black text-violet-400 font-mono">{item.value}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {modelInfo?.architecture && (
-              <div className="pt-4 border-t border-slate-800">
-                <p className="text-[10px] text-slate-500 mb-3">Katman Mimarisi</p>
-                <div className="flex items-center gap-2 flex-wrap">
-                  {[
-                    { name: 'Input', detail: `[${modelInfo.architecture.windowSize}, 1]`, color: 'bg-blue-600' },
-                    { name: 'LSTM', detail: `${modelInfo.architecture.lstmUnits} birim`, color: 'bg-violet-600' },
-                    { name: 'Dropout', detail: `${modelInfo.architecture.dropoutRate * 100}%`, color: 'bg-amber-600' },
-                    { name: 'Dense', detail: `${modelInfo.architecture.denseUnits} birim, ReLU`, color: 'bg-emerald-600' },
-                    { name: 'Output', detail: '1 birim, Linear', color: 'bg-rose-600' },
-                  ].map((layer, i) => (
-                    <div key={layer.name} className="flex items-center gap-2">
-                      <div className={`${layer.color} px-3 py-1.5 rounded-lg`}>
-                        <p className="text-[10px] font-bold text-white">{layer.name}</p>
-                        <p className="text-[9px] text-white/70">{layer.detail}</p>
-                      </div>
-                      {i < 4 && <span className="text-slate-600 text-xs">→</span>}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
         </div>

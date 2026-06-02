@@ -12,6 +12,7 @@ import {
   FaCheckDouble,
   FaThermometerHalf,
   FaTint,
+  FaInfoCircle,
 } from 'react-icons/fa'
 import DemirtekLogoSecondary from '../../assets/demirtek-logo-secondary.png'
 import { useSelector, useDispatch } from 'react-redux'
@@ -82,6 +83,21 @@ const NotificationItem = ({ notification, onRead }) => {
         <p className={`text-[11px] mt-0.5 line-clamp-2 ${notification.isRead ? 'text-slate-400' : 'text-slate-600'}`}>
           {notification.message}
         </p>
+        {notification.cause?.title && (
+          <div className={`flex items-start gap-1.5 mt-1.5 px-2 py-1.5 rounded-md ${notification.isRead ? 'bg-slate-50' : 'bg-indigo-50/70'}`}>
+            <FaInfoCircle size={10} className={`shrink-0 mt-0.5 ${notification.isRead ? 'text-slate-400' : 'text-indigo-500'}`} />
+            <div className="min-w-0">
+              <p className={`text-[10px] font-semibold leading-tight ${notification.isRead ? 'text-slate-500' : 'text-indigo-700'}`}>
+                {notification.cause.title}
+              </p>
+              {notification.cause.description && (
+                <p className={`text-[9px] mt-0.5 line-clamp-2 leading-snug ${notification.isRead ? 'text-slate-400' : 'text-indigo-600/70'}`}>
+                  {notification.cause.description}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
         <div className="flex items-center gap-2 mt-1">
           <span className="text-[10px] text-slate-400 flex items-center gap-1">
             {isTemp ? <FaThermometerHalf size={9} /> : <FaTint size={9} />}

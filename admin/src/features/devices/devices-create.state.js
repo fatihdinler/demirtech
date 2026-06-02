@@ -13,6 +13,10 @@ const initialState = {
   isActive: false,
   minValue: '',
   maxValue: '',
+  environment: 'sealed',
+  cooling: true,
+  defrostCycle: false,
+  frequentAccess: false,
 }
 
 export const devicesCreate = createSlice({
@@ -55,6 +59,18 @@ export const devicesCreate = createSlice({
     setMaxValue: (state, action) => {
       state.maxValue = action.payload
     },
+    setEnvironment: (state, action) => {
+      state.environment = action.payload
+    },
+    setCooling: (state, action) => {
+      state.cooling = action.payload
+    },
+    setDefrostCycle: (state, action) => {
+      state.defrostCycle = action.payload
+    },
+    setFrequentAccess: (state, action) => {
+      state.frequentAccess = action.payload
+    },
     clearPage: (state) => {
       state.name = initialState.name
       state.description = initialState.description
@@ -69,6 +85,10 @@ export const devicesCreate = createSlice({
       state.isActive = initialState.isActive
       state.minValue = initialState.minValue
       state.maxValue = initialState.maxValue
+      state.environment = initialState.environment
+      state.cooling = initialState.cooling
+      state.defrostCycle = initialState.defrostCycle
+      state.frequentAccess = initialState.frequentAccess
     },
   },
 })
@@ -87,6 +107,10 @@ export const {
   setIsActive,
   setMinValue,
   setMaxValue,
+  setEnvironment,
+  setCooling,
+  setDefrostCycle,
+  setFrequentAccess,
 } = devicesCreate.actions
 
 export default devicesCreate.reducer
