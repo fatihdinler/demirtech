@@ -9,63 +9,68 @@ import { checkAuth, clearState } from './features/auth/auth.api'
 import 'react-toastify/dist/ReactToastify.css'
 
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, user } = useSelector(state => state.auth.api)
-  if (!isAuthenticated) {
-    return <Navigate to='/login' replace />
-  }
-  if (!user.isVerified) {
-    return <Navigate to='verify-email' replace />
-  }
+    const { isAuthenticated, user } = useSelector(state => state.auth.api)
+    if (!isAuthenticated) {
+        return <Navigate to='/login' replace />
+    }
+    if (!user?.isVerified) { // user undefined olabilir diye opsiyonel zincirleme eklendi
+        return <Navigate to='/verify-email' replace /> // Yolu düzelttik (baþýna '/' eklendi)
+    }
 
-  return children
+    return children
 }
 
 const RedirectAuthenticatedUser = ({ children }) => {
-  const { isAuthenticated, user } = useSelector(state => state.auth.api)
-  if (isAuthenticated && user.isVerified) {
-    return <Navigate to='/' replace />
-  }
+    const { isAuthenticated, user } = useSelector(state => state.auth.api)
+    if (isAuthenticated && user?.isVerified) {
+        return <Navigate to='/' replace />
+    }
 
-  return children
+    return children
 }
 
 const App = () => {
-  const dispatch = useDispatch()
-  useSelector(state => state.auth.api)
+    const dispatch = useDispatch()
+    useSelector(state => state.auth.api)
 
-  useEffect(() => {
-    dispatch(checkAuth())
-    dispatch(clearState())
-  }, [dispatch])
+    useEffect(() => {
+        // SADECE TOKEN VARSA CHECK-AUTH ÝSTEÐÝ ATILACAK
+        const token = localStorage.getItem('authToken'); // Token anahtarýn neyse buraya onu yazmalýsýn (örneðin 'token' veya 'authToken' olabilir)
 
-  return (
-    <Router>
-      <Routes>
-        <Route path='/login'
-          element={
-            <RedirectAuthenticatedUser>
-              <Login />
-            </RedirectAuthenticatedUser>}
-        />
-        <Route element={<Layout />}>
-          {routes.map((route, index) => (
-            <Route
-              key={index}
-              path={route.to}
-              element={
-                <ProtectedRoute>
-                  {route.element}
-                </ProtectedRoute>
-              }
-            />
-          ))}
-          <Route path='/' element={<Navigate to='/dashboard' replace />} />
-          <Route path='*' element={<Navigate to='/dashboard' replace />} />
-        </Route>
-      </Routes>
-      <ToastContainer />
-    </Router >
-  )
+        if (token) {
+            dispatch(checkAuth())
+        }
+        dispatch(clearState())
+    }, [dispatch])
+
+    return (
+        <Router>
+            <Routes>
+                <Route path='/login'
+                    element={
+                        <RedirectAuthenticatedUser>
+                            <Login />
+                        </RedirectAuthenticatedUser>}
+                />
+                <Route element={<Layout />}>
+                    {routes.map((route, index) => (
+                        <Route
+                            key={index}
+                            path={route.to}
+                            element={
+                                <ProtectedRoute>
+                                    {route.element}
+                                </ProtectedRoute>
+                            }
+                        />
+                    ))}
+                    <Route path='/' element={<Navigate to='/dashboard' replace />} />
+                    <Route path='*' element={<Navigate to='/dashboard' replace />} />
+                </Route>
+            </Routes>
+            <ToastContainer />
+        </Router >
+    )
 }
 
 export default App

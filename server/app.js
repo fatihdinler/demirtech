@@ -23,22 +23,23 @@ const notificationRoutes = require('./src/routes/notification.route')
 const app = express()
 app.use(express.json())
 app.use(cors({
-  origin: ['http://localhost:3438', 'http://localhost:3439'],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+    origin: ['http://localhost:3438', 'http://localhost:3439'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }))
 app.use(cookieParser())
 
+// Not: .env dosyaný bozmamak için bu deðiþkenin ismine dokunmadýk.
 const port = config.DEMIRTECH_APPLICATION_PORT || 3000
 
 const server = http.createServer(app)
 const { Server } = require('socket.io')
 const io = new Server(server, {
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST']
-  }
+    cors: {
+        origin: '*',
+        methods: ['GET', 'POST']
+    }
 })
 
 initSocket(io)
@@ -47,28 +48,32 @@ const client = mqtt.connect('mqtt://broker.emqx.io', { username: 'emqx', passwor
 global.mqttClient = client
 
 const logger = createLogger({
-  format: format.combine(
-    format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-    format.printf(({ timestamp, level, message }) => `${timestamp} ${level}: ${message}`)
-  ),
-  transports: [
-    new transports.File({ filename: 'logs/app.log' }),
-    new transports.Console()
-  ]
+    format: format.combine(
+        format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+        format.printf(({ timestamp, level, message }) => `${timestamp} ${level}: ${message}`)
+    ),
+    transports: [
+        new transports.File({ filename: 'logs/app.log' }),
+        new transports.Console()
+    ]
 })
 global.logger = logger
 
 server.listen(port, async () => {
-  try {
-    console.log(`>>> DEMIRTECH API IS RUNNING ON http://localhost:${port}`)
-    const { connection: db } = await connectDb()
-    global.db = db
-    await require('./src/helpers/db-scripts/index.js')()
-    listenDevicesMqtt(global.mqttClient)
-    await startSimulation()
-  } catch (error) {
-    console.error(`Error in app.js: ${error.message}`)
-  }
+    try {
+        // GÜNCELLENEN KISIM: Konsol çýktýsý ThermaSense olarak deðiþtirildi
+        console.log(`>>> THERMASENSE API IS RUNNING ON http://localhost:${port}`)
+        const { connection: db } = await connectDb()
+        global.db = db
+
+        // GÜVENLÝK NOTU: Veritabaný seed dosyalarýnýn yolunu (aþaðýdaki satýr) projenin çalýþmasý bozulmasýn diye deðiþtirmedik.
+        await require('./src/helpers/db-scripts/index.js')()
+
+        listenDevicesMqtt(global.mqttClient)
+        await startSimulation()
+    } catch (error) {
+        console.error(`Error in app.js: ${error.message}`)
+    }
 })
 
 app.use('/api/customers', customerRoutes)
@@ -80,9 +85,9 @@ app.use('/api/users', userRoutes)
 app.use('/api/notifications', notificationRoutes)
 
 app.use((err, req, res, next) => {
-  const statusCode = res.statusCode !== 200 ? res.statusCode : 500
-  res.status(statusCode).json({
-    message: err.message,
-    stack: process.env.NODE_ENV === 'production' ? null : err.stack,
-  })
+    const statusCode = res.statusCode !== 200 ? res.statusCode : 500
+    res.status(statusCode).json({
+        message: err.message,
+        stack: process.env.NODE_ENV === 'production' ? null : err.stack,
+    })
 })
