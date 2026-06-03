@@ -8,8 +8,10 @@ const { checkAndAlert } = require('../services/alert.service')
 const { checkDeviceThresholds } = require('../services/notification.service')
 const PROFILES = require('./profiles')
 
-const TICK_INTERVAL_MS = 30_000
-const SEED_COUNT = 3000
+const MINUTE_MS = 60_000
+const TICK_INTERVAL_MS = MINUTE_MS          // Dakikada bir ölçüm → timeline'da dakika başına tek nokta
+const HISTORY_MINUTES = 7 * 24 * 60          // Her cihaz için 1 haftalık geçmiş (10080 dakika)
+const SEED_BATCH = 2000                      // insertMany toplu yazma boyutu
 
 const CUSTOMER_NAME = 'Yıldız Soğuk Hava Depoculuk A.Ş.'
 const BRANCH_NAME = 'Tuzla Merkez Depo'
@@ -100,34 +102,84 @@ async function seedEntities() {
   return { locationId: location.id, devices }
 }
 
+/**
+ * Mutlak dakika indeksi. Step olarak bu kullanılır; böylece aynı gerçek dakika
+ * her zaman aynı değeri/tahmini üretir (sunucu yeniden başlasa bile tutarlı).
+ */
+function minuteIndex(ms) {
+  return Math.floor(ms / MINUTE_MS)
+}
+
+/**
+ * Belirli bir dakika için ölçüm dokümanı (gerçek değer + tahmin) üretir.
+ * occurredTime tam dakika sınırına hizalanır.
+ */
+function buildDoc(profile, minute) {
+  return {
+    chipId: Number(profile.chipId),
+    value: profile.generate(minute),
+    predictedValue: profile.predict(minute),
+    type: profile.measurementType.toLowerCase(),
+    occurredTime: new Date(minute * MINUTE_MS),
+  }
+}
+
+async function insertInBatches(Model, docs) {
+  for (let i = 0; i < docs.length; i += SEED_BATCH) {
+    await Model.insertMany(docs.slice(i, i + SEED_BATCH), { ordered: false })
+  }
+}
+
+/**
+ * Her simülasyon cihazı için geçmişe dönük ~1 haftalık dakika-bazlı veri sağlar.
+ *
+ * Mantık:
+ *   - Veri yoksa, eski formatta (predictedValue içermiyorsa) veya 1 haftadan
+ *     eskiyse → koleksiyon temizlenir ve tam 1 hafta yeniden seed edilir.
+ *   - Güncel veri varsa → yalnızca son ölçümden şimdiye kadarki boşluk doldurulur
+ *     (yeniden başlatmalarda süreklilik korunur).
+ *   - Her durumda 1 haftadan eski kayıtlar budanır (rolling 1 hafta).
+ */
 async function seedHistoricalData(devices) {
-  const now = Date.now()
+  const nowMinute = minuteIndex(Date.now())
+  const startMinute = nowMinute - HISTORY_MINUTES
 
   for (const { id: deviceId, profileIdx } of devices) {
-    const Model = getDeviceDataModel(deviceId)
-    const count = await Model.countDocuments()
-
-    //if (count >= SEED_COUNT) continue
-
     const profile = PROFILES[profileIdx]
-    const toInsert = SEED_COUNT - count
-    const docs = []
+    const Model = getDeviceDataModel(deviceId)
 
-    for (let i = 0; i < toInsert; i++) {
-      const step = count + i
-      const value = profile.generate(step)
-      docs.push({
-        chipId: Number(profile.chipId),
-        value,
-        type: profile.measurementType.toLowerCase(),
-        occurredTime: new Date(now - (toInsert - i) * TICK_INTERVAL_MS),
-      })
+    const latestDoc = await Model.findOne().sort({ occurredTime: -1 }).lean()
+    const count = await Model.countDocuments()
+    const latestMinute = latestDoc ? minuteIndex(new Date(latestDoc.occurredTime).getTime()) : null
+
+    const doReseed =
+      !latestDoc ||
+      latestDoc.predictedValue == null ||        // eski format (tahmin yok)
+      latestMinute < startMinute ||              // 1 haftadan eski
+      count < HISTORY_MINUTES * 0.5              // yetersiz veri
+
+    let fillFromMinute
+    if (doReseed) {
+      await Model.deleteMany({})
+      fillFromMinute = startMinute
+    } else {
+      fillFromMinute = latestMinute + 1
+    }
+
+    const docs = []
+    for (let m = fillFromMinute; m < nowMinute; m++) {
+      docs.push(buildDoc(profile, m))
     }
 
     if (docs.length > 0) {
-      await Model.insertMany(docs)
-      console.log(`${LOG_PREFIX} ${profile.name}: ${docs.length} geçmiş veri noktası seed edildi.`)
+      await insertInBatches(Model, docs)
+      console.log(
+        `${LOG_PREFIX} ${profile.name}: ${docs.length} geçmiş veri noktası ${doReseed ? 'seed edildi (tam 1 hafta)' : 'boşluk dolduruldu'}.`
+      )
     }
+
+    // 1 haftadan eski kayıtları buda (rolling pencere)
+    await Model.deleteMany({ occurredTime: { $lt: new Date(startMinute * MINUTE_MS) } })
   }
 }
 
@@ -141,7 +193,8 @@ async function emitInitialValues(devices) {
       emitDeviceData({
         deviceId,
         chipId: Number(profile.chipId),
-        value: lastDoc.value,
+        value: lastDoc.value?.toFixed(2),
+        predictedValue: lastDoc.predictedValue ?? null,
         type: profile.measurementType.toLowerCase(),
         occurredTime: lastDoc.occurredTime,
       })
@@ -150,33 +203,45 @@ async function emitInitialValues(devices) {
   console.log(`${LOG_PREFIX} İlk değerler Socket.IO üzerinden gönderildi.`)
 }
 
-function startContinuousGeneration(devices, startStep) {
+function startContinuousGeneration(devices) {
   let tick = 0
 
   const writeTick = async () => {
-    const currentStep = startStep + tick
+    // Step = mutlak dakika indeksi; occurredTime tam dakika sınırına hizalı.
+    const currentMinute = minuteIndex(Date.now())
+    const occurredTime = new Date(currentMinute * MINUTE_MS)
     tick++
 
     for (const { id: deviceId, profileIdx } of devices) {
       const profile = PROFILES[profileIdx]
 
       try {
-        const value = profile.generate(currentStep)
+        const value = profile.generate(currentMinute)
+        const predictedValue = profile.predict(currentMinute)
         const Model = getDeviceDataModel(deviceId)
 
-        await Model.create({
-          chipId: Number(profile.chipId),
-          value,
-          type: profile.measurementType.toLowerCase(),
-          occurredTime: new Date(),
-        })
+        // Dakika başına tek kayıt: aynı dakika için upsert (idempotent).
+        await Model.updateOne(
+          { occurredTime },
+          {
+            $set: {
+              chipId: Number(profile.chipId),
+              value,
+              predictedValue,
+              type: profile.measurementType.toLowerCase(),
+              occurredTime,
+            },
+          },
+          { upsert: true }
+        )
 
         emitDeviceData({
           deviceId,
           chipId: Number(profile.chipId),
-          value,
+          value: value?.toFixed(2),
+          predictedValue,
           type: profile.measurementType.toLowerCase(),
-          occurredTime: new Date(),
+          occurredTime,
         })
 
         checkAndAlert({
@@ -202,18 +267,28 @@ function startContinuousGeneration(devices, startStep) {
     }
 
     if (tick % 20 === 0) {
-      console.log(`${LOG_PREFIX} Aktif — ${tick} tick tamamlandı (step: ${currentStep})`)
+      console.log(`${LOG_PREFIX} Aktif — ${tick} tick tamamlandı (dakika: ${currentMinute})`)
     }
   }
 
+  // Şimdiki dakikayı hemen yaz, sonraki tick'leri dakika sınırına hizala.
   writeTick()
 
-  const interval = setInterval(writeTick, TICK_INTERVAL_MS)
+  let interval = null
+  const msToNextMinute = MINUTE_MS - (Date.now() % MINUTE_MS)
+  const aligner = setTimeout(() => {
+    writeTick()
+    interval = setInterval(writeTick, TICK_INTERVAL_MS)
+  }, msToNextMinute)
 
-  process.on('SIGTERM', () => clearInterval(interval))
-  process.on('SIGINT', () => clearInterval(interval))
+  const cleanup = () => {
+    clearTimeout(aligner)
+    if (interval) clearInterval(interval)
+  }
+  process.on('SIGTERM', cleanup)
+  process.on('SIGINT', cleanup)
 
-  return interval
+  return aligner
 }
 
 async function startSimulation() {
@@ -224,17 +299,14 @@ async function startSimulation() {
     console.log(`${LOG_PREFIX} ${devices.length} cihaz hazır.`)
 
     await seedHistoricalData(devices)
-    console.log(`${LOG_PREFIX} Geçmiş veri kontrolü tamamlandı.`)
-
-    const firstModel = getDeviceDataModel(devices[0].id)
-    const existingCount = await firstModel.countDocuments()
+    console.log(`${LOG_PREFIX} Geçmiş veri (1 hafta) kontrolü tamamlandı.`)
 
     await emitInitialValues(devices)
 
-    startContinuousGeneration(devices, existingCount)
+    startContinuousGeneration(devices)
     console.log(
       `${LOG_PREFIX} Sürekli veri üretimi başladı — ` +
-      `${TICK_INTERVAL_MS / 1000}s aralıklarla ${devices.length} cihaz için veri yazılacak.`
+      `dakikada bir, ${devices.length} cihaz için ölçüm + tahmin yazılacak.`
     )
   } catch (err) {
     console.error(`${LOG_PREFIX} Başlatma hatası:`, err)

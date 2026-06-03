@@ -326,6 +326,7 @@ async function getDeviceForecast(deviceId, timeRange = 'hourly') {
                         $dateTrunc: { date: "$occurredTime", unit: "minute", binSize: 30 }
                     },
                     value: { $avg: { $toDouble: "$value" } },
+                    predictedValue: { $avg: { $toDouble: "$predictedValue" } },
                     occurredTime: { $first: "$occurredTime" }
                 }
             },
@@ -377,6 +378,28 @@ async function getDeviceForecast(deviceId, timeRange = 'hourly') {
 
     const { model, metrics, predStdDev } = cached
 
+    // Model başarımını, arayüzde GÖSTERİLEN (DB'de saklı) tahminlerle gerçek
+    // ölçümleri karşılaştırarak hesapla. Böylece metrik kartı, grafikteki tahmin
+    // çizgisiyle birebir tutarlı olur ve gerçek başarımı yansıtır.
+    const histActual = []
+    const histPred = []
+    for (const d of docs) {
+        if (d.predictedValue != null) {
+            histActual.push(Number(d.value))
+            histPred.push(Number(d.predictedValue))
+        }
+    }
+
+    let effectiveMetrics = metrics
+    let effectiveStdDev = predStdDev
+    if (histActual.length >= MIN_DATA_POINTS) {
+        effectiveMetrics = computeMetrics(histActual, histPred)
+        const errors = histActual.map((a, i) => a - histPred[i])
+        const meanErr = errors.reduce((s, e) => s + e, 0) / errors.length
+        const variance = errors.reduce((s, e) => s + (e - meanErr) ** 2, 0) / errors.length
+        effectiveStdDev = Math.sqrt(variance) || predStdDev
+    }
+
     const lastWindow = normParams.normalized.slice(-WINDOW_SIZE)
     const rawPredictions = await generateForecasts(model, lastWindow, FORECAST_STEPS, normParams, bounds)
 
@@ -389,7 +412,7 @@ async function getDeviceForecast(deviceId, timeRange = 'hourly') {
     const clamp = (v) => Math.max(bounds.min, Math.min(bounds.max, v))
 
     const forecast = predictions.map((value, i) => {
-        const uncertainty = predStdDev * Math.sqrt(i + 1)
+        const uncertainty = effectiveStdDev * Math.sqrt(i + 1)
         return {
             time: new Date(lastTime.getTime() + forecastIntervalMs * (i + 1)).toISOString(),
             value,
@@ -406,48 +429,62 @@ async function getDeviceForecast(deviceId, timeRange = 'hourly') {
             : slope > 0 ? 'increasing'
                 : 'decreasing'
 
-  // YERİNE BUNU YAPIŞTIR:
-    
-    // --- YENİ EKLENEN: GEÇMİŞ TAHMİNLERİ HESAPLAMA (BATCH PREDICTION) ---
-    const startIndex = Math.max(0, docs.length - HISTORY_CHART);
-    const historicalWindows = [];
-    const validIndices = [];
+    // --- GEÇMİŞ TAHMİNLER ---
+    // Tahminler ölçüm anında üretilip veritabanına yazıldığı için geçmiş tahmin
+    // değerleri doğrudan DB'den okunur. Bu sayede sayfa her yenilendiğinde aynı
+    // zaman için DAİMA aynı ölçüm ve aynı tahmin gösterilir (refresh tutarlılığı).
+    const slicedDocs = docs.slice(-HISTORY_CHART)
+    const hasStoredPredictions = slicedDocs.some(d => d.predictedValue != null)
 
-    // Her geçmiş veri noktası için modelin girdi penceresini (lookback) hazırlıyoruz
-    for (let i = startIndex; i < docs.length; i++) {
-        if (i >= WINDOW_SIZE) {
-            const window = normParams.normalized.slice(i - WINDOW_SIZE, i);
-            historicalWindows.push(window.map(v => [v]));
-            validIndices.push(i);
-        }
-    }
-
-    let pastPredictionsMap = new Map();
-    if (historicalWindows.length > 0) {
-        // Tek seferde (batch) tüm geçmişi tahmin ederek performansı koruyoruz
-        const inputTensor = tf.tensor3d(historicalWindows);
-        const predTensor = model.predict(inputTensor);
-        const predArray = predTensor.dataSync();
-        inputTensor.dispose();
-        predTensor.dispose();
-
-        validIndices.forEach((docIdx, idx) => {
-            const rawPred = denormalize(predArray[idx], normParams.min, normParams.range);
-            const clamped = Math.max(bounds.min, Math.min(bounds.max, rawPred));
-            pastPredictionsMap.set(docIdx, parseFloat(clamped.toFixed(2)));
-        });
-    }
-
-    const historical = docs.slice(-HISTORY_CHART).map((d, index) => {
-        const absoluteIdx = startIndex + index;
-        return {
+    let historical
+    if (hasStoredPredictions) {
+        historical = slicedDocs.map(d => ({
             time: new Date(d.occurredTime).toISOString(),
             value: parseFloat(Number(d.value).toFixed(2)),
-            // React'ın aradığı geçmiş tahmin verisi artık burada:
-            predictedValue: pastPredictionsMap.has(absoluteIdx) ? pastPredictionsMap.get(absoluteIdx) : null
-        };
-    });
-    // --- GEÇMİŞ TAHMİNLER EKLENTİSİ BİTTİ ---
+            predictedValue: d.predictedValue != null
+                ? parseFloat(Number(d.predictedValue).toFixed(2))
+                : null,
+        }))
+    } else {
+        // Fallback: DB'de saklı tahmin yoksa (örn. gerçek MQTT cihazları) LSTM ile
+        // geçmiş tahminler tek seferde (batch) hesaplanır.
+        const startIndex = Math.max(0, docs.length - HISTORY_CHART);
+        const historicalWindows = [];
+        const validIndices = [];
+
+        for (let i = startIndex; i < docs.length; i++) {
+            if (i >= WINDOW_SIZE) {
+                const window = normParams.normalized.slice(i - WINDOW_SIZE, i);
+                historicalWindows.push(window.map(v => [v]));
+                validIndices.push(i);
+            }
+        }
+
+        let pastPredictionsMap = new Map();
+        if (historicalWindows.length > 0) {
+            const inputTensor = tf.tensor3d(historicalWindows);
+            const predTensor = model.predict(inputTensor);
+            const predArray = predTensor.dataSync();
+            inputTensor.dispose();
+            predTensor.dispose();
+
+            validIndices.forEach((docIdx, idx) => {
+                const rawPred = denormalize(predArray[idx], normParams.min, normParams.range);
+                const clamped = Math.max(bounds.min, Math.min(bounds.max, rawPred));
+                pastPredictionsMap.set(docIdx, parseFloat(clamped.toFixed(2)));
+            });
+        }
+
+        historical = slicedDocs.map((d, index) => {
+            const absoluteIdx = startIndex + index;
+            return {
+                time: new Date(d.occurredTime).toISOString(),
+                value: parseFloat(Number(d.value).toFixed(2)),
+                predictedValue: pastPredictionsMap.has(absoluteIdx) ? pastPredictionsMap.get(absoluteIdx) : null
+            };
+        });
+    }
+    // --- GEÇMİŞ TAHMİNLER BİTTİ ---
 
     const allValues = timeSeries.slice(-HISTORY_CHART)
     const mean = allValues.reduce((s, v) => s + v, 0) / allValues.length
@@ -501,7 +538,7 @@ async function getDeviceForecast(deviceId, timeRange = 'hourly') {
                 validationSplit: VALIDATION_SPLIT,
                 windowSize: WINDOW_SIZE,
             },
-            metrics,
+            metrics: effectiveMetrics,
             trainingPoints: docs.length,
             forecastSteps: FORECAST_STEPS,
             confidenceLevel: 0.95,

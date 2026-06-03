@@ -73,7 +73,7 @@ async function listenDevicesMqtt(mqttClient) {
       emitDeviceData({
         deviceId: device.id,
         chipId: payload.chipId,
-        value: payload.value,
+        value: payload.value?.toFixed(2),
         type: payload.type,
         occurredTime: new Date()
       })

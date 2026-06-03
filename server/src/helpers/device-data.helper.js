@@ -3,6 +3,10 @@ const mongoose = require('mongoose')
 const DeviceDataSchema = new mongoose.Schema({
   chipId: Number,
   value: Number,
+  // Ölçüm anında üretilen model tahmini. Ölçüm ile birlikte kalıcı olarak
+  // saklanır; böylece arayüz her yenilendiğinde aynı zaman için aynı tahmin
+  // gösterilir (refresh tutarlılığı).
+  predictedValue: { type: Number, default: null },
   type: String,
   occurredTime: { type: Date, default: Date.now }
 }, { versionKey: false })
@@ -20,6 +24,7 @@ async function insertDeviceData(deviceId, payload) {
   const newDeviceData = new DeviceDataModel({
     chipId: payload.chipId,
     value: payload.value,
+    predictedValue: payload.predictedValue ?? null,
     type: payload.type,
     occurredTime: new Date()
   })
