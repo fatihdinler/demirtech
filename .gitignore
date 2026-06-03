@@ -15,3 +15,4 @@ server/.env
 
 .todo
 build/
+.vs
