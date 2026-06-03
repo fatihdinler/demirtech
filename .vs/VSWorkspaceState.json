@@ -1,12 +1,11 @@
 {
   "ExpandedNodes": [
     "",
-    "\\admin",
-    "\\admin\\src",
-    "\\admin\\src\\pages",
-    "\\admin\\src\\pages\\dashboard",
-    "\\admin\\src\\pages\\dashboard\\components",
-    "\\server"
+    "\\client-web",
+    "\\client-web\\public",
+    "\\client-web\\src",
+    "\\server",
+    "\\server\\src"
   ],
   "PreviewInSolutionExplorer": false
 }

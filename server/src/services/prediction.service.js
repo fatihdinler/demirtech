@@ -33,16 +33,16 @@ const { analyzeCauses } = require('./cause-analysis.service')
  *   - Validation Split       : 0.15
  */
 
-const TRAINING_LIMIT = 150
+const TRAINING_LIMIT =250
 const HISTORY_CHART = 40
 const FORECAST_STEPS = 12
 const MIN_DATA_POINTS = 5
-const WINDOW_SIZE = 10
+const WINDOW_SIZE = 15
 const LSTM_UNITS = 32
 const DENSE_UNITS = 16
 const EPOCHS = 30
 const BATCH_SIZE = 32
-const LEARNING_RATE = 0.002
+const LEARNING_RATE = 0.001
 const VALIDATION_SPLIT = 0.15
 const DROPOUT_RATE = 0.15
 const CACHE_RETRAIN_THRESHOLD = 50
@@ -406,10 +406,48 @@ async function getDeviceForecast(deviceId, timeRange = 'hourly') {
             : slope > 0 ? 'increasing'
                 : 'decreasing'
 
-    const historical = docs.slice(-HISTORY_CHART).map(d => ({
-        time: new Date(d.occurredTime).toISOString(),
-        value: parseFloat(Number(d.value).toFixed(2)),
-    }))
+  // YERİNE BUNU YAPIŞTIR:
+    
+    // --- YENİ EKLENEN: GEÇMİŞ TAHMİNLERİ HESAPLAMA (BATCH PREDICTION) ---
+    const startIndex = Math.max(0, docs.length - HISTORY_CHART);
+    const historicalWindows = [];
+    const validIndices = [];
+
+    // Her geçmiş veri noktası için modelin girdi penceresini (lookback) hazırlıyoruz
+    for (let i = startIndex; i < docs.length; i++) {
+        if (i >= WINDOW_SIZE) {
+            const window = normParams.normalized.slice(i - WINDOW_SIZE, i);
+            historicalWindows.push(window.map(v => [v]));
+            validIndices.push(i);
+        }
+    }
+
+    let pastPredictionsMap = new Map();
+    if (historicalWindows.length > 0) {
+        // Tek seferde (batch) tüm geçmişi tahmin ederek performansı koruyoruz
+        const inputTensor = tf.tensor3d(historicalWindows);
+        const predTensor = model.predict(inputTensor);
+        const predArray = predTensor.dataSync();
+        inputTensor.dispose();
+        predTensor.dispose();
+
+        validIndices.forEach((docIdx, idx) => {
+            const rawPred = denormalize(predArray[idx], normParams.min, normParams.range);
+            const clamped = Math.max(bounds.min, Math.min(bounds.max, rawPred));
+            pastPredictionsMap.set(docIdx, parseFloat(clamped.toFixed(2)));
+        });
+    }
+
+    const historical = docs.slice(-HISTORY_CHART).map((d, index) => {
+        const absoluteIdx = startIndex + index;
+        return {
+            time: new Date(d.occurredTime).toISOString(),
+            value: parseFloat(Number(d.value).toFixed(2)),
+            // React'ın aradığı geçmiş tahmin verisi artık burada:
+            predictedValue: pastPredictionsMap.has(absoluteIdx) ? pastPredictionsMap.get(absoluteIdx) : null
+        };
+    });
+    // --- GEÇMİŞ TAHMİNLER EKLENTİSİ BİTTİ ---
 
     const allValues = timeSeries.slice(-HISTORY_CHART)
     const mean = allValues.reduce((s, v) => s + v, 0) / allValues.length
